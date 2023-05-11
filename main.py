@@ -113,7 +113,7 @@ async def root(request: Request):
     :return: A templateresponse object
     :doc-author: Trelent
     """
-    return templates.TemplateResponse('index.html', {"request": request, "title": "Contacts"})
+    return templates.TemplateResponse('index.html', {"request": request, "title": "PhotoShare App"})
 
 
 @app.get("/api/healthchecker")
