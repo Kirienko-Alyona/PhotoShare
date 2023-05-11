@@ -6,13 +6,15 @@ poetry add uvicorn[standard]
 poetry add alembic 
 poetry add sqlalchemy 
 poetry add psycopg2 
-poetry add sphinx 
-poetry add pytest 
-poetry add pytest-mock
+poetry add sphinx -G dev 
+poetry add pytest-cov --dev
+poetry add pytest-mock --dev
 poetry add redis
 poetry add cloudinary
 poetry add libgravatar
 poetry add enum
+poetry add fastapi-limiter
+poetry add fastapi-mail
 
  
  
