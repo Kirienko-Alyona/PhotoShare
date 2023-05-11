@@ -40,5 +40,27 @@ class Photo(Base):
     __tablename__ = "photos"   
     id = Column(Integer, primary_key=True) 
     url_photo = Column(String(255), nullable=True)
+    description = Column(String(255), nullable=True)
+    tag = relationship('Tag', cascade="all, delete-orphan", back_populates="photo")
     user_id = Column(ForeignKey('users.id', ondelete='CASCADE'), default=None)
     __table_args__ = (UniqueConstraint("user_id", name="unique_photo_user"), )
+    
+    
+class Tag(Base):
+    __tablename__ = "tags"   
+    id = Column(Integer, primary_key=True) 
+    tag_name = Column(String, nullable=True)
+    photo = relationship("Photo", back_populates="tag")
+    user_id = Column(ForeignKey('users.id'), default=None)
+    __table_args__ = (UniqueConstraint("tag_name", name="unique_tags_name"), )
+    
+    
+class Comment(Base):
+    __tablename__ = "comments"   
+    id = Column(Integer, primary_key=True) 
+    text_comment = Column(String(255), nullable=False)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    photo_id = Column(ForeignKey('photos.id', ondelete='CASCADE'), default=None)
+    photo = relationship('Photo', backref="comments", uselist=False)
+    user_id = Column(ForeignKey('users.id', ondelete='CASCADE'), default=None)
