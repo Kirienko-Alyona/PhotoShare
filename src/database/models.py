@@ -31,4 +31,7 @@ class User(Base):
     active = Column(Boolean, default=False)
     role_id = Column(ForeignKey("roles.id", ondelete="CASCADE"), default=None)
     role = relationship("Role", backref="users")
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    __table_args__ = (UniqueConstraint("username", "phone", "email", "id", name="unique_user_username_phone_email_id"), )
     
