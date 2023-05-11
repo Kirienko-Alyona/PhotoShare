@@ -10,6 +10,6 @@ def sanitize_phone_num(pn: str) -> str:
     return tel_code.get(len(snz_phone), "") + snz_phone
 
 
-if __name__ == '__main__':
-    p_num = "0445421245"
-    print(format_phone_num(sanitize_phone_num(p_num)))
+# if __name__ == '__main__':
+#     p_num = "0445421245"
+#     print(format_phone_num(sanitize_phone_num(p_num)))

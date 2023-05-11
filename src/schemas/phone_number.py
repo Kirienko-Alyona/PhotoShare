@@ -21,7 +21,7 @@ class RequestPhoneNum(BaseModel):
         }
 
 
-if __name__ == '__main__':
-    phone = RequestPhoneNum(phone_number="44 54 ")
-    # phone = RequestPhoneNum(phone_number="44 54 2--12--45")
-    print(phone.phone_number)
+# if __name__ == '__main__':
+#     phone = RequestPhoneNum(phone_number="44 54 ")
+#     # phone = RequestPhoneNum(phone_number="44 54 2--12--45")
+#     print(phone.phone_number)
