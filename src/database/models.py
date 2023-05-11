@@ -20,7 +20,7 @@ class User(Base):
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
     username = Column(String(50), nullable=False)
-    email = Column(String(150), nullable=False, unique=True)
+    email = Column(String(150), nullable=False, unique=True, index=True)
     password = Column(String(255), nullable=False)
     phone = Column(String(18), nullable=False)
     birthday = Column(Date)
