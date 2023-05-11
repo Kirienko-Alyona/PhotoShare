@@ -17,7 +17,7 @@ from sqlalchemy import text
 from starlette.middleware.authentication import AuthenticationMiddleware
 
 from src.database.db import get_db
-from src.routes import photos, auth, users
+from src.routes import photos, auth, users, comments
 from src.conf.config import settings
 
 
@@ -141,6 +141,7 @@ def healthchecker(db: Session = Depends(get_db)):
 app.include_router(auth.router, prefix='/api')
 app.include_router(photos.router, prefix='/api')
 app.include_router(users.router, prefix='/api')
+app.include_router(comments.router, prefix='/api')
 
 
 

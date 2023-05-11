@@ -71,3 +71,4 @@ class Comment(Base):
     photo_id = Column(ForeignKey('photos.id', ondelete='CASCADE'), default=None)
     photo = relationship('Photo', backref='comments', uselist=False)
     user_id = Column(ForeignKey('users.id', ondelete='CASCADE'), default=None)
+    user = relationship('User', backref='comments')
