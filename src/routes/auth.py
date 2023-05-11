@@ -15,7 +15,16 @@ security = HTTPBearer()
 
 
 @router.post('/login', response_model=TokenModel)
-async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)) -> dict:   
+async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)) -> dict:
+    """
+    The login function is used to authenticate a user.
+        It takes in the username and password of the user, and returns an access token if successful.
+        The access token can be used to make requests on behalf of that user.
+
+    :param body: OAuth2PasswordRequestForm: Get the username and password from the request body
+    :param db: Session: Access the database
+    :return: A dictionary with the access token, refresh token and bearer
+    """
     user = await repository_users.get_user_by_email(body.username, db)
 
     if user is None:
@@ -37,7 +46,17 @@ async def request_email(body: RequestEmail,
                         background_tasks: BackgroundTasks,
                         request: Request,
                         db: Session = Depends(get_db)) -> dict:
+    """
+    The request_email function is used to send a confirmation email to the user.
+        The function takes in an email address and sends a confirmation link to that
+        address. If the user does not exist, it returns an error message.
 
+    :param body: RequestEmail: Validate the request body
+    :param background_tasks: BackgroundTasks: Add a task to the background tasks queue
+    :param request: Request: Get the base_url of the application
+    :param db: Session: Pass the database session to the repository functions
+    :return: A message to the user if they are already confirmed
+    """
     user = await repository_users.get_user_by_email(body.email, db)
 
     if user is None:
@@ -59,7 +78,17 @@ async def singup(body: UserModel,
                  background_tasks: BackgroundTasks,
                  request: Request,
                  db: Session = Depends(get_db)) -> dict:
+    """
+    The singup function creates a new user in the database.
+        It takes an email, username and password as input parameters.
+        The function returns a JSON object with the newly created user's information.
 
+    :param body: UserModel: Validate the data sent by the user
+    :param background_tasks: BackgroundTasks: Add a task to the background tasks queue
+    :param request: Request: Get the host url to send in the email
+    :param db: Session: Get the database session
+    :return: A dictionary with the user and a message
+    """
     exist_user = await repository_users.get_user_by_email(body.email, db)
     if exist_user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=messages.ACCOUNT_ALREADY_EXISTS)
@@ -77,7 +106,14 @@ async def singup(body: UserModel,
 @router.get('/refresh_token', response_model=TokenModel)
 async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(security),
                         db: Session = Depends(get_db)) -> dict:
+    """
+    The refresh_token function is used to refresh the access token.
+        The function takes in a refresh token and returns an access_token, a new refresh_token, and the type of token.
 
+    :param credentials: HTTPAuthorizationCredentials: Get the access token from the request header
+    :param db: Session: Get the database session
+    :return: A dictionary with the new access_token, refresh_token and token type
+    """
     token = credentials.credentials
     email = await auth_service.decode_refresh_token(token)
     user = await repository_users.get_user_by_email(email, db)
@@ -93,12 +129,21 @@ async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(sec
 
 @router.get('/confirmed_email/{token}')
 async def confirmed_email(token: str, db: Session = Depends(get_db)) -> dict:
+    """
+    The confirmed_email function is used to confirm a user's email address.
+        It takes the token from the URL and uses it to get the user's email address.
+        Then, it checks if that user exists in our database, and if they do not exist,
+        an error message is returned. If they do exist but their email has already been confirmed,
+        another error message is returned. Otherwise (if everything goes well), we update their
+        record in our database so that their &quot;confirmed&quot; field becomes True.
 
-    email, type_ = await auth_service.get_email_type_from_token(token)
+    :param token: str: Get the token from the url
+    :param db: Session: Access the database
+    :return: A message
+    """
+    email = await auth_service.get_email_from_token(token)
     user = await repository_users.get_user_by_email(email, db)
 
-    if type_ != 'Confirm email' or user is None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=messages.VERIFICATION_ERROR)
     if user.confirmed:
         return {'message': messages.YOUR_EMAIL_IS_ALREADY_CONFIRMED}
     await repository_users.confirmed_email(user, db)
