@@ -17,7 +17,7 @@ from sqlalchemy import text
 from starlette.middleware.authentication import AuthenticationMiddleware
 
 from src.database.db import get_db
-from src.routes import photos, auth, users
+from src.routes import photos, users #auth
 from src.conf.config import settings
 
 
@@ -138,9 +138,9 @@ def healthchecker(db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Error connecting to the database")
 
 
-app.include_router(auth.router, prefix='/api')
-app.include_router(photos.router, prefix='/api')
-app.include_router(users.router, prefix='/api')
+#app.include_router(auth.router, prefix='/api')
+#app.include_router(photos.router, prefix='/api')
+#app.include_router(users.router, prefix='/api')
 
 
 
