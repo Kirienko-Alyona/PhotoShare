@@ -14,9 +14,6 @@ uvicorn = {extras = ["standard"], version = "^0.22.0"}
 alembic = "^1.10.4"
 sqlalchemy = "^2.0.12"
 psycopg2 = "^2.9.6"
-sphinx = "^7.0.0"
-pytest = "^7.3.1"
-pytest-mock = "^3.10.0"
 python-multipart = "^0.0.6"
 redis = "^4.5.5"
 cloudinary = "^1.32.0"
@@ -24,6 +21,8 @@ libgravatar = "^1.0.4"
 
 
 [tool.poetry.group.dev.dependencies]
+pytest-mock = "^3.10.0"
+pytest-cov = "^4.0.0"
 sphinx = "^7.0.0"
 
 [build-system]
