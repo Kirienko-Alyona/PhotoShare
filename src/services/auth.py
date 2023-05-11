@@ -193,8 +193,10 @@ class Auth:
         """
         try:
             payload = jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
-            email = payload['sub']
-            return email
+            if payload['scope'] == 'email_token':
+                email = payload['sub']
+                return email
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=messages.INVALID_SCOPE_FOR_TOKEN)
         except JWTError as e:
             print(e)
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,

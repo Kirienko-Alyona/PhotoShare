@@ -144,6 +144,8 @@ async def confirmed_email(token: str, db: Session = Depends(get_db)) -> dict:
     email = await auth_service.get_email_from_token(token)
     user = await repository_users.get_user_by_email(email, db)
 
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
     if user.confirmed:
         return {'message': messages.YOUR_EMAIL_IS_ALREADY_CONFIRMED}
     await repository_users.confirmed_email(user, db)
