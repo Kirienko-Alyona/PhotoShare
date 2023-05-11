@@ -7,6 +7,10 @@ class CommentModel(BaseModel):
     text_comment: str = Field(min_length=1)
 
 
+class CommentUpdateModel(BaseModel):
+    text_comment: str = Field(min_length=1)
+
+
 class CommentResponse(BaseModel):
     id: int
     text_comment: str
