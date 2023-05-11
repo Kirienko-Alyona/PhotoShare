@@ -22,7 +22,7 @@ class User(Base):
     username = Column(String(50), nullable=False)
     email = Column(String(150), nullable=False, unique=True)
     password = Column(String(255), nullable=False)
-    phone = Column(String, nullable=False)
+    phone = Column(String(18), nullable=False)
     birthday = Column(Date)
     refresh_token = Column(String(255), nullable=True)
     avatar = Column(String(255), nullable=True)
@@ -35,3 +35,10 @@ class User(Base):
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
     __table_args__ = (UniqueConstraint("username", "phone", "email", "id", name="unique_user_username_phone_email_id"), )
     
+    
+class Photo(Base):
+    __tablename__ = "photos"   
+    id = Column(Integer, primary_key=True) 
+    url_photo = Column(String(255), nullable=True)
+    user_id = Column(ForeignKey('users.id', ondelete='CASCADE'), default=None)
+    __table_args__ = (UniqueConstraint("user_id", name="unique_photo_user"), )
