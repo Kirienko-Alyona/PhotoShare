@@ -49,25 +49,25 @@ app.add_middleware(
 )    
    
     
-ALLOWED_IPS = [ip_address("127.0.0.1"), ip_address("172.20.240.1"), ip_address('192.168.0.0'), ip_address('172.16.0.0')]
+# ALLOWED_IPS = [ip_address("127.0.0.1"), ip_address("172.20.240.1"), ip_address('192.168.0.0'), ip_address('172.16.0.0')]
 
 
-@app.middleware("http")
-async def limit_access_by_ip(request: Request, call_next: Callable):
-    """
-    The limit_access_by_ip function is a middleware function that limits access to the API by IP address.
-    It checks if the client's IP address is in ALLOWED_IPS, and if not, returns a 403 Forbidden response.
+# @app.middleware("http")
+# async def limit_access_by_ip(request: Request, call_next: Callable):
+#     """
+#     The limit_access_by_ip function is a middleware function that limits access to the API by IP address.
+#     It checks if the client's IP address is in ALLOWED_IPS, and if not, returns a 403 Forbidden response.
     
-    :param request: Request: Get the ip address of the client that is making a request
-    :param call_next: Callable: Pass the next function in the chain to be executed
-    :return: A jsonresponse object if the client ip address is not in allowed_ips
-    :doc-author: Trelent
-    """
-    ip = ip_address(request.client.host)
-    if ip not in ALLOWED_IPS:
-        return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"detail": "Not allowed IP address"})
-    response = await call_next(request)
-    return response
+#     :param request: Request: Get the ip address of the client that is making a request
+#     :param call_next: Callable: Pass the next function in the chain to be executed
+#     :return: A jsonresponse object if the client ip address is not in allowed_ips
+#     :doc-author: Trelent
+#     """
+#     ip = ip_address(request.client.host)
+#     if ip not in ALLOWED_IPS:
+#         return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content={"detail": "Not allowed IP address"})
+#     response = await call_next(request)
+#     return response
 
 
 @app.middleware('http')
