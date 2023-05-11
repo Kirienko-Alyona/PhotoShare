@@ -1,14 +1,15 @@
-from enum import Enum
-
+import enum
 from sqlalchemy import Boolean, Column, Date, Integer, String, UniqueConstraint, func
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.sql.schema import ForeignKey, Table
 from sqlalchemy.sql.sqltypes import DateTime
+from sqlalchemy.types import Enum
+
 
 Base = declarative_base()
     
     
-class Role(Enum):
+class Role(enum.Enum):
     admin: str = "admin"
     moderator: str = "moderator"
     user: str = "user"
@@ -33,9 +34,9 @@ class User(Base):
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
     __table_args__ = (UniqueConstraint('username', 'phone', 'email', 'id', name='unique_user_username_phone_email_id'), )
     
-    
-    
+
 photo_m2m_tag = Table(
+    "photo_m2m_tag",
     Base.metadata,
     Column('id', Integer, primary_key=True),
     Column('photo', Integer, ForeignKey('photos.id', ondelete='CASCADE')),
