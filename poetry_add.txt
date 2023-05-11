@@ -12,6 +12,7 @@ poetry add pytest-mock
 poetry add redis
 poetry add cloudinary
 poetry add libgravatar
+poetry add enum
 
  
  
