@@ -17,10 +17,10 @@ from src.conf import messages
 
 
 class Auth:
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
     SECRET_KEY = settings.secret_key
     ALGORITHM = settings.algorithm
-    oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
+    oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/api/auth/login')
     client_redis = redis.Redis(
         host=settings.redis_host,
         port=settings.redis_port,
@@ -29,7 +29,7 @@ class Auth:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail=messages.COULD_NOT_VALIDATE_CREDENTIALS,
-        headers={"WWW-Authenticate": "Bearer"},
+        headers={'WWW-Authenticate': 'Bearer'},
     )
 
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
@@ -46,7 +46,7 @@ class Auth:
         else:
             expire = datetime.utcnow() + timedelta(hours=2)
 
-        to_encode.update({"iat": datetime.utcnow(), "exp": expire, "scope": "access_token"})
+        to_encode.update({'iat': datetime.utcnow(), 'exp': expire, 'scope': 'access_token'})
         encoded_access_token = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
         return encoded_access_token
 
@@ -58,15 +58,15 @@ class Auth:
         else:
             expire = datetime.utcnow() + timedelta(days=7)
 
-        to_encode.update({"iat": datetime.utcnow(), "exp": expire, "scope": "refresh_token"})
+        to_encode.update({'iat': datetime.utcnow(), 'exp': expire, 'scope': 'refresh_token'})
         encode_refresh_token = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
         return encode_refresh_token
 
     async def decode_refresh_token(self, refresh_token: str) -> str:
         try:
             payload = jwt.decode(refresh_token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
-            if payload["scope"] == "refresh_token":
-                email = payload["sub"]
+            if payload['scope'] == 'refresh_token':
+                email = payload['sub']
                 return email
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=messages.INVALID_SCOPE_FOR_TOKEN)
         except JWTError:
@@ -76,7 +76,7 @@ class Auth:
         try:
             payload = jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
             if payload['scope'] == 'access_token':
-                email = payload["sub"]
+                email = payload['sub']
                 if email is None:
                     raise self.credentials_exception
             else:
@@ -86,17 +86,17 @@ class Auth:
         return email
 
     async def set_current_user(self, user: User):
-        await self.client_redis.set(f"user:{user.email}", pickle.dumps(user))
+        await self.client_redis.set(f'user:{user.email}', pickle.dumps(user))
 
     async def get_current_user(self, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
         email = self.verify_access_token(token)
-        user = self.client_redis.get(f"user:{email}")
+        user = self.client_redis.get(f'user:{email}')
 
         if user is None:
             user = await repository_users.get_user_by_email(email, db)
             if user is None:
                 raise self.credentials_exception
-            await self.client_redis.set(f"user:{email}", pickle.dumps(user), ex=7200)
+            await self.client_redis.set(f'user:{email}', pickle.dumps(user), ex=7200)
         else:
             user = pickle.loads(user)
         return user
@@ -104,14 +104,14 @@ class Auth:
     def create_email_token(self, data: dict) -> str:
         to_encode = data.copy()
         expire = datetime.utcnow() + timedelta(days=7)
-        to_encode.update({"iat": datetime.utcnow(), "exp": expire})
+        to_encode.update({'iat': datetime.utcnow(), 'exp': expire})
         token = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
         return token
 
     async def get_email_type_from_token(self, token: str):
         try:
             payload = jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
-            email = payload["sub"]
+            email = payload['sub']
             return email
         except JWTError as e:
             print(e)
