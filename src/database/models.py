@@ -29,8 +29,8 @@ class Role(Enum):
 
 class User(Base):
     __tablename__ = "users"
-    name = Column(String, nullable=False)
-    surname = Column(String, nullable=False)
+    first_name = Column(String, nullable=False)
+    last_name = Column(String, nullable=False)
     username = Column(String(50), nullable=False)
     email = Column(String(150), nullable=False, unique=True)
     password = Column(String(255), nullable=False)
