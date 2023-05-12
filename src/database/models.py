@@ -31,7 +31,7 @@ class User(Base):
     active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-    __table_args__ = (UniqueConstraint('username', 'phone', 'email', 'id', name='unique_user_username_phone_email_id'), )
+    __table_args__ = (UniqueConstraint('username', 'email', 'id', name='unique_user_username_email_id'), )
     
     
     
