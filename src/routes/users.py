@@ -47,9 +47,8 @@ The update_avatar_user function updates the avatar of a user.
         api_secret=settings.cloudinary_api_secret,
         secure=True
     )
-    public_id = f'Web9_FastapiAPP/{current_user.username}{current_user.id}'
-    cloudinary.uploader.upload(file.file, public_id=public_id, overwrite=True)
-    src_url = cloudinary.CloudinaryImage(public_id)\
-                        .build_url(width=250, height=250, crop='fill', version=auth_service.r.get('version'))
+    r = cloudinary.uploader.upload(file.file, public_id=f'Web9_FastapiAPP/{current_user.username}', overwrite=True)
+    src_url = cloudinary.CloudinaryImage(f'Web9_FastapiAPP/{current_user.username}') \
+        .build_url(width=250, height=250, crop='fill', version=r.get('version'))
     user = await repository_users.update_avatar(current_user.email, src_url, db)
     return user
