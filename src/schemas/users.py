@@ -22,12 +22,7 @@ class UserModel(BaseModel):
                 raise ValueError()
         except ValueError:
             raise ValueError(f"\"{username}\" - is not a valid username")
-        class Config:
-            schema_extra = {
-                "example": {
-                    "username": "ben_345"
-                }
-            }
+        
         
     @validator("email")
     def check_email_value(cls, email_str):
@@ -36,9 +31,10 @@ class UserModel(BaseModel):
         except EmailError:
             raise ValueError(f"\"{email_str}\" - is not a valid email address")
 
-        class Config:
+    class Config:
             schema_extra = {
                 "example": {
+                    "username": "ben_345",
                     "email": "example@example.ua"
                 }
             }    
