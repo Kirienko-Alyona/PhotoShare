@@ -4,7 +4,7 @@ from fastapi import Depends, HTTPException, status, Path, APIRouter
 from sqlalchemy.orm import Session
 
 from src.database.db import get_db
-from src.database.models import User
+from src.database.models import User, Role
 from src.conf import messages
 from src.repository import comments as repository_comments
 from src.schemas.comments import CommentResponse, CommentModel, CommentUpdateModel
