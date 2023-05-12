@@ -15,4 +15,5 @@ NOT_FOUND = "Not Found"
 INVALID_SCOPE_FOR_TOKEN = "Invalid scope for token"
 INVALID_TOKEN_FOR_EMAIL_VERIFICATION = "Invalid token for email verification"
 COULD_NOT_VALIDATE_CREDENTIALS = "Could not validate credentials"
+FORBIDDEN = "Forbidden"
 USER_NOT_FOUND = 'User not found'
