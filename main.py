@@ -22,7 +22,7 @@ from src.conf.config import settings
 
 
 app = FastAPI()
-#favicon_path = 'static/images/favicon.ico'
+favicon_path = 'static/images/favicon.ico'
 
 
 @app.on_event("startup")
@@ -92,15 +92,15 @@ BASE_DIR = pathlib.Path(__file__).parent
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
 
-# @app.get('/favicon.ico', include_in_schema=False)
-# async def favicon():
-#     """
-#     The favicon function returns the favicon.ico file from the static directory.
+@app.get('/favicon.ico', include_in_schema=False)
+async def favicon():
+    """
+    The favicon function returns the favicon.ico file from the static directory.
     
-#     :return: A file response with the contents of the favicon
-#     :doc-author: Trelent
-#     """
-#     return FileResponse(favicon_path)
+    :return: A file response with the contents of the favicon
+    :doc-author: Trelent
+    """
+    return FileResponse(favicon_path)
 
 @app.get("/", response_class=HTMLResponse, description="Main Page")
 async def root(request: Request):
