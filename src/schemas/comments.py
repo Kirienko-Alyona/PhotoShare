@@ -2,13 +2,15 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
+from src.conf.constants import COMMENT_MIN_LEN
+
 
 class CommentModel(BaseModel):
-    text_comment: str = Field(min_length=1)
+    text_comment: str = Field(min_length=COMMENT_MIN_LEN)
 
 
 class CommentUpdateModel(BaseModel):
-    text_comment: str = Field(min_length=1)
+    text_comment: str = Field(min_length=COMMENT_MIN_LEN)
 
 
 class CommentResponse(BaseModel):
