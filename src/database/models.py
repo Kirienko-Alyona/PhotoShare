@@ -1,4 +1,5 @@
 import enum
+from sqlalchemy import Enum
 
 from sqlalchemy import Boolean, Column, Date, Integer, String, UniqueConstraint, func
 from sqlalchemy.orm import declarative_base, relationship
@@ -26,7 +27,7 @@ class User(Base):
     birthday = Column(Date)
     refresh_token = Column(String(255), nullable=True)
     avatar = Column(String(255), nullable=True)
-    roles = Column(enum.Enum(Role), default=Role.user)
+    roles = Column(Enum(Role), default=Role.user)
     confirmed = Column(Boolean, default=False)
     active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=func.now())
