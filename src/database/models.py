@@ -1,4 +1,4 @@
-from enum import Enum
+import enum
 
 from sqlalchemy import Boolean, Column, Date, Integer, String, UniqueConstraint, func
 from sqlalchemy.orm import declarative_base, relationship
@@ -8,7 +8,7 @@ from sqlalchemy.sql.sqltypes import DateTime
 Base = declarative_base()
     
     
-class Role(Enum):
+class Role(enum.Enum):
     admin: str = "admin"
     moderator: str = "moderator"
     user: str = "user"
@@ -26,7 +26,7 @@ class User(Base):
     birthday = Column(Date)
     refresh_token = Column(String(255), nullable=True)
     avatar = Column(String(255), nullable=True)
-    roles = Column(Enum(Role), default=Role.user)
+    roles = Column(enum.Enum(Role), default=Role.user)
     confirmed = Column(Boolean, default=False)
     active = Column(Boolean, default=False)
     created_at = Column(DateTime, default=func.now())
@@ -36,6 +36,7 @@ class User(Base):
     
     
 photo_m2m_tag = Table(
+    'photo_m2m_tag',
     Base.metadata,
     Column('id', Integer, primary_key=True),
     Column('photo', Integer, ForeignKey('photos.id', ondelete='CASCADE')),
