@@ -25,15 +25,29 @@ async def get_comments_by_photo(photo_id: int, db: Session):
 
 async def update_comment(body: CommentUpdateModel, comment_id: int, db: Session):
     comment = await get_comment_by_id(comment_id, db)
+    # if comment:
+    #     comment.text_comment = body.text_comment
+    #     db.commit()
+    # return comment
     if comment:
-        comment.text_comment = body.text_comment
+        count = db.query(Comment).filter(Comment.id == comment_id).update({
+            'text_comment': body.text_comment
+        })
         db.commit()
-    return comment
+        if count == 1:
+            return comment
+    return None
 
 
 async def remove_comment(comment_id: int, db: Session):
     comment = await get_comment_by_id(comment_id, db)
+    # if comment:
+    #     db.delete(comment)
+    #     db.commit()
+    # return comment
     if comment:
-        db.delete(comment)
+        count = db.query(Comment).filter(Comment.id == comment_id).delete()
         db.commit()
-    return comment
+        if count == 1:
+            return comment
+    return None
