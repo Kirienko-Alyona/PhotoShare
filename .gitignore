@@ -4,3 +4,4 @@ postgres-data
 /.idea/
 migrations
 alembic
+__pycache__
