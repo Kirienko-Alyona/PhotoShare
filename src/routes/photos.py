@@ -14,7 +14,7 @@ router = APIRouter(prefix='/photos', tags=['photos'])
 
 @router.post('/', response_model=PhotoResponse, name='Create photo', status_code=status.HTTP_201_CREATED)
 async def create_photo(photo: UploadFile = File(), db: Session = Depends(get_db),
-                         current_user: User = Depends(auth_service.get_current_user)):
+                       current_user: User = Depends(auth_service.get_current_user)):
     
     '''
     The create_photo function creates a new photo in the database.
