@@ -2,6 +2,6 @@
 postgres-data
 /venv/
 /.idea/
-*pycache*
 migrations
 alembic
+__pycache__
