@@ -6,6 +6,8 @@ from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.sql.schema import ForeignKey, Table
 from sqlalchemy.sql.sqltypes import DateTime
 
+from src.conf import constants
+
 Base = declarative_base()
     
     
