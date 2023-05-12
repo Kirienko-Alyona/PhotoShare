@@ -9,11 +9,11 @@ from src.conf import messages
 from src.repository import comments as repository_comments
 from src.schemas.comments import CommentResponse, CommentModel, CommentUpdateModel
 from src.services.auth import auth_service
-from src.services.roles import RoleAccess
+# from src.services.roles import RoleAccess
 
 router = APIRouter(prefix="/comments", tags=['comments'])
 
-allowed_operation_remove = RoleAccess([Role.admin, Role.moderator])
+# allowed_operation_remove = RoleAccess([Role.admin, Role.moderator])
 
 
 @router.post("/", response_model=CommentResponse, name="Create comment to photo", status_code=status.HTTP_201_CREATED)
@@ -44,8 +44,9 @@ async def update_comment(body: CommentUpdateModel, comment_id: int = Path(ge=1),
     return comment
 
 
-@router.delete("/{comment_id}", name="Delete comment by id", status_code=status.HTTP_204_NO_CONTENT,
-               dependencies=[Depends(allowed_operation_remove)])
+# @router.delete("/{comment_id}", name="Delete comment by id", status_code=status.HTTP_204_NO_CONTENT,
+#                dependencies=[Depends(allowed_operation_remove)])
+@router.delete("/{comment_id}", name="Delete comment by id", status_code=status.HTTP_204_NO_CONTENT)
 async def remove_comment(comment_id: int = Path(ge=1), db: Session = Depends(get_db),
                          _: User = Depends(auth_service.get_current_user)):
     comment = await repository_comments.remove_comment(comment_id, db)
