@@ -3,6 +3,7 @@ from typing import List
 from fastapi import Depends, HTTPException, status, Request
 
 from src.database.models import User, Role
+from src.conf import messages
 from src.services.auth import auth_service
 
 
@@ -15,4 +16,4 @@ class RoleAccess:
         print(f'User role {current_user.roles}')
         print(f'Allowed roles: {self.allowed_roles}')
         if current_user.roles not in self.allowed_roles:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Operation forbidden')
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=messages.FORBIDDEN)
