@@ -3,3 +3,5 @@ postgres-data
 /venv/
 /.idea/
 *pycache*
+migrations
+alembic
