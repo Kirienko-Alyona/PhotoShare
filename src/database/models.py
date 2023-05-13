@@ -24,7 +24,7 @@ class User(Base):
     #last_name = Column(String, nullable=True)
     username = Column(String(30), nullable=False)
     email = Column(String(50), nullable=False, unique=True, index=True)
-    password = Column(String(10), nullable=False)
+    password = Column(String(255), nullable=False)
     #phone = Column(String(18), nullable=True)
     birthday = Column(Date)
     refresh_token = Column(String(255), nullable=True)
