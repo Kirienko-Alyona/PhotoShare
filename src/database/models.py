@@ -50,7 +50,6 @@ class Photo(Base):
     description = Column(String(255), nullable=True)
     tags = relationship('Tag', secondary=photo_m2m_tag, back_populates='photos')
     user_id = Column(ForeignKey('users.id', ondelete='CASCADE'), default=None)
-    __table_args__ = (UniqueConstraint('user_id', name='unique_photo_user'),)
 
 
 class Tag(Base):
