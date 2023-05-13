@@ -7,9 +7,8 @@ from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
-import redis.asyncio as redis
 
-from src.database.db import get_db
+from src.database.db import get_db, client_redis
 from src.database.models import User
 from src.repository import users as repository_users
 from src.conf.config import settings
@@ -21,11 +20,6 @@ class Auth:
     SECRET_KEY = settings.secret_key
     ALGORITHM = settings.algorithm
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/api/auth/login')
-    client_redis = redis.Redis(
-        host=settings.redis_host,
-        port=settings.redis_port,
-        db=0
-    )
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail=messages.COULD_NOT_VALIDATE_CREDENTIALS,
@@ -155,13 +149,13 @@ class Auth:
         :return: A user object
         """
         email = self.verify_access_token(token)
-        user = await self.client_redis.get(f'user:{email}')
+        user = await client_redis.get(f'user:{email}')
 
         if user is None:
             user = await repository_users.get_user_by_email(email, db)
             if user is None:
                 raise self.credentials_exception
-            await self.client_redis.set(f'user:{email}', pickle.dumps(user), ex=7200)
+            await client_redis.set(f'user:{email}', pickle.dumps(user), ex=7200)
         else:
             user = pickle.loads(user)
         return user

@@ -4,7 +4,6 @@ from ipaddress import ip_address
 from typing import Callable
 import uvicorn
 
-import redis.asyncio as redis
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
@@ -16,7 +15,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from starlette.middleware.authentication import AuthenticationMiddleware
 
-from src.database.db import get_db
+from src.database.db import get_db, client_redis_for_main
 from src.routes import photos, auth, users, comments
 from src.conf.config import settings
 
@@ -34,9 +33,7 @@ async def startup():
     :return: A list of objects
     :doc-author: Trelent
     """
-    client_redis = await redis.Redis(host=settings.redis_host, port=settings.redis_port, db=0, encoding="utf-8",
-                          decode_responses=True)
-    await FastAPILimiter.init(client_redis)
+    await FastAPILimiter.init(client_redis_for_main)
    # app.add_middleware() #backend=BearerTokenAuthBackend()
     
     
@@ -102,6 +99,7 @@ async def favicon():
     """
     return FileResponse(favicon_path)
 
+
 @app.get("/", response_class=HTMLResponse, description="Main Page")
 async def root(request: Request):
     """
@@ -142,7 +140,6 @@ app.include_router(auth.router, prefix='/api')
 app.include_router(photos.router, prefix='/api')
 app.include_router(users.router, prefix='/api')
 app.include_router(comments.router, prefix='/api')
-
 
 
 if __name__ == '__main__':
