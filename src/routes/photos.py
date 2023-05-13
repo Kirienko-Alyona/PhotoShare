@@ -34,7 +34,7 @@ async def create_photo(photo: UploadFile = File(),
     return photo
 
 
-@router.get('/', name="Get photo by request ")
+@router.get('/', response_model=PhotoResponse, name="Get photo by request ")
 async def get_photo(
         skip: int = 0, limit: int = Query(default=10, ge=1, le=50),
         photo_id: Optional[int] = Query(default=None),
@@ -47,3 +47,8 @@ async def get_photo(
     if photo is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
     return photo
+
+
+@router.patch('/photo_description', response_model=PhotoResponse, name="Update photo's description")
+async def photo_description_update():
+    pass
