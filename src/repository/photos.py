@@ -39,14 +39,35 @@ async def get_photo(skip: int,
     return db.query(Photo).offset(skip).limit(limit).all()
 
 
-async def description_photo_update(photo_id: int,
-                                   new_description: str,
-                                   db: Session,
-                                   user: User):
-    current_photo = db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).first()
-    if current_photo:
-        current_photo.description = new_description
+# async def description_photo_update(photo_id: int,
+#                                    new_description: str,
+#                                    db: Session,
+#                                    user: User):
+#     current_photo = db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).first()
+#     if current_photo:
+#         current_photo.description = new_description
+#         db.commit()
+#         db.refresh(current_photo)
+#     return current_photo
+
+
+async def description_update(new_description: str,
+                             skip: int,
+                             limit: int,
+                             photo_id: int,
+                             tags: list[str],
+                             username: str,
+                             db: Session,
+                             user: User):
+    photo = await get_photo(skip,limit, photo_id, tags,username,db)
+    if photo:
+        count = db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).update({
+            'description': new_description
+        })
         db.commit()
-        db.refresh(current_photo)
-    return current_photo
+        if count == 1:
+            return photo
+    return None
+
+
 

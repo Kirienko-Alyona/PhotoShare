@@ -7,7 +7,7 @@ from src.database.models import User
 from src.repository import photos as repository_photos
 from src.schemas.photos import PhotoResponse, PhotoModel
 from src.services.auth import auth_service
-from src.services.photos import upload_photo, update_filename
+from src.services.photos import upload_photo
 import src.conf.messages as messages
 
 router = APIRouter(prefix='/photos', tags=['photos'])
@@ -48,12 +48,20 @@ async def get_photo(
 
 @router.patch('/photo_description', response_model=PhotoResponse, name="Update photo's description")
 async def photo_description_update(
-        photo_id: int,
         new_description: str,
+        skip: int = 0, limit: int = Query(default=10, ge=1, le=50),
+        photo_id: Optional[int] = Query(default=None),
+        tags: Optional[list] = Query(default=None),
+        username: Optional[str] = Query(default=None),
         db: Session = Depends(get_db),
         current_user: User = Depends(auth_service.get_current_user)
 ):
-    updated_photo = await repository_photos.description_photo_update(photo_id, new_description, db, current_user)
+    updated_photo = await repository_photos.description_update(new_description,
+                                                               skip, limit,
+                                                               photo_id,
+                                                               tags,
+                                                               username,
+                                                               db, current_user)
     if updated_photo is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
     return updated_photo
