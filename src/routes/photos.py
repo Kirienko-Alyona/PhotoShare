@@ -14,23 +14,19 @@ router = APIRouter(prefix='/photos', tags=['photos'])
 
 
 @router.post('/', response_model=PhotoResponse, name='Create photo', status_code=status.HTTP_201_CREATED)
-
 async def create_photo(photo: UploadFile = File(),
-                       description: str|None =None,
+                       description: str | None = None,
                        db: Session = Depends(get_db),
-                       current_user: User = Depends(auth_service.get_current_user
-                    
-    The create_photo function creates a new photo in the database.
-
+                       current_user: User = Depends(auth_service.get_current_user)):
+    """The create_photo function creates a new photo in the database.
     :param photo: UploadFile: Upload a file to the server
     :param db: Session: Get a database session
     :param current_user: User: Get the user that is currently logged in
     :return: A photo object
-    :doc-author: Trelent
-    """
+    :doc-author: Trelent """
     public_id = update_filename(photo.filename)
     url = upload_photo(photo, public_id)
-    photo = await repository_photos.add_photo(url, description, db)  # current_user
+    photo = await repository_photos.add_photo(url, description, db, current_user)
     return photo
 
 
@@ -40,7 +36,8 @@ async def get_photo(
         photo_id: Optional[int] = Query(default=None),
         tags: Optional[list] = Query(default=None),
         username: Optional[str] = Query(default=None),
-        db: Session = Depends(get_db)):
+        db: Session = Depends(get_db),
+):
     photo = await repository_photos.get_photo(skip, limit,
                                               photo_id, tags,
                                               username, db)
@@ -50,5 +47,13 @@ async def get_photo(
 
 
 @router.patch('/photo_description', response_model=PhotoResponse, name="Update photo's description")
-async def photo_description_update():
-    pass
+async def photo_description_update(
+        photo_id: int,
+        new_description: str,
+        db: Session = Depends(get_db),
+        current_user: User = Depends(auth_service.get_current_user)
+):
+    updated_photo = await repository_photos.description_photo_update(photo_id, new_description, db, current_user)
+    if updated_photo is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
+    return updated_photo

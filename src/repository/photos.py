@@ -3,9 +3,8 @@ from sqlalchemy.orm import Session
 from src.database.models import User, Photo, Tag
 
 
-async def add_photo(url: str, description:str, db: Session):  # user: User
- >>>>>>> main
-    The add_photo function takes a url and adds it to the database.
+async def add_photo(url: str, description: str, db: Session, user: User):
+    """The add_photo function takes a url and adds it to the database.
         Args:
             url (str): The URL of the photo to be added.
             db (Session): A connection to the database.
@@ -14,8 +13,8 @@ async def add_photo(url: str, description:str, db: Session):  # user: User
     :param db: Session: Pass in the database session to the function
     :param user: User: Get the user id from the database
     :return: A photo object
-    :doc-author: Trelent 
-  photo = Photo(url_photo=url,description=description, user_id=user.id)
+    :doc-author: Trelent """
+    photo = Photo(url_photo=url, description=description, user_id=user.id)
     db.add(photo)
     db.commit()
     db.refresh(photo)
@@ -34,7 +33,20 @@ async def get_photo(skip: int,
         for tag in tags:
             return db.query(Photo).filter(Photo.tags == tag).all()
     if username:
-        get_user:User = db.query(User).filter(User.username == username).first()
+        get_user: User = db.query(User).filter(User.username == username).first()
         return db.query(Photo).filter(Photo.user_id == get_user.id).all()
 
     return db.query(Photo).offset(skip).limit(limit).all()
+
+
+async def description_photo_update(photo_id: int,
+                                   new_description: str,
+                                   db: Session,
+                                   user: User):
+    current_photo = db.query(Photo).filter(Photo.id == photo_id).first()
+    if current_photo:
+        current_photo.description = new_description
+        db.commit()
+        db.refresh(current_photo)
+    return current_photo
+
