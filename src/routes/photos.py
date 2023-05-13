@@ -40,7 +40,7 @@ async def create_photo(photo: Annotated[UploadFile, File()],
 async def remove_photo(photo_id: int,
                        db: Session = Depends(get_db),
                        current_user: User = Depends(auth_service.get_current_user)):
-    photo = await repository_photos.delete_photo(photo_id, db, current_user)
+    photo = await repository_photos.remove_photo(photo_id, db, current_user)
     if photo is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Photo not found")
     return photo

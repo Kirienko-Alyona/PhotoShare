@@ -1,6 +1,7 @@
 from typing import Optional
 
 from sqlalchemy.orm import Session
+from sqlalchemy import and_
 
 from src.database.models import User, Photo
 
@@ -26,8 +27,8 @@ async def add_photo(url: str, description: str, db: Session, user: User) -> Phot
     return photo
 
 
-async def delete_photo(photo_id: int, db: Session, user: User) -> Optional[Photo]:
-    photo = db.query(Photo).filter_by(photo_id=photo_id, user_id=user.id).first()
+async def remove_photo(photo_id: int, db: Session, user: User) -> Optional[Photo]:
+    photo = db.query(Photo).filter_by(id=photo_id, user_id=user.id).first()
     if photo:
         db.delete(photo)
         db.commit()
