@@ -17,7 +17,7 @@ class UserModel(BaseModel):
     def validate_username(cls, username: str):
         try:
             if re.search(r"^[a-zA-Z0-9 _]+$", username):
-                return '@' + username.strip().lower().title().replace(' ', '_')
+                return '@' + username.strip().lower().replace(' ', '_')
             else:
                 raise ValueError()
         except ValueError:
