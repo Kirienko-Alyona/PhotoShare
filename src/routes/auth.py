@@ -147,5 +147,5 @@ async def confirmed_email(token: str, db: Session = Depends(get_db)) -> dict:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
     if user.confirmed:
         return {'message': messages.YOUR_EMAIL_IS_ALREADY_CONFIRMED}
-    await repository_users.confirmed_email(user, db)
+    await repository_users.confirmed_email(email, db)
     return {'message': messages.EMAIL_CONFIRMED}
