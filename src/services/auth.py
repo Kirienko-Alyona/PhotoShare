@@ -24,7 +24,6 @@ class Auth:
     client_redis = redis.Redis(
         host=settings.redis_host,
         port=settings.redis_port,
-        password=settings.redis_password,
         db=0
     )
     credentials_exception = HTTPException(

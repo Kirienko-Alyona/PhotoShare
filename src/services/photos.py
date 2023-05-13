@@ -8,25 +8,11 @@ import cloudinary.api
 from src.conf.config import settings
 
 
-def update_filename(filename: str):
-    '''
-    The update_filename function takes a filename as an argument and returns the same filename with a random UUID appended to it.
-
-    :param filename: str: Specify the type of data that is expected to be passed into the function
-    :return: A new filename
-    :doc-author: Trelent
-    '''
-    ext = filename.split('.')[-1]
-    filename = f'{uuid4().hex}.{ext}'
-    return filename
-
-
-def upload_photo(file: UploadFile, public_id: str) -> str:
+def upload_photo(file: UploadFile) -> str:
     """
     The upload_avatar function takes in a file and name, uploads the file to cloudinary,
     and returns the url of that image. The function is asynchronous because it uses await.
 
-    :param public_id:
     :param file: UploadFile: Get the file from the request
     :param name: str: Give the image a unique name
     :return: The url of the uploaded image
@@ -37,7 +23,7 @@ def upload_photo(file: UploadFile, public_id: str) -> str:
         api_secret=settings.cloudinary_api_secret,
         secure=True
     )
-
+    public_id = uuid4().hex
     cloudinary.uploader.upload(file.file, public_id=public_id, overwrite=True)
     image_info = cloudinary.api.resource(public_id)
     src_url = image_info['secure_url']
