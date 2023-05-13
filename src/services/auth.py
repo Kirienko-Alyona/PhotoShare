@@ -24,6 +24,7 @@ class Auth:
     client_redis = redis.Redis(
         host=settings.redis_host,
         port=settings.redis_port,
+        password=settings.redis_password,
         db=0
     )
     credentials_exception = HTTPException(
@@ -155,7 +156,7 @@ class Auth:
         :return: A user object
         """
         email = self.verify_access_token(token)
-        user = self.client_redis.get(f'user:{email}')
+        user = await self.client_redis.get(f'user:{email}')
 
         if user is None:
             user = await repository_users.get_user_by_email(email, db)
