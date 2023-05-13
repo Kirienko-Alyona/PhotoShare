@@ -59,7 +59,7 @@ async def description_update(new_description: str,
                              username: str,
                              db: Session,
                              user: User):
-    photo = await get_photo(skip,limit, photo_id, tags,username,db)
+    photo = await get_photo(skip, limit, photo_id, tags, username, db)
     if photo:
         count = db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).update({
             'description': new_description
@@ -70,4 +70,17 @@ async def description_update(new_description: str,
     return None
 
 
-
+async def delete_photo(skip: int,
+                       limit: int,
+                       photo_id: int,
+                       tags: list[str],
+                       username: str,
+                       db: Session,
+                       user: User):
+    photo = await get_photo(skip, limit, photo_id, tags, username, db)
+    if photo:
+        count = db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).delete()
+        db.commit()
+        if count == 1:
+            return photo
+    return None
