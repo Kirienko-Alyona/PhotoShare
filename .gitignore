@@ -2,6 +2,5 @@
 postgres-data
 /venv/
 /.idea/
-migrations
-alembic
 __pycache__
+.vscode/launch.json

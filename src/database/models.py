@@ -24,7 +24,7 @@ class User(Base):
     #last_name = Column(String, nullable=True)
     username = Column(String(30), nullable=False)
     email = Column(String(50), nullable=False, unique=True, index=True)
-    password = Column(String(10), nullable=False)
+    password = Column(String(255), nullable=False)
     #phone = Column(String(18), nullable=True)
     birthday = Column(Date)
     refresh_token = Column(String(255), nullable=True)
@@ -52,19 +52,22 @@ class Photo(Base):
     id = Column(Integer, primary_key=True) 
     url_photo = Column(String(255), nullable=True)
     description = Column(String(255), nullable=True)
-    tags = relationship('Tag', cascade='all, delete-orphan', back_populates='photo')
+    #tags = relationship('Tag', cascade='all, delete-orphan', back_populates='photo')
     user_id = Column(ForeignKey('users.id', ondelete='CASCADE'), default=None)
     __table_args__ = (UniqueConstraint('user_id', name='unique_photo_user'), )
+    
+    tags = relationship('Tag', secondary='photo_m2m_tag', passive_deletes=True, back_populates='photos')
     
     
 class Tag(Base):
     __tablename__ = 'tags'   
     id = Column(Integer, primary_key=True) 
     tag_name = Column(String, nullable=True)
-    photo = relationship('Photo', secondary='photo_m2m_tag', passive_deletes=True, back_populates='tags')
+    #photo = relationship('Photo', secondary='photo_m2m_tag', passive_deletes=True, back_populates='tags')
     user_id = Column(ForeignKey('users.id'), default=None)
     __table_args__ = (UniqueConstraint('tag_name', name='unique_tags_name'), )
     
+    photos = relationship('Photo', secondary='photo_m2m_tag', passive_deletes=True, back_populates='tags')
     
 class Comment(Base):
     __tablename__ = 'comments'   
@@ -72,7 +75,7 @@ class Comment(Base):
     text_comment = Column(String(255), nullable=False)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-    photo_id = Column(ForeignKey('photos.id', ondelete='CASCADE'), default=None)
-    photo = relationship('Photo', backref='comments', uselist=False)
-    user_id = Column(ForeignKey('users.id', ondelete='CASCADE'), default=None)
+    photo_id = Column(ForeignKey('photos.id', ondelete='CASCADE'), nullable=False)
+    photo = relationship('Photo', backref='comments')
+    user_id = Column(ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     user = relationship('User', backref='comments')
