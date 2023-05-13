@@ -1,6 +1,10 @@
 from pydantic import BaseModel, HttpUrl, Field
 
 
+class PhotoModel(BaseModel):
+    pass
+
+
 class PhotoResponse(BaseModel):
     id: int
     url_photo: HttpUrl
@@ -10,3 +14,7 @@ class PhotoResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class PhotoUpdate(BaseModel):
+    pass
