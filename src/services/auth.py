@@ -179,7 +179,7 @@ class Auth:
         """
         to_encode = data.copy()
         expire = datetime.utcnow() + timedelta(days=7)
-        to_encode.update({'iat': datetime.utcnow(), 'exp': expire})
+        to_encode.update({'iat': datetime.utcnow(), 'exp': expire, 'scope': 'email_token'})
         token = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
         return token
 
