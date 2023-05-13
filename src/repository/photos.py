@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from src.database.models import User, Photo, Tag
 
 
-async def add_photo(url: str, db: Session):  # user: User
+async def add_photo(url: str, description:str, db: Session):  # user: User
     '''
     The add_photo function takes a url and adds it to the database.
         Args:
@@ -16,7 +16,7 @@ async def add_photo(url: str, db: Session):  # user: User
     :return: A photo object
     :doc-author: Trelent
     '''
-    photo = Photo(url_photo=url)  # user_id=user.id
+    photo = Photo(url_photo=url, description=description)  # user_id=user.id
     db.add(photo)
     db.commit()
     db.refresh(photo)

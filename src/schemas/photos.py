@@ -1,8 +1,11 @@
+from fastapi import UploadFile, File
 from pydantic import BaseModel, HttpUrl, Field
 
 
 class PhotoModel(BaseModel):
-    pass
+    file: UploadFile
+    description: str | None = Field(
+        default=None, title="The description of the Photo", max_length=300)
 
 
 class PhotoResponse(BaseModel):
