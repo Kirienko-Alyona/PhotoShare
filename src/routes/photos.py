@@ -68,7 +68,7 @@ async def photo_description_update(
 
 
 @router.delete('/photo_delete', status_code=status.HTTP_204_NO_CONTENT)
-async def photo_description_update(
+async def photo_delete(
         skip: int = 0, limit: int = Query(default=10, ge=1, le=50),
         photo_id: Optional[int] = Query(default=None),
         tags: Optional[list] = Query(default=None),
