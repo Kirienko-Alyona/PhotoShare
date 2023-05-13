@@ -43,7 +43,7 @@ async def description_photo_update(photo_id: int,
                                    new_description: str,
                                    db: Session,
                                    user: User):
-    current_photo = db.query(Photo).filter(Photo.id == photo_id).first()
+    current_photo = db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).first()
     if current_photo:
         current_photo.description = new_description
         db.commit()
