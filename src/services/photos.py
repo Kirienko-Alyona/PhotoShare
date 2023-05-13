@@ -21,15 +21,16 @@ def update_filename(filename: str):
     return filename
 
 
-async def upload_photo(file: UploadFile, public_id: str) -> str:
-    '''
+def upload_photo(file: UploadFile, public_id: str) -> str:
+    """
     The upload_avatar function takes in a file and name, uploads the file to cloudinary,
     and returns the url of that image. The function is asynchronous because it uses await.
 
+    :param public_id:
     :param file: UploadFile: Get the file from the request
     :param name: str: Give the image a unique name
     :return: The url of the uploaded image
-    '''
+    """
     cloudinary.config(
         cloud_name=settings.cloudinary_name,
         api_key=settings.cloudinary_api_key,
@@ -37,8 +38,7 @@ async def upload_photo(file: UploadFile, public_id: str) -> str:
         secure=True
     )
 
-    await cloudinary.uploader.upload(file.file, public_id=public_id, overwrite=True,
-                                     eager=[{'width': 250, 'height': 250, 'crop': 'fill'}])
-    image_info = await cloudinary.api.resource(public_id)
-    src_url = image_info['derived'][0]['secure_url']
+    cloudinary.uploader.upload(file.file, public_id=public_id, overwrite=True)
+    image_info = cloudinary.api.resource(public_id)
+    src_url = image_info['secure_url']
     return src_url

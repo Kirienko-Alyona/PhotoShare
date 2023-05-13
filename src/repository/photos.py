@@ -4,7 +4,7 @@ from src.database.models import User, Photo
 
 
 async def add_photo(url: str, db: Session, user: User):
-    '''
+    """
     The add_photo function takes a url and adds it to the database.
         Args:
             url (str): The URL of the photo to be added.
@@ -15,7 +15,7 @@ async def add_photo(url: str, db: Session, user: User):
     :param user: User: Get the user id from the database
     :return: A photo object
     :doc-author: Trelent
-    '''
+    """
     photo = Photo(url_photo=url, user_id=user.id)
     db.add(photo)
     db.commit()
