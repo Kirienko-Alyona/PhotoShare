@@ -5,3 +5,4 @@ postgres-data
 migrations
 alembic
 __pycache__
+.vscode/launch.json
