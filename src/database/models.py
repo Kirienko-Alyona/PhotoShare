@@ -6,11 +6,9 @@ from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.sql.schema import ForeignKey, Table
 from sqlalchemy.sql.sqltypes import DateTime
 
-from src.conf import constants
-
 Base = declarative_base()
-    
-    
+
+
 class Role(enum.Enum):
     admin: str = "admin"
     moderator: str = "moderator"
@@ -21,11 +19,11 @@ class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     first_name = Column(String, nullable=True)
-    #last_name = Column(String, nullable=True)
+    # last_name = Column(String, nullable=True)
     username = Column(String(30), nullable=False)
     email = Column(String(50), nullable=False, unique=True, index=True)
     password = Column(String(255), nullable=False)
-    #phone = Column(String(18), nullable=True)
+    # phone = Column(String(18), nullable=True)
     birthday = Column(Date)
     refresh_token = Column(String(255), nullable=True)
     avatar = Column(String(255), nullable=True)
@@ -34,41 +32,36 @@ class User(Base):
     active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-    __table_args__ = (UniqueConstraint('username', 'email', 'id', name='unique_user_username_email_id'), )
-    
-    
-    
+    __table_args__ = (UniqueConstraint('username', 'email', 'id', name='unique_user_username_email_id'),)
+
+
 photo_m2m_tag = Table(
     'photo_m2m_tag',
     Base.metadata,
-    Column('id', Integer, primary_key=True),
-    Column('photo', Integer, ForeignKey('photos.id', ondelete='CASCADE')),
-    Column('tag', Integer, ForeignKey('tags.id', ondelete='CASCADE')),
+    Column('photo_id', Integer, ForeignKey('photos.id', ondelete='CASCADE'), primary_key=True),
+    Column('tag_id', Integer, ForeignKey('tags.id', ondelete='CASCADE'), primary_key=True),
 )
 
-    
+
 class Photo(Base):
-    __tablename__ = 'photos'  
-    id = Column(Integer, primary_key=True) 
+    __tablename__ = 'photos'
+    id = Column(Integer, primary_key=True)
     url_photo = Column(String(255), nullable=True)
     description = Column(String(255), nullable=True)
-    #tags = relationship('Tag', cascade='all, delete-orphan', back_populates='photo')
+    tags = relationship('Tag', secondary=photo_m2m_tag, back_populates='photos')
     user_id = Column(ForeignKey('users.id', ondelete='CASCADE'), default=None)
-    __table_args__ = (UniqueConstraint('user_id', name='unique_photo_user'), )
-    
-    tags = relationship('Tag', secondary='photo_m2m_tag', passive_deletes=True, back_populates='photos')
-    
-    
+    __table_args__ = (UniqueConstraint('user_id', name='unique_photo_user'),)
+
+
 class Tag(Base):
-    __tablename__ = 'tags'   
-    id = Column(Integer, primary_key=True) 
+    __tablename__ = 'tags'
+    id = Column(Integer, primary_key=True)
     tag_name = Column(String, nullable=True)
-    #photo = relationship('Photo', secondary='photo_m2m_tag', passive_deletes=True, back_populates='tags')
+    photos = relationship('Photo', secondary=photo_m2m_tag, back_populates='tags')
     user_id = Column(ForeignKey('users.id'), default=None)
-    __table_args__ = (UniqueConstraint('tag_name', name='unique_tags_name'), )
-    
-    photos = relationship('Photo', secondary='photo_m2m_tag', passive_deletes=True, back_populates='tags')
-    
+    __table_args__ = (UniqueConstraint('tag_name', name='unique_tags_name'),)
+
+
 class Comment(Base):
     __tablename__ = 'comments'   
     id = Column(Integer, primary_key=True) 
