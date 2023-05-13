@@ -24,6 +24,7 @@ class Auth:
     client_redis = redis.Redis(
         host=settings.redis_host,
         port=settings.redis_port,
+        password=settings.redis_password,
         db=0
     )
     credentials_exception = HTTPException(
@@ -155,7 +156,7 @@ class Auth:
         :return: A user object
         """
         email = self.verify_access_token(token)
-        user = self.client_redis.get(f'user:{email}')
+        user = await self.client_redis.get(f'user:{email}')
 
         if user is None:
             user = await repository_users.get_user_by_email(email, db)
@@ -178,7 +179,7 @@ class Auth:
         """
         to_encode = data.copy()
         expire = datetime.utcnow() + timedelta(days=7)
-        to_encode.update({'iat': datetime.utcnow(), 'exp': expire})
+        to_encode.update({'iat': datetime.utcnow(), 'exp': expire, 'scope': 'email_token'})
         token = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
         return token
 

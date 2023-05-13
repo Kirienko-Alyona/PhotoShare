@@ -96,11 +96,9 @@ async def singup(body: UserModel,
     body.password = auth_service.get_password_hash(body.password)
     new_user = await repository_users.create_user(body, db)
 
-    background_tasks.add_task(send_email, email=new_user.email,
-                              subject='Confirm email',
-                              template_name='email_template.html',
-                              username=new_user.username,
-                              host=request.base_url)
+    background_tasks.add_task(send_email, new_user.email,
+                              new_user.username,
+                              request.base_url) #subject='Confirm email', template_name='email_template.html'
     return {'user': new_user, 'detail': messages.USER_SUCCESSFULLY_CREATED}
 
 
