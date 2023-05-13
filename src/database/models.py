@@ -52,19 +52,22 @@ class Photo(Base):
     id = Column(Integer, primary_key=True) 
     url_photo = Column(String(255), nullable=True)
     description = Column(String(255), nullable=True)
-    tags = relationship('Tag', cascade='all, delete-orphan', back_populates='photo')
+    #tags = relationship('Tag', cascade='all, delete-orphan', back_populates='photo')
     user_id = Column(ForeignKey('users.id', ondelete='CASCADE'), default=None)
     __table_args__ = (UniqueConstraint('user_id', name='unique_photo_user'), )
+    
+    tags = relationship('Tag', secondary='photo_m2m_tag', passive_deletes=True, back_populates='photos')
     
     
 class Tag(Base):
     __tablename__ = 'tags'   
     id = Column(Integer, primary_key=True) 
     tag_name = Column(String, nullable=True)
-    photo = relationship('Photo', secondary='photo_m2m_tag', passive_deletes=True, back_populates='tags')
+    #photo = relationship('Photo', secondary='photo_m2m_tag', passive_deletes=True, back_populates='tags')
     user_id = Column(ForeignKey('users.id'), default=None)
     __table_args__ = (UniqueConstraint('tag_name', name='unique_tags_name'), )
     
+    photos = relationship('Photo', secondary='photo_m2m_tag', passive_deletes=True, back_populates='tags')
     
 class Comment(Base):
     __tablename__ = 'comments'   
