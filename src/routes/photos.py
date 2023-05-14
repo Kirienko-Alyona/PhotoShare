@@ -49,19 +49,14 @@ async def get_photo(
 @router.patch('/photo_description', response_model=PhotoResponse, name="Update photo's description")
 async def photo_description_update(
         new_description: str,
-        skip: int = 0, limit: int = Query(default=10, ge=1, le=50),
-        photo_id: Optional[int] = Query(default=None),
-        tags: Optional[list] = Query(default=None),
-        username: Optional[str] = Query(default=None),
+        photo_id: int,
         db: Session = Depends(get_db),
         current_user: User = Depends(auth_service.get_current_user)
 ):
     updated_photo = await repository_photos.description_update(new_description,
-                                                               skip, limit,
                                                                photo_id,
-                                                               tags,
-                                                               username,
-                                                               db, current_user)
+                                                               db,
+                                                               current_user)
     if updated_photo is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
     return updated_photo
@@ -69,18 +64,11 @@ async def photo_description_update(
 
 @router.delete('/photo_delete', status_code=status.HTTP_204_NO_CONTENT)
 async def photo_delete(
-        skip: int = 0, limit: int = Query(default=10, ge=1, le=50),
         photo_id: Optional[int] = Query(default=None),
-        tags: Optional[list] = Query(default=None),
-        username: Optional[str] = Query(default=None),
         db: Session = Depends(get_db),
         current_user: User = Depends(auth_service.get_current_user)
 ):
-    photo = await repository_photos.delete_photo(
-                                                skip, limit,
-                                                photo_id,
-                                                tags,
-                                                username,
+    photo = await repository_photos.delete_photo(photo_id,
                                                 db, current_user)
     if photo is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)

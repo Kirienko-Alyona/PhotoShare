@@ -51,15 +51,15 @@ async def get_photo(skip: int,
 #     return current_photo
 
 
+async def get_photo_by_id(photo_id: int, db: Session, user: User):
+    return db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).first()
+
+
 async def description_update(new_description: str,
-                             skip: int,
-                             limit: int,
                              photo_id: int,
-                             tags: list[str],
-                             username: str,
                              db: Session,
                              user: User):
-    photo = await get_photo(skip, limit, photo_id, tags, username, db)
+    photo = await get_photo_by_id(photo_id, db, user)
     if photo:
         count = db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).update({
             'description': new_description
@@ -70,14 +70,10 @@ async def description_update(new_description: str,
     return None
 
 
-async def delete_photo(skip: int,
-                       limit: int,
-                       photo_id: int,
-                       tags: list[str],
-                       username: str,
+async def delete_photo(photo_id: int,
                        db: Session,
                        user: User):
-    photo = await get_photo(skip, limit, photo_id, tags, username, db)
+    photo = await get_photo_by_id(photo_id, db, user)
     if photo:
         count = db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).delete()
         db.commit()
