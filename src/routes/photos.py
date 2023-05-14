@@ -46,7 +46,7 @@ async def get_photo(
     return photo
 
 
-@router.patch('/photo_description', response_model=PhotoResponse, name="Update photo's description")
+@router.patch('/photo_description/{photo_id}', response_model=PhotoResponse, name="Update photo's description")
 async def photo_description_update(
         new_description: str,
         photo_id: int,
@@ -62,9 +62,9 @@ async def photo_description_update(
     return updated_photo
 
 
-@router.delete('/photo_delete', status_code=status.HTTP_204_NO_CONTENT)
+@router.delete('/photo_delete/{photo_id}', status_code=status.HTTP_204_NO_CONTENT)
 async def photo_delete(
-        photo_id: Optional[int] = Query(default=None),
+        photo_id: int,
         db: Session = Depends(get_db),
         current_user: User = Depends(auth_service.get_current_user)
 ):
