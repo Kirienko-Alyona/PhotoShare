@@ -38,7 +38,7 @@ async def update_comment(body: CommentUpdateModel, comment_id: int = Path(ge=1),
     comment = await repository_comments.get_comment_by_id(comment_id, db)
     if comment is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
-    if comment.user != current_user:
+    if comment.user_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=messages.FORBIDDEN)
     comment = await repository_comments.update_comment(body, comment_id, db)
     return comment
