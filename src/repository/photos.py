@@ -35,14 +35,14 @@ async def description_update(new_description: str,
                              photo_id: int,
                              db: Session,
                              user: User):
-    photo = await get_photo_by_id(photo_id, db, user)
-    if photo:
-        count = db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).update({
+    #photo = await get_photo_by_id(photo_id, db, user)
+    #if photo:
+    count = db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).update({
             'description': new_description
         })
+    if count == 1:
         db.commit()
-        if count == 1:
-            return photo
+        #return photo
     return None
 
 

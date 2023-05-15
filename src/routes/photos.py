@@ -52,7 +52,7 @@ async def photo_description_update(
                                                                current_user)
     if updated_photo is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
-    return updated_photo
+    #return #updated_photo
 
 
 @router.delete('/{photo_id}', status_code=status.HTTP_204_NO_CONTENT)
