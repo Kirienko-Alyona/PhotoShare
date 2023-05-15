@@ -39,7 +39,7 @@ async def get_photos(skip: int = 0, limit: int = Query(default=10, ge=1, le=50),
     return photos
 
 
-@router.patch('/{photo_id}', response_model=PhotoResponse, name="Update photo's description")
+@router.patch('/{photo_id}', response_model=int, name="Update photo's description")
 async def photo_description_update(
         new_description: str,
         photo_id: int,
@@ -52,7 +52,7 @@ async def photo_description_update(
                                                                current_user)
     if updated_photo is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
-    #return #updated_photo
+    return updated_photo
 
 
 @router.delete('/{photo_id}', status_code=status.HTTP_204_NO_CONTENT)

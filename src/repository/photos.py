@@ -42,7 +42,7 @@ async def description_update(new_description: str,
         })
     if count == 1:
         db.commit()
-        #return photo
+        return count
     return None
 
 
