@@ -16,3 +16,6 @@ FIRST_NAME_MAX_LEN = 20
 
 #--> comment
 COMMENT_MIN_LEN = 1
+
+#--> comment
+TAG_MIN_LEN = 1

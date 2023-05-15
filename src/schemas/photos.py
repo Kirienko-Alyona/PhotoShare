@@ -1,5 +1,8 @@
+from typing import List
+
 from pydantic import BaseModel, HttpUrl, Field
-from typing import Optional
+
+# from src.schemas.tags import TagDBModel
 
 
 class PhotoModel(BaseModel):
@@ -19,3 +22,14 @@ class PhotoResponse(BaseModel):
 
 class PhotoUpdate(BaseModel):
     pass
+
+
+class PhotoDBModel(BaseModel):
+    id: int
+    cloud_public_id: str
+    url_photo: str
+    description: str
+    # tags: List[TagDBModel]
+
+    class Config:
+        orm_mode = True
