@@ -39,7 +39,8 @@ async def startup():
     
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5500", "http://127.0.0.1:5500"],
+    allow_origins=["*"],
+    # allow_origins=["http://localhost:5501", "http://127.0.0.1:5501"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -87,6 +88,9 @@ async def custom_middleware(request: Request, call_next):
 templates = Jinja2Templates(directory='templates')
 BASE_DIR = pathlib.Path(__file__).parent
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+app.mount("/webadmin/css", StaticFiles(directory=BASE_DIR / "templates/web-admin/css"), name="static")
+app.mount("/webadmin/javascript", StaticFiles(directory=BASE_DIR / "templates/web-admin/javascript"), name="static")
+app.mount("/webadmin/images", StaticFiles(directory=BASE_DIR / "templates/web-admin/images"), name="static")
 
 
 @app.get('/favicon.ico', include_in_schema=False)
@@ -112,6 +116,33 @@ async def root(request: Request):
     :doc-author: Trelent
     """
     return templates.TemplateResponse('index.html', {"request": request, "title": "PhotoShare App"})
+
+
+@app.get("/webadmin/", response_class=HTMLResponse, description="Main Page")
+async def root(request: Request):
+    """
+    The root function is the entry point for the web application.
+    It returns a TemplateResponse object, which renders an HTML template using Jinja2.
+    The template is located in templates/index.html and uses data from the request object to render itself.
+    
+    :param request: Request: Get the request object
+    :return: A templateresponse object
+    :doc-author: Trelent
+    """
+    return templates.TemplateResponse('web-admin/index.html', {"request": request, "title": "PhotoShare App"})
+
+@app.get("/webadmin/main.html", response_class=HTMLResponse, description="Main Page")
+async def root(request: Request):
+    """
+    The root function is the entry point for the web application.
+    It returns a TemplateResponse object, which renders an HTML template using Jinja2.
+    The template is located in templates/index.html and uses data from the request object to render itself.
+    
+    :param request: Request: Get the request object
+    :return: A templateresponse object
+    :doc-author: Trelent
+    """
+    return templates.TemplateResponse('web-admin/main.html', {"request": request, "title": "PhotoShare App"})
 
 
 @app.get("/api/healthchecker")
