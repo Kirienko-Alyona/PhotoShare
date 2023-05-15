@@ -8,7 +8,7 @@ import cloudinary.api
 from src.conf.config import settings
 
 
-def upload_photo(file: UploadFile) -> str:
+def upload_photo(file: UploadFile) -> tuple[str, str]:
     """
     The upload_avatar function takes in a file and name, uploads the file to cloudinary,
     and returns the url of that image. The function is asynchronous because it uses await.
@@ -27,4 +27,4 @@ def upload_photo(file: UploadFile) -> str:
     cloudinary.uploader.upload(file.file, public_id=public_id, overwrite=True)
     image_info = cloudinary.api.resource(public_id)
     src_url = image_info['secure_url']
-    return src_url
+    return src_url, public_id
