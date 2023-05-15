@@ -2,6 +2,7 @@ import enum
 from sqlalchemy import Enum
 
 from sqlalchemy import Boolean, Column, Date, Integer, String, UniqueConstraint, func
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.sql.schema import ForeignKey, Table
 from sqlalchemy.sql.sqltypes import DateTime
@@ -46,10 +47,12 @@ photo_m2m_tag = Table(
 class Photo(Base):
     __tablename__ = 'photos'
     id = Column(Integer, primary_key=True)
-    url_photo = Column(String(255), nullable=True)
+    user_id = Column(ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    cloud_public_id = Column(String(255), nullable=False)
+    url_photo = Column(String(255), nullable=False)
     description = Column(String(255), nullable=True)
+    transformations = relationship('PhotoTransformation', cascade='all, delete-orphan', back_populates='original_photo')
     tags = relationship('Tag', secondary=photo_m2m_tag, back_populates='photos')
-    user_id = Column(ForeignKey('users.id', ondelete='CASCADE'), default=None)
 
 
 class Tag(Base):
@@ -71,3 +74,25 @@ class Comment(Base):
     photo = relationship('Photo', backref='comments')
     user_id = Column(ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     user = relationship('User', backref='comments')
+
+
+# class PhotoTransformer(Base):
+#     __tablename__ = 'photo_transformers'
+#     id = Column(Integer, primary_key=True)
+#     user_id = Column(ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+#     name = Column(String(128), nullable=False, unique=True, index=True)
+#     description = Column(String(255), nullable=True)
+#     preset = Column(JSONB, nullable=False)  # [{'radius': "max"}, {'width': 200, 'crop': "scale"},]
+#     created_at = Column(DateTime, default=func.now())
+#     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+
+
+class PhotoTransformation(Base):
+    __tablename__ = 'photo_transformations'
+    id = Column(Integer, primary_key=True)
+    photo_id = Column(ForeignKey('photos.id', ondelete='CASCADE'), nullable=False)
+    transformed_url = Column(String(255), nullable=False)
+    description = Column(String(255), nullable=True)
+    original_photo = relationship('Photo', back_populates='transformations')
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
