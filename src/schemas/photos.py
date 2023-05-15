@@ -11,7 +11,7 @@ class PhotoResponse(BaseModel):
 
     url_photo: HttpUrl
     description: str | None = Field(
-        default=None, title="The description of the Photo", max_length=200)
+        default=None, title="The description of the Photo", max_length=255)
 
     class Config:
         orm_mode = True
