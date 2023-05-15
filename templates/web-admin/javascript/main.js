@@ -1,24 +1,56 @@
 token = localStorage.getItem('accessToken')
 
-const get_contacts = async () => {
-  const response = await fetch('http://localhost:8000/api/contacts', {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  })
-  console.log(response.status, response.statusText)
-  if (response.status === 200) {
-    result = await response.json()
-    for (contact of result) {
-      el = document.createElement('li')
-      el.className = 'list-group-item'
-      el.innerHTML = `ID: ${contact.id} name: <b>${contact.name}</b> surname: ${contact.name} email: ${contact.email} phone: ${contact.phone} born_date: ${contact.born_date}`
-      contacts.appendChild(el)
-    }
-  }
-}
+function new_table_row(user) {
+  let tr = document.createElement("tr");
+  tr.setAttribute("data-rowid", user.id);
+  let td = document.createElement("td");
+  td.className = "text-end";
+  td.innerHTML = user.id;
+  tr.append(td);
+  td = document.createElement("td");
+  td.className = "text-start";
+  td.innerHTML = user.full_name;
+  tr.append(td);
+  td = document.createElement("td");
+  td.className = "text-start";
+  if (user.birthday)
+    td.innerHTML = user.birthday.split("-").reverse().join(".");
+  else
+    td.innerHTML = "";
+  tr.append(td);
+  td = document.createElement("td");
+  td.className = "text-start";
+  td.innerHTML = user.email;
+  tr.append(td);
 
+  td = document.createElement("td");
+
+  let button = document.createElement("button");
+  button.className = "btn btn-outline-secondary btn-edit";
+  button.innerHTML = "<span class=\'btn-label\'><i class=\'fa fa-user-edit\'></i></span>";
+  button.setAttribute("style", "--bs-btn-padding-y: .2rem; --bs-btn-padding-x: .5rem; " +
+    "--bs-btn-font-size: .75rem;");
+  button.onclick = async function() {
+    await EditContactShow(user.id);
+  }
+  td.append(button);
+  tr.append(td);
+
+  td = document.createElement("td");
+  button = document.createElement("button");
+  button.className = "btn btn-outline-secondary btn-delete";
+  button.innerHTML = "<span class=\'btn-label\'><i class=\'fa fa-user-minus\'></i></span>";
+  button.setAttribute("style", "--bs-btn-padding-y: .2rem; --bs-btn-padding-x: .5rem; " +
+    "--bs-btn-font-size: .75rem;");
+  button.onclick = async function() {
+    await DeleteContactShow(user.id);
+  }
+
+  td.append(button);
+  tr.append(td);
+
+  return tr;
+}
 
 
 window.addEventListener('load', function(){
@@ -27,16 +59,14 @@ window.addEventListener('load', function(){
     if (this.readyState === 4 && this.status === 200) {
       // Код, що потрібно виконати, якщо запит успішний
       var result = JSON.parse(this.responseText);
-      //  var data = xmlhttp.responseText;
-      for (contact of result) {
-        el = document.createElement('li')
-        el.className = 'list-group-item'
-        el.innerHTML = `ID: ${user.id} first_name: <b>${first_name}</b> username: ${username} email: ${email} password: ${password} birthday: ${birthday} refresh_token: ${refresh_token} avatar: ${avatar} roles: ${roles} confirmed: ${confirmed} active: ${active} created_at: ${created_at} updated_at: ${updated_at}`
-        contacts.appendChild(el)
+      var users = document.getElementById("userlist");
+      for (user of result) {
+        var tr = new_table_row(user)
+        users.appendChild(tr)
       }
     }
   };
-  xhttp.open('GET', 'http://localhost:8000/api/users/me', true);
+  xhttp.open('GET', 'http://localhost:8000/api/users/', true);
   xhttp.setRequestHeader('Authorization', 'Bearer ' + localStorage.getItem('accessToken')
   );
   
@@ -44,7 +74,7 @@ window.addEventListener('load', function(){
 });
 
 
-contactCreate.addEventListener('submit', async (e) => {
+/** contactCreate.addEventListener('submit', async (e) => {
   e.preventDefault()
   const response = await fetch('http://localhost:8000/api/contacts', {
     method: 'POST',
@@ -64,4 +94,4 @@ contactCreate.addEventListener('submit', async (e) => {
     console.log('Ви успішно створили новий контакт')
     get_contacts()
   }
-})
+}) */
