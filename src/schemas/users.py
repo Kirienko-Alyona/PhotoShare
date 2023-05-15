@@ -38,6 +38,7 @@ class UserDb(BaseModel):
     username: str
     email: str
     created_at: datetime
+    updated_at: datetime
     avatar: str = None
     roles: Role
     birthday: date = None #'2023-03-29'
