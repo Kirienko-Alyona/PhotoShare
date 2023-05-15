@@ -26,13 +26,12 @@ async def create_photo(photo: UploadFile = File(),
 
 @router.get('/', response_model=list[PhotoResponse], name="Get photos by request ")
 async def get_photos(skip: int = 0, limit: int = Query(default=10, ge=1, le=50),
-                    tags: Optional[list] = Query(default=None),
+                    tags_id: Optional[int] = Query(default=None),
                     user: User = Depends(auth_service.get_current_user),
                     db: Session = Depends(get_db)):
-    photos = await repository_photos.get_photos({'tags': tags},
+    photos = await repository_photos.get_photos({'tags': tags_id},
                                                 skip,
                                                 limit,
-                                                user,
                                                 db)
     if len(photos) == 0:
         raise HTTPException(

@@ -17,17 +17,14 @@ async def add_photo(url: str, description: str, db: Session, user: User):
 async def get_photos(dict_values: dict,
                     skip: int,
                     limit: int,
-                    user: User,
                     db: Session) -> Optional[List[Photo]]:
-    # if not input params - returned all list contacts
-    # else - search by parametrs: name, surname, email, phone - returned list contacts
-    contacts = db.query(Photo)
+    photos = db.query(Photo)
     for key, value in dict_values.items():
         if value is not None:
             attr = getattr(Photo, key)
-            contacts = contacts.filter(attr.icontains(value), Photo.user_id == user.id)
-    contacts = contacts.offset(skip).limit(limit).all()
-    return contacts
+            photos = photos.filter(attr.icontains(value))
+    photos = photos.offset(skip).limit(limit).all()
+    return photos
 
 
 async def get_photo_by_id(photo_id: int, db: Session, user: User):
