@@ -18,7 +18,6 @@ async def create_photo(photo: UploadFile = File(),
                        description: str | None = None,
                        db: Session = Depends(get_db),
                        current_user: User = Depends(auth_service.get_current_user)):
-
     url, public_id = upload_photo(photo)
     photo = await repository_photos.add_photo(url, public_id, description, db, current_user)
     return photo
@@ -26,9 +25,9 @@ async def create_photo(photo: UploadFile = File(),
 
 @router.get('/', response_model=list[PhotoResponse], name="Get photos by request ")
 async def get_photos(skip: int = 0, limit: int = Query(default=10, ge=1, le=50),
-                    tag_name: Optional[str] = Query(default=None),
-                    user: User = Depends(auth_service.get_current_user),
-                    db: Session = Depends(get_db)):
+                     tag_name: Optional[str] = Query(default=None),
+                     user: User = Depends(auth_service.get_current_user),
+                     db: Session = Depends(get_db)):
     photos = await repository_photos.get_photos({'tag_name': tag_name},
                                                 skip,
                                                 limit,
@@ -37,6 +36,17 @@ async def get_photos(skip: int = 0, limit: int = Query(default=10, ge=1, le=50),
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
     return photos
+
+
+@router.get('/{photo_id}', response_model=PhotoResponse, name="Get photos by id ")
+async def get_photo(photo_id: int,
+                    db: Session = Depends(get_db),
+                    user: User = Depends(auth_service.get_current_user)):
+    photo = await repository_photos.get_photo_by_id(photo_id, db, user)
+    if photo is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
+    return photo
 
 
 @router.patch('/{photo_id}', response_model=PhotoResponse, name="Update photo's description")
