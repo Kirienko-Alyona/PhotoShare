@@ -1,17 +1,53 @@
-from fastapi import APIRouter, Depends, status, UploadFile, File
-from sqlalchemy.orm import Session
+from datetime import datetime, date
+from typing import List
 import cloudinary
 import cloudinary.uploader
+from fastapi import APIRouter, Depends, status, UploadFile, File, HTTPException, Query
+
+from sqlalchemy.orm import Session
 
 from src.database.db import get_db
-from src.database.models import User
+from src.database.models import User, Role
 from src.repository import users as repository_users
 from src.services.auth import auth_service
 from src.conf.config import settings
-from src.schemas.users import UserDb
+from src.schemas.users import UserDb, UserResponse
+from src.conf import messages
 
 
 router = APIRouter(prefix="/users", tags=["users"])
+
+
+@router.get("/", response_model=List[UserDb])
+async def read_users(first_name: str = None, 
+                     username: str = None, 
+                     email: str = None, 
+                     created_at: datetime = None, 
+                     updated_at: datetime = None, 
+                     avatar: str = None, 
+                     roles: Role = None, 
+                     birthday: date = None, 
+                     limit: int = Query(default=10, ge=1, le=50), 
+                     offset: int = 0, 
+                     db: Session = Depends(get_db), 
+                     current_user: User = Depends(auth_service.get_current_user)):
+    
+    users = await repository_users.get_users({'first_name': first_name, 
+                                              'username': username, 
+                                              'email': email, 
+                                              'created_at': created_at, 
+                                              'updated_at': updated_at, 
+                                              'avatar': avatar, 
+                                              'roles': roles, 
+                                              'birthday': birthday}, 
+                                             limit, 
+                                             offset, 
+                                             db,
+                                             current_user)
+    if len(users) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
+    return users
 
 
 @router.get("/me/", response_model=UserDb)

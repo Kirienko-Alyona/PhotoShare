@@ -5,9 +5,9 @@ from sqlalchemy.orm import Session
 from src.database.models import User, Photo, Tag
 
 
-async def add_photo(url: str, description: str, db: Session, user: User):
+async def add_photo(url: str, public_id: str, description: str, db: Session, user: User):
 
-    photo = Photo(url_photo=url, description=description, user_id=user.id)
+    photo = Photo(url_photo=url, cloud_public_id=public_id, description=description, user_id=user.id)
     db.add(photo)
     db.commit()
     db.refresh(photo)

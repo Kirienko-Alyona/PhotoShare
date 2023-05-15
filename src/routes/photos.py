@@ -19,8 +19,8 @@ async def create_photo(photo: UploadFile = File(),
                        db: Session = Depends(get_db),
                        current_user: User = Depends(auth_service.get_current_user)):
 
-    url = upload_photo(photo)
-    photo = await repository_photos.add_photo(url, description, db, current_user)
+    url, public_id = upload_photo(photo)
+    photo = await repository_photos.add_photo(url, public_id, description, db, current_user)
     return photo
 
 
