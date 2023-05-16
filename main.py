@@ -14,7 +14,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from starlette.middleware.authentication import AuthenticationMiddleware
+from sqladmin import Admin, ModelView
 
+from src.database.db import engine
+from src.web_admin.admin_view import UserAdmin
 from src.database.db import get_db, client_redis_for_main
 from src.routes import photos, auth, users, comments, tags, photo_transformations
 
@@ -23,6 +26,13 @@ from src.conf.config import settings
 
 app = FastAPI()
 favicon_path = 'static/images/favicon.ico'
+
+
+
+admin = Admin(app, engine)
+
+
+admin.add_view(UserAdmin)
 
 
 @app.on_event("startup")
@@ -88,6 +98,7 @@ async def custom_middleware(request: Request, call_next):
 templates = Jinja2Templates(directory='templates')
 BASE_DIR = pathlib.Path(__file__).parent
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+app.mount("/admin", app=admin, name="admin")
 
 
 @app.get('/favicon.ico', include_in_schema=False)
