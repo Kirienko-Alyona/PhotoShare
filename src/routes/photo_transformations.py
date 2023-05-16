@@ -22,7 +22,7 @@ allowed_operation_delete = RoleAccess([Role.admin])
 @router.post('/', response_model=PhotoTransformationModelDb,
              name='Create photo transformation', status_code=status.HTTP_201_CREATED,
              dependencies=[Depends(allowed_operation_create)])
-async def create_transformation(user_id: int, transformation: PhotoTransformationModel,
+async def create_transformation(record_user_id: int, transformation: PhotoTransformationModel,
                                 db: Session = Depends(get_db),
                                 _: User = Depends(auth_service.get_current_user)):
     try:
@@ -38,7 +38,7 @@ async def create_transformation(user_id: int, transformation: PhotoTransformatio
 @router.patch('/{trans_id}', response_model=PhotoTransformationModelDb,
               name='Changing description of transformation', status_code=status.HTTP_200_OK,
               dependencies=[Depends(allowed_operation_update)])
-async def change_description(trans_id: int, user_id: int, transformation: NewDescTransformationModel,
+async def change_description(trans_id: int, record_user_id: int, transformation: NewDescTransformationModel,
                              db: Session = Depends(get_db),
                              _: User = Depends(auth_service.get_current_user)):
     try:
@@ -54,7 +54,7 @@ async def change_description(trans_id: int, user_id: int, transformation: NewDes
 @router.delete("/{trans_id}",
                name='Delete photo transformation',
                status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(allowed_operation_delete)])
-async def delete_transformation(trans_id: int, user_id: int,
+async def delete_transformation(trans_id: int, record_user_id: int,
                                 db: Session = Depends(get_db),
                                 _: User = Depends(auth_service.get_current_user)):
     try:
