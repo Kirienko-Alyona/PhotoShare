@@ -1,6 +1,4 @@
-BASE_DESCRIPTION_LEN = 255
-
-#--> email
+#--> email 
 EMAIL_MAX__LEN = 50
 EMAIL_MIN_LEN = 5
 
@@ -19,8 +17,8 @@ FIRST_NAME_MAX_LEN = 20
 #--> comment
 COMMENT_MIN_LEN = 1
 
-#--> photo transformer name
-TRANSFORMER_NAME_MIN_LEN = 1
-TRANSFORMER_NAME_MAX_LEN = 128
+#--> tag
+TAG_MIN_LEN = 1
 
-
+#-->schemas/photos.response_model
+MAX_LENGTH_PHOTO_DESCRIPTION=255
