@@ -67,8 +67,6 @@ async def request_email(body: RequestEmail,
         return {'message': messages.YOUR_EMAIL_IS_ALREADY_CONFIRMED}
 
     background_tasks.add_task(send_email, email=user.email,
-                              subject='Confirm email',
-                              template_name='email_template.html',
                               username=user.username,
                               host=request.base_url)
     return {'message': messages.CHECK_YOUR_EMAIL_FOR_CONFIRMATION}
