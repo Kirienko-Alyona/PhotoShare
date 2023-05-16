@@ -2,6 +2,7 @@ from fastapi import Depends, status, APIRouter, File, UploadFile, Query, HTTPExc
 from sqlalchemy.orm import Session
 from typing import Optional
 
+from src.services.roles import RoleAccess
 from src.database.db import get_db
 from src.database.models import User
 from src.repository import photos as repository_photos
@@ -12,8 +13,15 @@ import src.conf.messages as messages
 
 router = APIRouter(prefix='/photos', tags=['photos'])
 
+allowed_operations = {
+    'admin': ['C', 'R', 'U', 'D'],
+    'moderator': [],
+    'user': ['C', 'R', 'U', 'D'],
+}
 
-@router.post('/', response_model=PhotoResponse, name='Create photo', status_code=status.HTTP_201_CREATED)
+
+@router.post('/', response_model=PhotoResponse, name='Create photo', status_code=status.HTTP_201_CREATED, 
+             dependencies=[Depends(RoleAccess(allowed_operations, "C"))])
 async def create_photo(photo: UploadFile = File(),
                        description: str | None = None,
                        db: Session = Depends(get_db),
@@ -23,7 +31,8 @@ async def create_photo(photo: UploadFile = File(),
     return photo
 
 
-@router.get('/', response_model=list[PhotoResponse], name="Get photos by request ")
+@router.get('/', response_model=list[PhotoResponse], name="Get photos by request ",
+            dependencies=[Depends(RoleAccess(allowed_operations, "R"))])
 async def get_photos(skip: int = 0, limit: int = Query(default=10, ge=1, le=50),
                      tag_name: Optional[str] = Query(default=None),
                      user: User = Depends(auth_service.get_current_user),
@@ -38,7 +47,8 @@ async def get_photos(skip: int = 0, limit: int = Query(default=10, ge=1, le=50),
     return photos
 
 
-@router.get('/{photo_id}', response_model=PhotoResponse, name="Get photos by id ")
+@router.get('/{photo_id}', response_model=PhotoResponse, name="Get photos by id ", 
+            dependencies=[Depends(RoleAccess(allowed_operations, "R"))])
 async def get_photo_id(photo_id: int,
                        db: Session = Depends(get_db),
                        user: User = Depends(auth_service.get_current_user)):
@@ -49,7 +59,8 @@ async def get_photo_id(photo_id: int,
     return photo
 
 
-@router.patch('/{photo_id}', response_model=PhotoResponse, name="Update photo's description")
+@router.patch('/{photo_id}', response_model=PhotoResponse, name="Update photo's description", 
+              dependencies=[Depends(RoleAccess(allowed_operations, "U"))])
 async def photo_description_update(
         new_description: str,
         photo_id: int,
@@ -65,7 +76,8 @@ async def photo_description_update(
     return updated_photo
 
 
-@router.delete('/{photo_id}', status_code=status.HTTP_204_NO_CONTENT)
+@router.delete('/{photo_id}', status_code=status.HTTP_204_NO_CONTENT, 
+               dependencies=[Depends(RoleAccess(allowed_operations, "D"))])
 async def photo_remove(
         photo_id: int,
         db: Session = Depends(get_db),
@@ -79,7 +91,8 @@ async def photo_remove(
 
 
 @router.post('/qrcode/', response_model=PhotoQRCodeResponse, name='Generate QRCode by url',
-             status_code=status.HTTP_201_CREATED)
+             status_code=status.HTTP_201_CREATED,
+             dependencies=[Depends(RoleAccess(allowed_operations, "C"))])
 async def generate_qrcode(photo_url: str, _: User = Depends(auth_service.get_current_user)):
     qrcode_encode = await repository_photos.generate_qrcode(photo_url)
     return qrcode_encode

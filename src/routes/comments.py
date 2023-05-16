@@ -13,17 +13,23 @@ from src.services.roles import RoleAccess
 
 router = APIRouter(prefix="/comments", tags=['comments'])
 
-allowed_operation_remove = RoleAccess([Role.admin, Role.moderator])
+allowed_operations = {
+    'admin': ['R', 'D'],
+    'moderator': ['R', 'D'],
+    'user': ['C', 'U', 'R'],
+}
 
 
-@router.post("/", response_model=CommentResponse, name="Create comment to photo", status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=CommentResponse, name="Create comment to photo", status_code=status.HTTP_201_CREATED, 
+             dependencies=[Depends(RoleAccess(allowed_operations, "C"))])
 async def create_comment(body: CommentModel, db: Session = Depends(get_db),
                          current_user: User = Depends(auth_service.get_current_user)):
     comment = await repository_comments.add_comment(body, db, current_user)
     return comment
 
 
-@router.get("/{comment_id}", response_model=CommentResponse, name="Return comment by id")
+@router.get("/{comment_id}", response_model=CommentResponse, name="Return comment by id", 
+            dependencies=[Depends(RoleAccess(allowed_operations, "R"))])
 async def get_comment(comment_id: int = Path(ge=1), db: Session = Depends(get_db),
                       _: User = Depends(auth_service.get_current_user)):
     comment = await repository_comments.get_comment_by_id(comment_id, db)
@@ -32,7 +38,8 @@ async def get_comment(comment_id: int = Path(ge=1), db: Session = Depends(get_db
     return comment
 
 
-@router.put("/{comment_id}", name="Update comment by id", response_model=CommentResponse)
+@router.put("/{comment_id}", name="Update comment by id", response_model=CommentResponse, 
+            dependencies=[Depends(RoleAccess(allowed_operations, "U"))])
 async def update_comment(body: CommentUpdateModel, comment_id: int = Path(ge=1), db: Session = Depends(get_db),
                          current_user: User = Depends(auth_service.get_current_user)):
     comment = await repository_comments.get_comment_by_id(comment_id, db)
@@ -45,7 +52,7 @@ async def update_comment(body: CommentUpdateModel, comment_id: int = Path(ge=1),
 
 
 @router.delete("/{comment_id}", name="Delete comment by id", status_code=status.HTTP_204_NO_CONTENT,
-               dependencies=[Depends(allowed_operation_remove)])
+               dependencies=[Depends(RoleAccess(allowed_operations, "D"))])
 async def remove_comment(comment_id: int = Path(ge=1), db: Session = Depends(get_db),
                          _: User = Depends(auth_service.get_current_user)):
     comment = await repository_comments.remove_comment(comment_id, db)
@@ -54,7 +61,8 @@ async def remove_comment(comment_id: int = Path(ge=1), db: Session = Depends(get
     return comment
 
 
-@router.get("/by_photo/{photo_id}", response_model=List[CommentResponse], name="Return all comments for photo")
+@router.get("/by_photo/{photo_id}", response_model=List[CommentResponse], name="Return all comments for photo", 
+            dependencies=[Depends(RoleAccess(allowed_operations, "R"))])
 async def get_comments_by_photo(photo_id: int, db: Session = Depends(get_db),
                                   _: User = Depends(auth_service.get_current_user)):
     comments = await repository_comments.get_comments_by_photo(photo_id, db)

@@ -13,10 +13,15 @@ from src.conf import messages
 
 router = APIRouter(prefix="/tags", tags=['tags'])
 
-allowed_remove_tag = RoleAccess([Role.admin, Role.moderator])
+allowed_operations = {
+    'admin': ['R', 'D'],
+    'moderator': ['R', 'D'],
+    'user': ['C', 'R', 'D'],
+}
 
 
-@router.post("/", response_model=PhotoResponse, name="Create tags to photo (max 5 tags to one photo)", status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=PhotoResponse, name="Create tags to photo (max 5 tags to one photo)", status_code=status.HTTP_201_CREATED, 
+             dependencies=[Depends(RoleAccess(allowed_operations, "C"))])
 async def create_tags(body: TagModel, db: Session = Depends(get_db),
                       current_user: User = Depends(auth_service.get_current_user)):
     photo = await repository_tags.add_tags(body, db, current_user)
@@ -25,7 +30,8 @@ async def create_tags(body: TagModel, db: Session = Depends(get_db),
     return photo
 
 
-@router.delete("/{tag_id}", dependencies=[Depends(allowed_remove_tag)], status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{tag_id}", status_code=status.HTTP_204_NO_CONTENT, 
+               dependencies=[Depends(RoleAccess(allowed_operations, "D"))])
 async def delete_tag(tag_id: int, db: Session = Depends(get_db)):
     count = await repository_tags.delete_tag(tag_id, db)
     if not count:

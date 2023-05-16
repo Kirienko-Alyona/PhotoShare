@@ -14,11 +14,16 @@ from src.services.roles import RoleAccess
 
 router = APIRouter(prefix="/rating", tags=['rating'])
 
-allowed_admin_operations = RoleAccess([Role.admin, Role.moderator])
+allowed_operations = {
+    'admin': ['R', 'D'],
+    'moderator': ['R', 'D'],
+    'user': ['C', 'R'],
+}
 
 
 @router.post("/", response_model=RateResponse, name="Set rate to photo",
-             status_code=status.HTTP_201_CREATED)
+             status_code=status.HTTP_201_CREATED, 
+             dependencies=[Depends(RoleAccess(allowed_operations, "C"))])
 async def create_rate(body: RateModel, db: Session = Depends(get_db),
                       current_user: User = Depends(auth_service.get_current_user)):
     photo = await repository_photos.get_photo_by_id(body.photo_id, db, current_user)
@@ -34,7 +39,7 @@ async def create_rate(body: RateModel, db: Session = Depends(get_db),
 
 
 @router.get("/{photo_id}", response_model=RateResponse, name="Return photo rating by photo id",
-            status_code=status.HTTP_200_OK, dependencies=[Depends(allowed_admin_operations)])
+            status_code=status.HTTP_200_OK, dependencies=[Depends(RoleAccess(allowed_operations, "R"))])
 async def get_rating_by_photo_id(photo_id: int = Path(ge=1), db: Session = Depends(get_db),
                                  _: User = Depends(auth_service.get_current_user)):
     print(_.roles)
@@ -46,7 +51,7 @@ async def get_rating_by_photo_id(photo_id: int = Path(ge=1), db: Session = Depen
 
 @router.get("/detail/{photo_id}", response_model=List[RateDetailResponse],
             name="Return detail rating by photo id",
-            status_code=status.HTTP_200_OK, dependencies=[Depends(allowed_admin_operations)])
+            status_code=status.HTTP_200_OK, dependencies=[Depends(RoleAccess(allowed_operations, "R"))])
 async def get_rating_by_photo_id(photo_id: int = Path(ge=1), db: Session = Depends(get_db),
                                  _: User = Depends(auth_service.get_current_user)):
     rating = await repository_rates.get_detail_rating_by_photo(photo_id, db)
@@ -56,7 +61,7 @@ async def get_rating_by_photo_id(photo_id: int = Path(ge=1), db: Session = Depen
 
 
 @router.delete("/detail", name="Delete user's photo rating", status_code=status.HTTP_204_NO_CONTENT,
-               dependencies=[Depends(allowed_admin_operations)])
+               dependencies=[Depends(RoleAccess(allowed_operations, "D"))])
 async def remove_rate(body: RateDeleteModel, db: Session = Depends(get_db),
                       _: User = Depends(auth_service.get_current_user)):
     deleted_count = await repository_rates.remove_rating(body, db)

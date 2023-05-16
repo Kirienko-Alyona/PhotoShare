@@ -14,12 +14,20 @@ from src.conf.config import settings
 from src.schemas.users import UserDb, UserResponse
 from src.services.photos import upload_photo
 from src.conf import messages
+from src.services.roles import RoleAccess
+
 
 
 router = APIRouter(prefix="/users", tags=["users"])
 
+allowed_operations = {
+    'admin': ['C', 'R', 'U', 'D'],
+    'moderator': [],
+    'user': ['C', 'R', 'U', 'D'],
+}
 
-@router.get("/", response_model=List[UserDb])
+
+@router.get("/", response_model=List[UserDb], dependencies=[Depends(RoleAccess(allowed_operations, "R"))])
 async def read_users(first_name: str = None, 
                      username: str = None, 
                      email: str = None, 
@@ -50,7 +58,7 @@ async def read_users(first_name: str = None,
     return users
 
 
-@router.get("/me/", response_model=UserDb)
+@router.get("/me/", response_model=UserDb, dependencies=[Depends(RoleAccess(allowed_operations, "R"))])
 async def read_users_me(current_user: User = Depends(auth_service.get_current_user),
                         db: Session = Depends(get_db)):
 
@@ -68,7 +76,7 @@ async def read_users_me(current_user: User = Depends(auth_service.get_current_us
     return current_user
 
 
-@router.patch('/avatar', response_model=UserDb)
+@router.patch('/avatar', response_model=UserDb, dependencies=[Depends(RoleAccess(allowed_operations, "U"))])
 async def update_avatar_user(file: UploadFile = File(),
                              current_user: User = Depends(auth_service.get_current_user),
                              db: Session = Depends(get_db)):
