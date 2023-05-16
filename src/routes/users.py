@@ -18,8 +18,8 @@ router = APIRouter(prefix="/users", tags=["users"])
 async def read_users_me(current_user: User = Depends(auth_service.get_current_user),
                         db: Session = Depends(get_db)):
 
-    photos_num = await repository_users.numbers_photo_by_users(current_user, db)
-    if photos_num:
+    quantity_photos = await repository_users.quantity_photo_by_users(current_user, db)
+    if quantity_photos:
         return {'id': current_user.id,
                 'first_name': current_user.first_name,
                 'username': current_user.username,
@@ -28,7 +28,7 @@ async def read_users_me(current_user: User = Depends(auth_service.get_current_us
                 'avatar': current_user.avatar,
                 'roles': current_user.roles,
                 'birthday': current_user.birthday,
-                'number_of_photos': photos_num}
+                'quantity_photos': quantity_photos}
     return current_user
 
 

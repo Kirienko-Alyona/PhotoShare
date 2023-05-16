@@ -80,6 +80,6 @@ The update_avatar function updates the avatar of a user.
     return user
 
 
-async def numbers_photo_by_users(user: User, db: Session):
-    photos_num = db.query(Photo).filter(Photo.user_id==user.id).count()
-    return photos_num
+async def quantity_photo_by_users(user: User, db: Session):
+    quantity_photos = db.query(Photo).filter(Photo.user_id==user.id).count()
+    return quantity_photos

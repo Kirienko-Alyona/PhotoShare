@@ -39,7 +39,7 @@ async def get_photos(skip: int = 0, limit: int = Query(default=10, ge=1, le=50),
 
 
 @router.get('/{photo_id}', response_model=PhotoResponse, name="Get photos by id ")
-async def get_photo(photo_id: int,
+async def get_photo_id(photo_id: int,
                     db: Session = Depends(get_db),
                     user: User = Depends(auth_service.get_current_user)):
     photo = await repository_photos.get_photo_by_id(photo_id, db, user)
