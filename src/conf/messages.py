@@ -17,3 +17,6 @@ INVALID_TOKEN_FOR_EMAIL_VERIFICATION = "Invalid token for email verification"
 COULD_NOT_VALIDATE_CREDENTIALS = "Could not validate credentials"
 FORBIDDEN = "Operation forbidden"
 USER_NOT_FOUND = 'User not found'
+
+COULD_NOT_FIND_FOTO_BY_ID = "Could not find photo by id"
+COULD_NOT_FIND_FOTO_TRANSFORMATION_BY_ID = "Could not find photo transformation by id"
