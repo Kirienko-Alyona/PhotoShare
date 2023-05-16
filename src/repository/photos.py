@@ -21,8 +21,8 @@ async def get_photos(dict_values: dict,
     photos = db.query(Photo)
     for key, value in dict_values.items():
         if value is not None:
-            attr = getattr(Photo, key)
-            photos = photos.filter(attr.icontains(value))
+            attr = getattr(Tag, key)
+            photos = photos.filter(attr.contains(value))
     photos = photos.offset(skip).limit(limit).all()
     return photos
 
