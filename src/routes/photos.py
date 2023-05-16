@@ -5,7 +5,7 @@ from typing import Optional
 from src.database.db import get_db
 from src.database.models import User
 from src.repository import photos as repository_photos
-from src.schemas.photos import PhotoResponse
+from src.schemas.photos import PhotoResponse, PhotoQRCodeResponse
 from src.services.auth import auth_service
 from src.services.photos import upload_photo
 import src.conf.messages as messages
@@ -40,8 +40,8 @@ async def get_photos(skip: int = 0, limit: int = Query(default=10, ge=1, le=50),
 
 @router.get('/{photo_id}', response_model=PhotoResponse, name="Get photos by id ")
 async def get_photo_id(photo_id: int,
-                    db: Session = Depends(get_db),
-                    user: User = Depends(auth_service.get_current_user)):
+                       db: Session = Depends(get_db),
+                       user: User = Depends(auth_service.get_current_user)):
     photo = await repository_photos.get_photo_by_id(photo_id, db, user)
     if photo is None:
         raise HTTPException(
@@ -76,3 +76,10 @@ async def photo_remove(
     if photo is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
     return photo
+
+
+@router.post('/qrcode/', response_model=PhotoQRCodeResponse, name='Generate QRCode by url',
+             status_code=status.HTTP_201_CREATED)
+async def generate_qrcode(photo_url: str, _: User = Depends(auth_service.get_current_user)):
+    qrcode_encode = await repository_photos.generate_qrcode(photo_url)
+    return qrcode_encode

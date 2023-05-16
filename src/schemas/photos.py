@@ -24,3 +24,7 @@ class PhotoResponse(BaseModel):
 
 class PhotoUpdate(BaseModel):
     pass
+
+
+class PhotoQRCodeResponse(BaseModel):
+    qrcode_encode: str
