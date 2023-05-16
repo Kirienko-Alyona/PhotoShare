@@ -54,7 +54,7 @@ async def remove_comment(comment_id: int = Path(ge=1), db: Session = Depends(get
     return comment
 
 
-@router.get("/comments_by_photo/{photo_id}", response_model=List[CommentResponse], name="Return all comments for photo")
+@router.get("/by_photo/{photo_id}", response_model=List[CommentResponse], name="Return all comments for photo")
 async def get_comments_by_photo(photo_id: int, db: Session = Depends(get_db),
                                   _: User = Depends(auth_service.get_current_user)):
     comments = await repository_comments.get_comments_by_photo(photo_id, db)
