@@ -19,3 +19,5 @@ FORBIDDEN = "Operation forbidden"
 USER_NOT_FOUND = 'User not found'
 PHOTO_NOT_FOUND = "Photo not found"
 TAG_NOT_FOUND = "Tag not found"
+COULD_NOT_FIND_FOTO_BY_ID = "Could not find photo by id"
+COULD_NOT_FIND_FOTO_TRANSFORMATION_BY_ID = "Could not find photo transformation by id"
