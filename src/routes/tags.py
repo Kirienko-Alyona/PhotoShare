@@ -13,7 +13,7 @@ from src.conf import messages
 router = APIRouter(prefix="/tags", tags=['tags'])
 
 
-@router.post("/", response_model=PhotoResponse, name="Create tags to photo", status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=PhotoResponse, name="Create tags to photo (max 5 tags to one photo)", status_code=status.HTTP_201_CREATED)
 async def create_tags(body: TagModel, db: Session = Depends(get_db),
                       current_user: User = Depends(auth_service.get_current_user)):
     photo = await repository_tags.add_tags(body, db, current_user)
