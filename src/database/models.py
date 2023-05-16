@@ -96,3 +96,14 @@ class PhotoTransformation(Base):
     original_photo = relationship('Photo', back_populates='transformations')
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+
+
+class Rate(Base):
+    __tablename__ = 'rates'
+    photo_id = Column(ForeignKey('photos.id', ondelete='CASCADE'), nullable=False, primary_key=True)
+    photo = relationship('Photo', backref='rates')
+    user_id = Column(ForeignKey('users.id', ondelete='CASCADE'), nullable=False, primary_key=True)
+    user = relationship('User', backref='rates')
+    rate = Column(Integer, nullable=False)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
