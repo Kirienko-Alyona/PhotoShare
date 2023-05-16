@@ -698,6 +698,28 @@ files = [
 ]
 
 [[package]]
+name = "httpcore"
+version = "0.17.0"
+description = "A minimal low-level HTTP client."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "httpcore-0.17.0-py3-none-any.whl", hash = "sha256:0fdfea45e94f0c9fd96eab9286077f9ff788dd186635ae61b312693e4d943599"},
+    {file = "httpcore-0.17.0.tar.gz", hash = "sha256:cc045a3241afbf60ce056202301b4d8b6af08845e3294055eb26b09913ef903c"},
+]
+
+[package.dependencies]
+anyio = ">=3.0,<5.0"
+certifi = "*"
+h11 = ">=0.13,<0.15"
+sniffio = ">=1.0.0,<2.0.0"
+
+[package.extras]
+http2 = ["h2 (>=3,<5)"]
+socks = ["socksio (>=1.0.0,<2.0.0)"]
+
+[[package]]
 name = "httptools"
 version = "0.5.0"
 description = "A collection of framework independent HTTP protocol utils."
@@ -752,6 +774,30 @@ files = [
 test = ["Cython (>=0.29.24,<0.30.0)"]
 
 [[package]]
+name = "httpx"
+version = "0.24.0"
+description = "The next generation HTTP client."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "httpx-0.24.0-py3-none-any.whl", hash = "sha256:447556b50c1921c351ea54b4fe79d91b724ed2b027462ab9a329465d147d5a4e"},
+    {file = "httpx-0.24.0.tar.gz", hash = "sha256:507d676fc3e26110d41df7d35ebd8b3b8585052450f4097401c9be59d928c63e"},
+]
+
+[package.dependencies]
+certifi = "*"
+httpcore = ">=0.15.0,<0.18.0"
+idna = "*"
+sniffio = "*"
+
+[package.extras]
+brotli = ["brotli", "brotlicffi"]
+cli = ["click (>=8.0.0,<9.0.0)", "pygments (>=2.0.0,<3.0.0)", "rich (>=10,<14)"]
+http2 = ["h2 (>=3,<5)"]
+socks = ["socksio (>=1.0.0,<2.0.0)"]
+
+[[package]]
 name = "idna"
 version = "3.4"
 description = "Internationalized Domain Names in Applications (IDNA)"
@@ -785,6 +831,18 @@ python-versions = ">=3.7"
 files = [
     {file = "iniconfig-2.0.0-py3-none-any.whl", hash = "sha256:b6a85871a79d2e3b22d2d1b94ac2824226a63c6b741c88f7ae975f18b6778374"},
     {file = "iniconfig-2.0.0.tar.gz", hash = "sha256:2d91e135bf72d31a410b17c16da610a82cb55f6b0477d1a902134b24a455b8b3"},
+]
+
+[[package]]
+name = "itsdangerous"
+version = "2.1.2"
+description = "Safely pass data to untrusted environments and back."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "itsdangerous-2.1.2-py3-none-any.whl", hash = "sha256:2c2349112351b88699d8d4b6b075022c0808887cb7ad10069318a8b0bc88db44"},
+    {file = "itsdangerous-2.1.2.tar.gz", hash = "sha256:5dbbc68b317e5e42f327f9021763545dc3fc3bfe22e6deb96aaf1fc38874156a"},
 ]
 
 [[package]]
@@ -1447,6 +1505,23 @@ lint = ["docutils-stubs", "flake8", "mypy"]
 test = ["pytest"]
 
 [[package]]
+name = "sqladmin"
+version = "0.10.3"
+description = "SQLAlchemy admin for FastAPI and Starlette"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "sqladmin-0.10.3-py3-none-any.whl", hash = "sha256:84592f68fe89a48db76edc70c7fd07e8d203966e5aedfebbdbbb15843cff0704"},
+    {file = "sqladmin-0.10.3.tar.gz", hash = "sha256:75703df630c35a954b91bac8476cafa8abc65c5aae39c1e7405c0d11b758e925"},
+]
+
+[package.dependencies]
+sqlalchemy = ">=1.4"
+starlette = {version = "*", extras = ["full"]}
+wtforms = ">=3,<4"
+
+[[package]]
 name = "sqlalchemy"
 version = "2.0.12"
 description = "Database Abstraction Library"
@@ -1538,6 +1613,11 @@ files = [
 
 [package.dependencies]
 anyio = ">=3.4.0,<5"
+httpx = {version = ">=0.22.0", optional = true, markers = "extra == \"full\""}
+itsdangerous = {version = "*", optional = true, markers = "extra == \"full\""}
+jinja2 = {version = "*", optional = true, markers = "extra == \"full\""}
+python-multipart = {version = "*", optional = true, markers = "extra == \"full\""}
+pyyaml = {version = "*", optional = true, markers = "extra == \"full\""}
 
 [package.extras]
 full = ["httpx (>=0.22.0)", "itsdangerous", "jinja2", "python-multipart", "pyyaml"]
@@ -1769,7 +1849,25 @@ files = [
     {file = "websockets-11.0.3.tar.gz", hash = "sha256:88fc51d9a26b10fc331be344f1781224a375b78488fc343620184e95a4b27016"},
 ]
 
+[[package]]
+name = "wtforms"
+version = "3.0.1"
+description = "Form validation and rendering for Python web development."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "WTForms-3.0.1-py3-none-any.whl", hash = "sha256:837f2f0e0ca79481b92884962b914eba4e72b7a2daaf1f939c890ed0124b834b"},
+    {file = "WTForms-3.0.1.tar.gz", hash = "sha256:6b351bbb12dd58af57ffef05bc78425d08d1914e0fd68ee14143b7ade023c5bc"},
+]
+
+[package.dependencies]
+MarkupSafe = "*"
+
+[package.extras]
+email = ["email-validator"]
+
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "bf804fe6a2c7c01ac22ce27253e3c1778ca73c602ca639a6e3120bae27a3c2bf"
+content-hash = "8ca52ed1e89a456cc15100567f38ed963eb66b08173cd30580fdbb1056543227"
