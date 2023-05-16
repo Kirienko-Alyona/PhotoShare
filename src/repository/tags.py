@@ -1,4 +1,4 @@
-from typing import Optional, Type, Union
+from typing import Type
 
 from sqlalchemy.orm import Session
 
@@ -6,7 +6,7 @@ from src.database.models import Tag, User, Photo
 from src.schemas.tags import TagModel
 
 
-async def add_tag(body: TagModel, db: Session, user: User) -> Type[Photo] | None:
+async def add_tags(body: TagModel, db: Session, user: User) -> Type[Photo] | None:
     photo = db.query(Photo).filter_by(id=body.photo_id, user_id=user.id).first()
 
     if not photo:
