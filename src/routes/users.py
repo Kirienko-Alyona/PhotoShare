@@ -31,7 +31,7 @@ async def read_users(first_name: str = None,
                      limit: int = Query(default=10, ge=1, le=50), 
                      offset: int = 0, 
                      db: Session = Depends(get_db), 
-                     current_user: User = Depends(auth_service.get_current_user)):
+                     _: User = Depends(auth_service.get_current_user)):
     
     users = await repository_users.get_users({'first_name': first_name, 
                                               'username': username, 
@@ -43,8 +43,7 @@ async def read_users(first_name: str = None,
                                               'birthday': birthday}, 
                                              limit, 
                                              offset, 
-                                             db,
-                                             current_user)
+                                             db)
     if len(users) == 0:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
