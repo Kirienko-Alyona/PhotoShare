@@ -1,8 +1,8 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, HttpUrl, Field
 
-# from src.schemas.tags import TagDBModel
+from src.schemas.tags import TagResponse
 
 
 class PhotoModel(BaseModel):
@@ -15,6 +15,7 @@ class PhotoResponse(BaseModel):
     url_photo: HttpUrl
     description: str | None = Field(
         default=None, title="The description of the Photo", max_length=255)
+    tags: Optional[List[TagResponse]]
 
     class Config:
         orm_mode = True
@@ -22,14 +23,3 @@ class PhotoResponse(BaseModel):
 
 class PhotoUpdate(BaseModel):
     pass
-
-
-class PhotoDBModel(BaseModel):
-    id: int
-    cloud_public_id: str
-    url_photo: str
-    description: str
-    # tags: List[TagDBModel]
-
-    class Config:
-        orm_mode = True
