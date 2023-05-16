@@ -10,7 +10,7 @@ async def add_rate(body: RateModel, db: Session, user: User):
     rate = Rate(**body.dict(), user_id=user.id)
     db.add(rate)
     db.commit()
-    return None
+    return rate
 
 
 async def get_rate_photo_by_user(photo_id: int, db: Session, user: User):
