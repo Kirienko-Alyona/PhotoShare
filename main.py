@@ -16,7 +16,7 @@ from sqlalchemy import text
 from starlette.middleware.authentication import AuthenticationMiddleware
 
 from src.database.db import get_db, client_redis_for_main
-from src.routes import photos, auth, users, comments
+from src.routes import photos, auth, users, comments, tags
 from src.conf.config import settings
 
 
@@ -140,6 +140,7 @@ app.include_router(auth.router, prefix='/api')
 app.include_router(photos.router, prefix='/api')
 app.include_router(users.router, prefix='/api')
 app.include_router(comments.router, prefix='/api')
+app.include_router(tags.router, prefix='/api')
 
 
 if __name__ == '__main__':

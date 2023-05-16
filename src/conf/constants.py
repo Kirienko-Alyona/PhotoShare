@@ -17,5 +17,8 @@ FIRST_NAME_MAX_LEN = 20
 #--> comment
 COMMENT_MIN_LEN = 1
 
+#--> tag
+TAG_MIN_LEN = 1
+
 #-->schemas/photos.response_model
 MAX_LENGTH_PHOTO_DESCRIPTION=255
