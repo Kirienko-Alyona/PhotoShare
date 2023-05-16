@@ -22,3 +22,9 @@ async def add_tags(body: TagModel, db: Session, user: User) -> Type[Photo] | Non
     db.commit()
     db.refresh(photo)
     return photo
+
+
+async def delete_tag(tag_id: int, db: Session):
+    count = db.query(Tag).filter_by(id=tag_id).delete()
+    db.commit()
+    return count
