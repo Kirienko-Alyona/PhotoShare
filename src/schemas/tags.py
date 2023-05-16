@@ -1,10 +1,10 @@
-from pydantic import BaseModel, Field
+from typing import List
 
-from src.conf.constants import TAG_MIN_LEN
+from pydantic import BaseModel
 
 
 class TagModel(BaseModel):
-    tag_name: str = Field(min_length=TAG_MIN_LEN)
+    tags: List
     photo_id: int
 
 

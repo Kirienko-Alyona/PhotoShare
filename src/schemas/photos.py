@@ -3,6 +3,7 @@ from typing import List, Optional
 from pydantic import BaseModel, HttpUrl, Field
 
 from src.schemas.tags import TagResponse
+import src.conf.constants as constants
 
 
 class PhotoModel(BaseModel):
@@ -14,7 +15,7 @@ class PhotoResponse(BaseModel):
 
     url_photo: HttpUrl
     description: str | None = Field(
-        default=None, title="The description of the Photo", max_length=255)
+        default=None, title="The description of the Photo", max_length=constants.MAX_LENGTH_PHOTO_DESCRIPTION)
     tags: Optional[List[TagResponse]]
 
     class Config:

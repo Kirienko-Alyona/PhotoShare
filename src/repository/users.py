@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
-from src.database.models import User
+from src.database.models import User, Photo
 from src.schemas.users import UserModel
 
 async def get_users(dict_values: dict, limit: int, offset: int, db: Session, current_user: User) -> Optional[List[User]]:
@@ -62,7 +62,6 @@ The update_token function updates the refresh token for a user.
 
 
 async def confirmed_email(email: str, db: Session) -> None:
-
     """
 The confirmed_email function takes in an email and a database session,
 and sets the confirmed field of the user with that email to True.
@@ -93,3 +92,8 @@ The update_avatar function updates the avatar of a user.
     db.commit()
     db.refresh(user)
     return user
+
+
+async def quantity_photo_by_users(user: User, db: Session):
+    quantity_photos = db.query(Photo).filter(Photo.user_id==user.id).count()
+    return quantity_photos
