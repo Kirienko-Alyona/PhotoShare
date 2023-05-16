@@ -1,28 +1,24 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from src.conf.allowed_operation import allowed_operation_create, allowed_operation_update, allowed_operation_delete
 from src.conf.messages import COULD_NOT_FIND_FOTO_BY_ID, COULD_NOT_FIND_FOTO_TRANSFORMATION_BY_ID
 from src.database.db import get_db
-from src.database.models import User, Role
+from src.database.models import User
 from src.repository import photo_transformations as repository_transformations
 from src.schemas.photo_transformations import (
     PhotoTransformationModelDb,
     PhotoTransformationModel,
     NewDescTransformationModel)
 from src.services.auth import auth_service
-from src.services.roles import RoleAccess
 
 router = APIRouter(prefix="/photos/transformed", tags=['photo transformations'])
-
-allowed_operation_create = RoleAccess([Role.admin])
-allowed_operation_update = RoleAccess([Role.admin])
-allowed_operation_delete = RoleAccess([Role.admin])
 
 
 @router.post('/', response_model=PhotoTransformationModelDb,
              name='Create photo transformation', status_code=status.HTTP_201_CREATED,
              dependencies=[Depends(allowed_operation_create)])
-async def create_transformation(record_user_id: int, transformation: PhotoTransformationModel,
+async def create_transformation(transformation: PhotoTransformationModel,
                                 db: Session = Depends(get_db),
                                 _: User = Depends(auth_service.get_current_user)):
     try:
@@ -38,7 +34,7 @@ async def create_transformation(record_user_id: int, transformation: PhotoTransf
 @router.patch('/{trans_id}', response_model=PhotoTransformationModelDb,
               name='Changing description of transformation', status_code=status.HTTP_200_OK,
               dependencies=[Depends(allowed_operation_update)])
-async def change_description(trans_id: int, record_user_id: int, transformation: NewDescTransformationModel,
+async def change_description(trans_id: int, transformation: NewDescTransformationModel,
                              db: Session = Depends(get_db),
                              _: User = Depends(auth_service.get_current_user)):
     try:
@@ -54,7 +50,7 @@ async def change_description(trans_id: int, record_user_id: int, transformation:
 @router.delete("/{trans_id}",
                name='Delete photo transformation',
                status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(allowed_operation_delete)])
-async def delete_transformation(trans_id: int, record_user_id: int,
+async def delete_transformation(trans_id: int,
                                 db: Session = Depends(get_db),
                                 _: User = Depends(auth_service.get_current_user)):
     try:

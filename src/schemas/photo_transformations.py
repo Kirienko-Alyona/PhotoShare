@@ -2,7 +2,7 @@ from typing import Optional, List
 
 from pydantic import BaseModel, Field
 
-from src.conf.constants import BASE_DESCRIPTION_LEN
+from src.conf.constants import MAX_LENGTH_PHOTO_DESCRIPTION
 
 
 class NewDescTransformationModel(BaseModel):
@@ -27,7 +27,7 @@ class TransformationModel(BaseModel):
 
 class PhotoTransformationModel(BaseModel):
     photo_id: int
-    description: Optional[str] = Field(max_length=BASE_DESCRIPTION_LEN)
+    description: Optional[str] = Field(max_length=MAX_LENGTH_PHOTO_DESCRIPTION)
     transformation: TransformationModel
 
     class Config:
