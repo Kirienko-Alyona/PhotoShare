@@ -12,7 +12,7 @@ async def get_users(dict_values: dict, limit: int, offset: int, db: Session, cur
     for key, value in dict_values.items():
         if value != None:
             attr = getattr(User, key)
-            users = users.filter(attr.icontains(value))
+            users = users.filter(attr.contains(value))
     users = users.limit(limit).offset(offset).all()
     return users
 
