@@ -2,10 +2,11 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 
 from src.database.models import User, Photo
-from src.schemas.users import UserModel
+from src.schemas.users import UserModel, UserUpdateModel
+import src.services.auth as auth
 
-async def get_users(dict_values: dict, limit: int, offset: int, db: Session) -> Optional[List[User]]:
-    
+async def get_users(dict_values: dict, limit: int, offset: int, db: Session) -> Optional[List[User]]:    
+
     # if not input params - returned all list users
     # else - search by parametrs: first_name, username, email, created_at, updated_at, avatar, roles, birthday - returned list contacts
     users = db.query(User)
@@ -15,6 +16,7 @@ async def get_users(dict_values: dict, limit: int, offset: int, db: Session) -> 
             users = users.filter(attr.contains(value))
     users = users.limit(limit).offset(offset).all()
     return users
+
 
 
 async def get_user_by_id(id: int, db: Session) -> User:
@@ -98,5 +100,22 @@ The update_avatar function updates the avatar of a user.
 
 
 async def quantity_photo_by_users(user: User, db: Session):
-    quantity_photos = db.query(Photo).filter(Photo.user_id==user.id).count()
+    quantity_photos = db.query(Photo).filter(Photo.user_id == user.id).count()
     return quantity_photos
+
+
+async def update_user(body: UserUpdateModel, user_id: int, user: User, db: Session):
+    user = db.query(User).filter(User.id == user_id).first()
+    if user:
+        count = db.query(User).filter(User.id == user_id).update({
+            'first_name': body.first_name,
+            'username': body.username,
+            'birthday': body.birthday,
+            'email' : body.email,
+            'password': auth.auth_service.get_password_hash(body.password)
+        })
+        db.commit()
+        db.refresh(user)
+        if count == 1:
+            return user
+    return None
