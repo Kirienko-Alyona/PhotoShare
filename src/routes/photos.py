@@ -6,7 +6,6 @@ from src.database.db import get_db
 from src.database.models import User
 from src.repository import photos as repository_photos
 from src.schemas.photos import PhotoResponse, PhotoQRCodeResponse
-from src.schemas.tags import TagModel
 from src.services.auth import auth_service
 from src.services.photos import upload_photo
 import src.conf.messages as messages
@@ -85,3 +84,7 @@ async def photo_remove(
 async def generate_qrcode(photo_url: str, _: User = Depends(auth_service.get_current_user)):
     qrcode_encode = await repository_photos.generate_qrcode(photo_url)
     return qrcode_encode
+
+
+@router.put("/", response_model=PhotoResponse)
+async def photo_tags_update()
