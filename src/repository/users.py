@@ -103,12 +103,15 @@ async def quantity_photo_by_users(user: User, db: Session):
 async def update_user(body: UserUpdateModel, user_id: int, user: User, db: Session):
     user = db.query(User).filter(User.id == user_id).first()
     if user:
-        user.first_name = body.first_name
-        user.username = body.username
-        user.birthday = body.birthday
-        user.email = body.email
-        body.password = auth.auth_service.get_password_hash(body.password)
-        user.password = body.password
+        count = db.query(User).filter(User.id == user_id).update({
+            'first_name': body.first_name,
+            'username': body.username,
+            'birthday': body.birthday,
+            'email' : body.email,
+            'password': auth.auth_service.get_password_hash(body.password)
+        })
         db.commit()
         db.refresh(user)
-    return user
+        if count == 1:
+            return user
+    return None

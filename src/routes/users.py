@@ -73,6 +73,8 @@ async def user_edit(body: UserUpdateModel,
                     current_user: User = Depends(auth_service.get_current_user),
                     db: Session = Depends(get_db)):
     user = await repository_users.update_user(body, user_id, current_user, db)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
     return user
 
 
@@ -93,4 +95,6 @@ The update_avatar_user function updates the avatar of a user.
 """
     url, public_id = upload_photo(file)
     user = await repository_users.update_avatar(current_user.email, url, db)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
     return user
