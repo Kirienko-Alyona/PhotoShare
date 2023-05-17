@@ -1,8 +1,62 @@
 token = localStorage.getItem('accessToken')
 
+async function DeleteContactShow(cnt_id) {
+  const modal_form = document.getElementById("DeleteContact")
+  const modal = new bootstrap.Modal(modal_form);
+
+  const submit_btn = modal_form.querySelector(".btn-danger");
+  submit_btn.onclick = async function () {
+    if (await deleteContact(cnt_id))
+      modal.hide();
+  };
+  modal.show();
+}
+
+async function EditContactShow(cnt_id) {
+  const modal_form = document.getElementById("EditContact")
+  const modal = new bootstrap.Modal(modal_form);
+  if (cnt_id === "") {
+    modal_form.querySelector("#first_name").value = "";
+    modal_form.querySelector("#last_name").value = "";
+    modal_form.querySelector("#birthday").value = "";
+    modal_form.querySelector("#email").value = "";
+    modal_form.querySelector("#phones").value = "";
+    modal_form.querySelector("#address").value = "";
+  }
+  else{
+    const response = await getContact(cnt_id);
+    if (response.ok === true) {
+      const contact = await response.json();
+      modal_form.querySelector("#first_name").value = contact.first_name;
+      modal_form.querySelector("#last_name").value = contact.last_name;
+      modal_form.querySelector("#birthday").value = contact.birthday;
+      modal_form.querySelector("#email").value = contact.email;
+      modal_form.querySelector("#phones").value = phones_to_str(contact.phones);
+      modal_form.querySelector("#address").value = contact.address;
+    } else {
+      const error = await response.json();
+      alert(error.detail);
+      return;
+    }
+  }
+}
+
+async function getContact(id) {
+  const token = localStorage.getItem('accessToken');
+
+  return(await fetch(`/api/contacts/${id}`, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      Authorization: `Bearer ${token}`,
+    }
+  }));
+}
+
 function new_table_row(user) {
   let tr = document.createElement("tr");
   tr.setAttribute("data-rowid", user.id);
+  tr.className = "table-secondary";
   let td = document.createElement("td");
   td.className = "text-end";
   td.innerHTML = user.id;
@@ -27,7 +81,7 @@ function new_table_row(user) {
 
   let button = document.createElement("button");
   button.className = "btn btn-outline-secondary btn-edit";
-  button.innerHTML = "<span class=\'btn-label\'><i class=\'fa fa-user-edit\'></i></span>";
+  button.innerHTML = "<span class=\'btn-label\'><i class=\'fa fa-user-edit\'>Edit</i></span>";
   button.setAttribute("style", "--bs-btn-padding-y: .2rem; --bs-btn-padding-x: .5rem; " +
     "--bs-btn-font-size: .75rem;");
   button.onclick = async function() {
@@ -39,7 +93,7 @@ function new_table_row(user) {
   td = document.createElement("td");
   button = document.createElement("button");
   button.className = "btn btn-outline-secondary btn-delete";
-  button.innerHTML = "<span class=\'btn-label\'><i class=\'fa fa-user-minus\'></i></span>";
+  button.innerHTML = "<span class=\'btn-label\'><i class=\'fa fa-user-minus\'>Delete</i></span>";
   button.setAttribute("style", "--bs-btn-padding-y: .2rem; --bs-btn-padding-x: .5rem; " +
     "--bs-btn-font-size: .75rem;");
   button.onclick = async function() {
