@@ -5,8 +5,7 @@ from src.database.models import User, Photo
 from src.schemas.users import UserModel, UserUpdateModel
 import src.services.auth as auth
 
-async def get_users(dict_values: dict, limit: int, offset: int, db: Session) -> Optional[List[User]]:
-    
+async def get_users(dict_values: dict, limit: int, offset: int, db: Session) -> Optional[List[User]]:    
 
     # if not input params - returned all list users
     # else - search by parametrs: first_name, username, email, created_at, updated_at, avatar, roles, birthday - returned list contacts
