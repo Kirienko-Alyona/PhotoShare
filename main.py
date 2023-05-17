@@ -16,7 +16,7 @@ from sqlalchemy import text
 from starlette.middleware.authentication import AuthenticationMiddleware
 
 from src.database.db import get_db, client_redis_for_main
-from src.routes import photos, auth, users, comments, tags, photo_transformations
+from src.routes import photos, auth, users, comments, tags, photo_transformations, rates
 
 from src.conf.config import settings
 
@@ -32,7 +32,6 @@ async def startup():
     It's a good place to initialize things that are used by the app, such as databases or caches.
     
     :return: A list of objects
-    :doc-author: Trelent
     """
     await FastAPILimiter.init(client_redis_for_main)
    # app.add_middleware() #backend=BearerTokenAuthBackend()
@@ -59,7 +58,6 @@ app.add_middleware(
 #     :param request: Request: Get the ip address of the client that is making a request
 #     :param call_next: Callable: Pass the next function in the chain to be executed
 #     :return: A jsonresponse object if the client ip address is not in allowed_ips
-#     :doc-author: Trelent
 #     """
 #     ip = ip_address(request.client.host)
 #     if ip not in ALLOWED_IPS:
@@ -77,7 +75,6 @@ async def custom_middleware(request: Request, call_next):
     :param request: Request: Get the request object
     :param call_next: Call the next middleware in the chain
     :return: A response object
-    :doc-author: Trelent
     """
     start_time = time.time()
     response = await call_next(request)
@@ -96,7 +93,6 @@ async def favicon():
     The favicon function returns the favicon.ico file from the static directory.
     
     :return: A file response with the contents of the favicon
-    :doc-author: Trelent
     """
     return FileResponse(favicon_path)
 
@@ -110,7 +106,6 @@ async def root(request: Request):
     
     :param request: Request: Get the request object
     :return: A templateresponse object
-    :doc-author: Trelent
     """
     return templates.TemplateResponse('index.html', {"request": request, "title": "PhotoShare App"})
 
@@ -124,7 +119,6 @@ def healthchecker(db: Session = Depends(get_db)):
     
     :param db: Session: Get the database session
     :return: A dictionary with a message
-    :doc-author: Trelent
     """
     try:
         # Make request
@@ -138,11 +132,13 @@ def healthchecker(db: Session = Depends(get_db)):
 
 
 app.include_router(auth.router, prefix='/api')
+app.include_router(users.router, prefix='/api')
 app.include_router(photos.router, prefix='/api')
 app.include_router(photo_transformations.router, prefix='/api')
-app.include_router(users.router, prefix='/api')
 app.include_router(comments.router, prefix='/api')
 app.include_router(tags.router, prefix='/api')
+app.include_router(rates.router, prefix='/api')
+
 
 
 # if __name__ == '__main__':

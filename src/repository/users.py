@@ -5,16 +5,15 @@ from src.database.models import User, Photo
 from src.schemas.users import UserModel, UserUpdateModel
 import src.services.auth as auth
 
+async def get_users(dict_values: dict, limit: int, offset: int, db: Session) -> Optional[List[User]]:    
 
-async def get_users(dict_values: dict, limit: int, offset: int, db: Session, current_user: User) -> Optional[
-    List[User]]:
     # if not input params - returned all list users
     # else - search by parametrs: first_name, username, email, created_at, updated_at, avatar, roles, birthday - returned list contacts
     users = db.query(User)
     for key, value in dict_values.items():
         if value != None:
             attr = getattr(User, key)
-            users = users.filter(attr.icontains(value))
+            users = users.filter(attr.contains(value))
     users = users.limit(limit).offset(offset).all()
     return users
 

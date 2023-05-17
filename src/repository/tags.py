@@ -7,7 +7,7 @@ from src.schemas.tags import TagModel
 
 
 async def add_tags(body: TagModel, db: Session, user: User) -> Type[Photo] | None:
-    photo = db.query(Photo).filter_by(id=body.photo_id, user_id=user.id).first()
+    photo = db.query(Photo).filter_by(id=body.photo_id).first()
     if not photo:
         return None
     elif len(photo.tags) > 4:
