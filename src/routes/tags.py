@@ -25,6 +25,7 @@ async def get_tags(db: Session = Depends(get_db)):
         return tags
     raise  HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.TAGS_NOT_FOUND)
 
+
 @router.delete("/{tag_id}", dependencies=[Depends(allowed_remove_tag)], status_code=status.HTTP_204_NO_CONTENT)
 async def delete_tag(tag_id: int, db: Session = Depends(get_db)):
     count = await repository_tags.delete_tag(tag_id, db)
