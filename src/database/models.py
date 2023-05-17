@@ -76,15 +76,15 @@ class Comment(Base):
     user = relationship('User', backref='comments')
 
 
-# class PhotoTransformer(Base):
-#     __tablename__ = 'photo_transformers'
-#     id = Column(Integer, primary_key=True)
-#     user_id = Column(ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
-#     name = Column(String(128), nullable=False, unique=True, index=True)
-#     description = Column(String(255), nullable=True)
-#     preset = Column(JSONB, nullable=False)  # [{'radius': "max"}, {'width': 200, 'crop': "scale"},]
-#     created_at = Column(DateTime, default=func.now())
-#     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+class PhotoFilter(Base):
+    __tablename__ = 'photo_filters'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    name = Column(String(128), nullable=False, unique=True, index=True)
+    description = Column(String(255), nullable=True)
+    preset = Column(JSONB, nullable=False)  # [{'radius': "max"}, {'width': 200, 'crop': "scale"},]
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
 
 class PhotoTransformation(Base):
