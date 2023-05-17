@@ -6,11 +6,25 @@ import qrcode as qrcode
 from sqlalchemy.orm import Session
 
 from src.database.models import User, Photo, Tag
+from src.repository.tags import add_tags_
 
 
-async def add_photo(url: str, public_id: str, description: str, db: Session, user: User):
-
-    photo = Photo(url_photo=url, cloud_public_id=public_id, description=description, user_id=user.id)
+async def add_photo(url: str,
+                    public_id: str,
+                    description: str,
+                    tags: List,
+                    db: Session,
+                    user: User):
+    tags_ = []
+    tags = tags[0].split(",")
+    if tags[0]:
+        tags_ = await add_tags_(tags, db, user)
+    photo = Photo(
+        url_photo=url,
+        cloud_public_id=public_id,
+        description=description,
+        tags=tags_,
+        user_id=user.id)
     db.add(photo)
     db.commit()
     db.refresh(photo)

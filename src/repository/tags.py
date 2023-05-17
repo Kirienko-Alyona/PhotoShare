@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, List
 
 from sqlalchemy.orm import Session
 
@@ -22,6 +22,22 @@ async def add_tags(body: TagModel, db: Session, user: User) -> Type[Photo] | Non
     db.commit()
     db.refresh(photo)
     return photo
+
+
+async def add_tags_(tags: List, db: Session, user: User) -> List[Tag]:
+    tags_ = []
+    for i, tag_name in enumerate(tags):
+        if i < 5:
+            tag = db.query(Tag).filter_by(tag_name=tag_name).first()
+            if tag:
+                tags_.append(tag)
+            else:
+                tags_.append(Tag(tag_name=tag_name, user_id=user.id))
+        else:
+            break
+    return tags_
+
+
 
 
 async def delete_tag(tag_id: int, db: Session):
