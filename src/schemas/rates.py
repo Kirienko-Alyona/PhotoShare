@@ -2,8 +2,6 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from src.schemas.users import UserDb
-
 
 class RateModel(BaseModel):
     photo_id: int
@@ -14,13 +12,8 @@ class RateModel(BaseModel):
 
 
 class RateResponse(BaseModel):
-    average_rate: float
-    rate_count: int
-
-
-class RateDetailResponse(BaseModel):
     photo_id: int
-    user: UserDb
+    user_id: int
     rate: int
     created_at: datetime
     updated_at: datetime
@@ -33,3 +26,7 @@ class RateDeleteModel(BaseModel):
     photo_id: int
     user_id: int
 
+
+class PhotoRatingResponse(BaseModel):
+    average_rate: float
+    rate_count: int

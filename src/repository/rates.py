@@ -10,6 +10,7 @@ async def add_rate(body: RateModel, db: Session, user: User):
     rate = Rate(**body.dict(), user_id=user.id)
     db.add(rate)
     db.commit()
+    db.refresh(rate)
     return rate
 
 
@@ -20,7 +21,7 @@ async def get_rate_photo_by_user(photo_id: int, db: Session, user: User):
 
 async def get_rating_by_photo_id(photo_id: int, db: Session):
     result = db.query(func.count(Rate.user_id), func.avg(Rate.rate)).filter(Photo.id == photo_id).first()
-    return {'average_rate': result[1], 'rate_count': result[0]}
+    return {'average_rate': result[1] or 0, 'rate_count': result[0]}
 
 
 async def get_detail_rating_by_photo(photo_id: int, db: Session):
