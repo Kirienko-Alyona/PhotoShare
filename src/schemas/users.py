@@ -57,3 +57,16 @@ class TokenModel(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
+
+
+class UserUpdateModel(BaseModel):
+    # id: int
+    first_name: str = None
+    username: str
+    email: str
+    # created_at: datetime
+    # updated_at: datetime
+    # avatar: str = None
+    # roles: Role
+    birthday: date = None  # '2023-03-29'
+    password: str = Field(min_length=PASSWORD_MIN_LEN, max_length=PASSWORD_MAX_LEN)

@@ -11,38 +11,36 @@ from src.database.models import User, Role
 from src.repository import users as repository_users
 from src.services.auth import auth_service
 from src.conf.config import settings
-from src.schemas.users import UserDb, UserResponse
+from src.schemas.users import UserDb, UserUpdateModel
 from src.services.photos import upload_photo
 from src.conf import messages
-
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.get("/", response_model=List[UserDb])
-async def read_users(first_name: str = None, 
-                     username: str = None, 
-                     email: str = None, 
-                     created_at: datetime = None, 
-                     updated_at: datetime = None, 
-                     avatar: str = None, 
-                     roles: Role = None, 
-                     birthday: date = None, 
-                     limit: int = Query(default=10, ge=1, le=50), 
-                     offset: int = 0, 
-                     db: Session = Depends(get_db), 
+async def read_users(first_name: str = None,
+                     username: str = None,
+                     email: str = None,
+                     created_at: datetime = None,
+                     updated_at: datetime = None,
+                     avatar: str = None,
+                     roles: Role = None,
+                     birthday: date = None,
+                     limit: int = Query(default=10, ge=1, le=50),
+                     offset: int = 0,
+                     db: Session = Depends(get_db),
                      current_user: User = Depends(auth_service.get_current_user)):
-    
-    users = await repository_users.get_users({'first_name': first_name, 
-                                              'username': username, 
-                                              'email': email, 
-                                              'created_at': created_at, 
-                                              'updated_at': updated_at, 
-                                              'avatar': avatar, 
-                                              'roles': roles, 
-                                              'birthday': birthday}, 
-                                             limit, 
-                                             offset, 
+    users = await repository_users.get_users({'first_name': first_name,
+                                              'username': username,
+                                              'email': email,
+                                              'created_at': created_at,
+                                              'updated_at': updated_at,
+                                              'avatar': avatar,
+                                              'roles': roles,
+                                              'birthday': birthday},
+                                             limit,
+                                             offset,
                                              db,
                                              current_user)
     if len(users) == 0:
@@ -54,7 +52,6 @@ async def read_users(first_name: str = None,
 @router.get("/me/", response_model=UserDb)
 async def read_users_me(current_user: User = Depends(auth_service.get_current_user),
                         db: Session = Depends(get_db)):
-
     quantity_photos = await repository_users.quantity_photo_by_users(current_user, db)
     if quantity_photos:
         return {'id': current_user.id,
@@ -62,11 +59,21 @@ async def read_users_me(current_user: User = Depends(auth_service.get_current_us
                 'username': current_user.username,
                 'email': current_user.email,
                 'created_at': current_user.created_at,
+                'updated_at': current_user.updated_at,
                 'avatar': current_user.avatar,
                 'roles': current_user.roles,
                 'birthday': current_user.birthday,
                 'quantity_photos': quantity_photos}
     return current_user
+
+
+@router.put('/user_update/{user_id}', response_model=UserDb)
+async def user_edit(body: UserUpdateModel,
+                    user_id: int,
+                    current_user: User = Depends(auth_service.get_current_user),
+                    db: Session = Depends(get_db)):
+    user = await repository_users.update_user(body, user_id, current_user, db)
+    return user
 
 
 @router.patch('/avatar', response_model=UserDb)
