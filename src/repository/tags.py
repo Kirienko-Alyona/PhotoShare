@@ -2,8 +2,7 @@ from typing import Type, List
 
 from sqlalchemy.orm import Session
 
-from src.database.models import Tag, User, Photo
-from src.schemas.tags import TagModel
+from src.database.models import Tag, User
 
 
 async def get_tags(db: Session) -> List[Type[Tag]]:
@@ -27,22 +26,12 @@ async def add_tags(tags: List, db: Session, user: User) -> List[Tag]:
     return tags_
 
 
-async def update_tags(body: TagModel, db: Session, user: User) -> Type[Photo] | None:
-    photo = db.query(Photo).filter_by(id=body.photo_id).first()
-    if not photo:
-        return None
-    elif len(photo.tags) > 4:
-        return photo
-    for tag_name in body.tags:
+async def update_tags(tags: List, db: Session, user: User) -> List[Tag]:
+    tags_ = []
+    for tag_name in tags:
         tag = db.query(Tag).filter_by(tag_name=tag_name).first()
-        if tag:
-            tag.photos.append(photo)
-        else:
-            tag = Tag(tag_name=tag_name, photos=[photo], user_id=user.id)
-        db.add(tag)
-    db.commit()
-    db.refresh(photo)
-    return photo
+        tags_.append(tag if tag else Tag(tag_name=tag_name, user_id=user.id))
+    return tags_
 
 
 async def delete_tag(tag_id: int, db: Session):

@@ -6,6 +6,7 @@ from src.database.db import get_db
 from src.database.models import User
 from src.repository import photos as repository_photos
 from src.schemas.photos import PhotoResponse, PhotoQRCodeResponse
+from src.schemas.tags import TagModel
 from src.services.auth import auth_service
 from src.services.photos import upload_photo
 import src.conf.messages as messages
@@ -86,5 +87,23 @@ async def generate_qrcode(photo_url: str, _: User = Depends(auth_service.get_cur
     return qrcode_encode
 
 
-@router.put("/", response_model=PhotoResponse)
-async def photo_tags_update()
+@router.put("/{photo_id}", response_model=PhotoResponse, status_code=status.HTTP_200_OK)
+async def update_tags_by_photo(photo_id: int,
+                               tags: TagModel = Depends(),
+                               db: Session = Depends(get_db),
+                               current_user: User = Depends(auth_service.get_current_user)):
+    photo = await repository_photos.update_tags(photo_id, tags, db, current_user)
+    if photo:
+        return photo
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.PHOTO_NOT_FOUND)
+
+
+@router.patch("/untach/{photo_id}", response_model=PhotoResponse, status_code=status.HTTP_200_OK)
+async def untach_tag_photo(photo_id: int,
+                           tag_name: str,
+                           db: Session = Depends(get_db),
+                           current_user: User = Depends(auth_service.get_current_user)):
+    photo = await repository_photos.untach_tag(photo_id, tag_name, db, current_user)
+    if photo:
+        return photo
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.PHOTO_NOT_FOUND)
