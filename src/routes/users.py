@@ -2,7 +2,7 @@ from datetime import datetime, date
 from typing import List
 import cloudinary
 import cloudinary.uploader
-from fastapi import APIRouter, Depends, status, UploadFile, File, HTTPException, Query
+from fastapi import APIRouter, Depends, status, UploadFile, File, HTTPException, Query, Path
 
 from sqlalchemy.orm import Session
 
@@ -53,6 +53,18 @@ async def read_users(first_name: str = None,
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
     return users
+
+
+@router.get("/{user_id}", response_model=UserDb)
+async def read_user_by_id(user_id: int = Path(ge=1), 
+                     db: Session = Depends(get_db), 
+                     _: User = Depends(auth_service.get_current_user)):
+    
+    user = await repository_users.get_user_by_id(user_id, db)
+    if user == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
+    return user
 
 
 @router.get("/me/", response_model=UserDb)
