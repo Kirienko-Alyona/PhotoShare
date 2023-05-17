@@ -1,5 +1,8 @@
+import base64
+import io
 from typing import Optional, List
 
+import qrcode as qrcode
 from sqlalchemy.orm import Session
 
 from src.database.models import User, Photo, Tag
@@ -21,8 +24,8 @@ async def get_photos(dict_values: dict,
     photos = db.query(Photo)
     for key, value in dict_values.items():
         if value is not None:
-            attr = getattr(Photo, key)
-            photos = photos.filter(attr.icontains(value))
+            attr = getattr(Tag, key)
+            photos = photos.filter(attr.contains(value))
     photos = photos.offset(skip).limit(limit).all()
     return photos
 
@@ -56,3 +59,10 @@ async def delete_photo(photo_id: int,
         if count == 1:
             return photo
     return None
+
+
+async def generate_qrcode(photo_url: str):
+    img = qrcode.make(photo_url)
+    buffer = io.BytesIO()
+    img.save(buffer)
+    return {'qrcode_encode': base64.b64encode(buffer.getvalue()).decode('utf-8')}

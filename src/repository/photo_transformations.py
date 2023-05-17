@@ -39,21 +39,21 @@ async def create_transformation(data: PhotoTransformationModel, db: Session) -> 
 async def change_description(trans_id: int, data: NewDescTransformationModel,
                              db: Session) -> Optional[PhotoTransformation]:
     transformation = await get_transformation_by_id(trans_id, db)
+
     if transformation is None:
         raise RecordNotFound(f'{trans_id}')
 
-    transformation.description = data.description
-    db.commit()
-    db.refresh(transformation)
+    count = db.query(PhotoTransformation).filter_by(id=trans_id).update(
+        {'description': data.description})
 
-    return transformation
+    if count == 1:
+        return transformation
+    return None
 
 
-async def remove_transformation(trans_id: int, db: Session) -> PhotoTransformation:
+async def remove_transformation(trans_id: int, db: Session) -> None:
     transformation = await get_transformation_by_id(trans_id, db)
     if transformation is None:
         raise RecordNotFound(f'{trans_id}')
-
-    db.delete(transformation)
+    db.query(PhotoTransformation).filter_by(id=trans_id).delete()
     db.commit()
-    return transformation

@@ -12,7 +12,6 @@ class PhotoModel(BaseModel):
 
 class PhotoResponse(BaseModel):
     id: int
-
     url_photo: HttpUrl
     description: str | None = Field(
         default=None, title="The description of the Photo", max_length=constants.MAX_LENGTH_PHOTO_DESCRIPTION)
@@ -24,3 +23,7 @@ class PhotoResponse(BaseModel):
 
 class PhotoUpdate(BaseModel):
     pass
+
+
+class PhotoQRCodeResponse(BaseModel):
+    qrcode_encode: str
