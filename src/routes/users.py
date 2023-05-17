@@ -68,7 +68,7 @@ async def read_user_by_id(user_id: int = Path(ge=1),
 
 
 @router.get("/me/", response_model=UserDb)
-async def read_users_me(current_user: User = Depends(auth_service.get_current_user),
+async def read_user_me(current_user: User = Depends(auth_service.get_current_user),
                         db: Session = Depends(get_db)):
     quantity_photos = await repository_users.quantity_photo_by_users(current_user, db)
     if quantity_photos:
@@ -85,7 +85,7 @@ async def read_users_me(current_user: User = Depends(auth_service.get_current_us
     return current_user
 
 
-@router.put('/user_update/{user_id}', response_model=UserDb)
+@router.put('/{user_id}', response_model=UserDb)
 async def user_edit(body: UserUpdateModel,
                     user_id: int,
                     current_user: User = Depends(auth_service.get_current_user),
