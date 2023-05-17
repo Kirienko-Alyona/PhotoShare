@@ -6,6 +6,10 @@ from src.database.models import Tag, User, Photo
 from src.schemas.tags import TagModel
 
 
+async def get_tags(db: Session) -> List[Type[Tag]]:
+    return db.query(Tag).all()
+
+
 def handler_tags(tags: List):
     tags_ = tags[0].split(",")
     return tags_ if tags_[0] else []
