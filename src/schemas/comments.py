@@ -2,7 +2,6 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from src.schemas.users import UserDb
 from src.conf.constants import COMMENT_MIN_LEN
 
 
@@ -17,8 +16,9 @@ class CommentUpdateModel(BaseModel):
 
 class CommentResponse(BaseModel):
     id: int
+    photo_id: int
+    user_id: int
     text_comment: str
-    user: UserDb
     created_at: datetime
     updated_at: datetime
 
