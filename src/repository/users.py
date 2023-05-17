@@ -18,6 +18,11 @@ async def get_users(dict_values: dict, limit: int, offset: int, db: Session) -> 
     return users
 
 
+
+async def get_user_by_id(id: int, db: Session) -> User:
+    return db.query(User).filter(User.id == id).first()
+
+
 async def get_user_by_email(email: str, db: Session) -> User | None:
     """
 The get_user_by_email function takes in an email and a database session,
