@@ -5,7 +5,7 @@ from typing import Optional
 from src.database.db import get_db
 from src.database.models import User
 from src.repository import photos as repository_photos
-from src.schemas.photos import PhotoResponse
+from src.schemas.photos import PhotoResponse, PhotoQRCodeResponse
 from src.services.auth import auth_service
 from src.services.photos import upload_photo
 import src.conf.messages as messages
@@ -18,7 +18,6 @@ async def create_photo(photo: UploadFile = File(),
                        description: str | None = None,
                        db: Session = Depends(get_db),
                        current_user: User = Depends(auth_service.get_current_user)):
-
     url, public_id = upload_photo(photo)
     photo = await repository_photos.add_photo(url, public_id, description, db, current_user)
     return photo
@@ -26,9 +25,9 @@ async def create_photo(photo: UploadFile = File(),
 
 @router.get('/', response_model=list[PhotoResponse], name="Get photos by request ")
 async def get_photos(skip: int = 0, limit: int = Query(default=10, ge=1, le=50),
-                    tag_name: Optional[str] = Query(default=None),
-                    user: User = Depends(auth_service.get_current_user),
-                    db: Session = Depends(get_db)):
+                     tag_name: Optional[str] = Query(default=None),
+                     user: User = Depends(auth_service.get_current_user),
+                     db: Session = Depends(get_db)):
     photos = await repository_photos.get_photos({'tag_name': tag_name},
                                                 skip,
                                                 limit,
@@ -39,7 +38,18 @@ async def get_photos(skip: int = 0, limit: int = Query(default=10, ge=1, le=50),
     return photos
 
 
-@router.patch('/{photo_id}', response_model=int, name="Update photo's description")
+@router.get('/{photo_id}', response_model=PhotoResponse, name="Get photos by id ")
+async def get_photo_id(photo_id: int,
+                       db: Session = Depends(get_db),
+                       user: User = Depends(auth_service.get_current_user)):
+    photo = await repository_photos.get_photo_by_id(photo_id, db, user)
+    if photo is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
+    return photo
+
+
+@router.patch('/{photo_id}', response_model=PhotoResponse, name="Update photo's description")
 async def photo_description_update(
         new_description: str,
         photo_id: int,
@@ -66,3 +76,10 @@ async def photo_remove(
     if photo is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
     return photo
+
+
+@router.post('/qrcode/', response_model=PhotoQRCodeResponse, name='Generate QRCode by url',
+             status_code=status.HTTP_201_CREATED)
+async def generate_qrcode(photo_url: str, _: User = Depends(auth_service.get_current_user)):
+    qrcode_encode = await repository_photos.generate_qrcode(photo_url)
+    return qrcode_encode

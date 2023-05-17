@@ -42,8 +42,7 @@ class UserDb(BaseModel):
     avatar: str = None
     roles: Role
     birthday: date = None #'2023-03-29'
-    active: bool
-    confirmed: bool
+    quantity_photos: int = None
 
     class Config:
         orm_mode = True

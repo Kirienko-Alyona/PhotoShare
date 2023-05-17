@@ -37,7 +37,6 @@ async def send_email(email: EmailStr, username: str, host: str):
     :param username: str: Pass the username to the email template
     :param host: str: Pass the host of the server to the email template
     :return: A coroutine, which is a special type of object that works with asyncio
-    :doc-author: Trelent
     """
     try:
         token_verification = auth_service.create_email_token({"sub": email})
@@ -66,7 +65,6 @@ async def send_reset_password_email(email: EmailStr, username: str, host: str):
     :param username: str: Display the username in the email
     :param host: str: Pass the host name to the template
     :return: A coroutine, which is an object that can be used to start a task
-    :doc-author: Trelent
     """
     try:
         token_verification = auth_service.create_password_token({"sub": email})
