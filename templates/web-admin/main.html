@@ -15,13 +15,13 @@
     <title>Document</title>
   </head>
   <body>
-    <!-- Modal for updating a contact -->
-    <div class="modal fade" id="EditContact" tabindex="-1" aria-labelledby="EditContactLabel" aria-hidden="true"
+    <!-- Modal for updating a user -->
+    <div class="modal fade" id="EditUser" tabindex="-1" aria-labelledby="EditUserLabel" aria-hidden="true"
         data-bs-note_id="0">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="EditContactLabel">Adding a contact</h1>
+            <h1 class="modal-title fs-5" id="EditUserLabel">Adding a User</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
@@ -71,20 +71,20 @@
         </div>
       </div>
     </div>
-    <!-- End Modal for updating a contact-->
+    <!-- End Modal for updating a User-->
 
-    <!-- Modal for deleting a contact -->
-    <div class="modal fade" id="DeleteContact" tabindex="-1" aria-labelledby="basicModalLabel"
+    <!-- Modal for deleting a User -->
+    <div class="modal fade" id="DeleteUser" tabindex="-1" aria-labelledby="basicModalLabel"
         aria-hidden="true">
       <div class="modal-dialog modal-sm">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="basicModalLabel">Deleting a contact</h1>
+            <h1 class="modal-title fs-5" id="basicModalLabel">Deleting a user</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <label class="col-xs-2 control-label">Do you want to
-              <span style="font-weight:bold;color:red">delete</span> the contact ?
+              <span style="font-weight:bold;color:red">delete</span> the user ?
             </label>
           </div>
           <div class="modal-footer">
@@ -94,18 +94,18 @@
         </div>
       </div>
     </div>
-    <!-- End Modal for deleting a contact-->
+    <!-- End Modal for deleting a user-->
 
     <div class="container">
       <div class="row mb-3">
         <div class="col-6">
           <h3>Додати контакт</h3>
-          <ul class="list-group" id="contact"></ul>
+          <ul class="list-group" id="user"></ul>
         </div>
       </div>
       <div class="row">
         <div class="col-6">
-          <form id="contactCreate">
+          <form id="userCreate">
             <div class="mb-3">
               <label for="name" class="form-label"
                 >Введіть ім'я контакта</label
