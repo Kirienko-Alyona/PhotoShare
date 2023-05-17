@@ -16,7 +16,7 @@ router = APIRouter(prefix="/tags", tags=['tags'])
 allowed_operations = {
     'admin': ['R', 'D'],
     'moderator': ['R', 'D'],
-    'user': ['C', 'R', 'D'],
+    'user': ['C', 'R', 'U'],
 }
 
 
