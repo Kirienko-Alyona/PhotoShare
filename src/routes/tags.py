@@ -42,11 +42,6 @@ async def get_tags(tag_name: str = None,
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=messages.TAGS_NOT_FOUND)
     return tags    
-# async def get_tags(db: Session = Depends(get_db)):
-#     tags = await repository_tags.get_tags(db)
-#     if tags:
-#         return tags
-#     raise  HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.TAGS_NOT_FOUND)
 
 
 @router.delete("/{tag_id}", dependencies=[Depends(allowed_delete)], status_code=status.HTTP_204_NO_CONTENT)
