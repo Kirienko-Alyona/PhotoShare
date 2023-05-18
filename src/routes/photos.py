@@ -77,9 +77,9 @@ async def update_tags_by_photo(photo_id: int,
                                db: Session = Depends(get_db),
                                current_user: User = Depends(auth_service.get_current_user)):
     photo = await repository_photos.update_tags_descriptions_for_photo(
-                                photo_id, {
-                                'new_description': new_description, 
-                                'tags': tags}, 
+                                photo_id, 
+                                new_description, 
+                                tags, 
                                 db, 
                                 current_user)
     if photo:

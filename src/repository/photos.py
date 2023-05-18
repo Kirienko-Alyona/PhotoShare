@@ -59,20 +59,18 @@ async def generate_qrcode(photo_url: str):
 
 
 async def update_tags_descriptions_for_photo(photo_id: int, 
-                                            dict_values: dict,
-                                            #  new_description: str,
-                                            #  tags: str,
+                                             new_description: str,
+                                             tags: str,
                                              db: Session,
                                              user: User):
     photo = db.query(Photo).filter_by(id=photo_id, user_id=user.id).first()
     if not photo:
         return None
-    for key, value in dict_values.items():
-        if key == 'tags' and value != None:
-            new_tags_list = await repository_tags.update_tags(dict_values['tags'], photo_id, db, user)
-            photo.tags = new_tags_list
-        if key == 'new_description' and value != None:    
-            photo.description = dict_values['new_description']
+    if tags != None:
+        new_tags_list = await repository_tags.update_tags(tags, photo_id, db, user)
+        photo.tags = new_tags_list
+    if new_description != None:    
+        photo.description = new_description
     db.commit()
     db.refresh(photo)
     return photo
