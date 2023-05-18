@@ -35,9 +35,12 @@ async def get_photos(dict_values: dict,
                     db: Session) -> Optional[List[Photo]]:
     photos = db.query(Photo)
     for key, value in dict_values.items():
-        if value is not None:
-            attr = getattr(Tag, key)
-            photos = photos.filter(attr.contains(value))
+        if key == "tag_name":
+          photos = await repository_tags.get_tags(key, db)  
+        # if value is not None:
+        #     attr = getattr(Tag, key)
+        #     photos = photos.filter(attr.contains(value))
+        
     photos = photos.offset(skip).limit(limit).all()
     return photos
 

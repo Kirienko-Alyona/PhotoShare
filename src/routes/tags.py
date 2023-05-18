@@ -1,14 +1,15 @@
 from typing import List
 
-from fastapi import Depends, status, APIRouter, HTTPException
+from fastapi import Depends, status, APIRouter, HTTPException, Query, Path
 from sqlalchemy.orm import Session
 
 from src.database.db import get_db
-from src.database.models import Role
+from src.database.models import Role, User
 from src.repository import tags as repository_tags
 from src.services.roles import RoleAccess
 from src.conf import messages
 from src.schemas.tags import TagResponse
+from src.services.auth import auth_service
 
 
 router = APIRouter(prefix="/tags", tags=['tags'])
@@ -26,11 +27,26 @@ allowed_delete = RoleAccess([Role.admin, Role.moderator])
 @router.get("/", response_model=List[TagResponse],
             dependencies=[Depends(allowed_read)],
             status_code=status.HTTP_200_OK)
-async def get_tags(db: Session = Depends(get_db)):
-    tags = await repository_tags.get_tags(db)
-    if tags:
-        return tags
-    raise  HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.TAGS_NOT_FOUND)
+async def get_tags(tag_name: str = None, 
+                     limit: int = Query(default=10, ge=1, le=50), 
+                     offset: int = 0, 
+                     db: Session = Depends(get_db), 
+                     _: User = Depends(auth_service.get_current_user)):
+    
+    tags = await repository_tags.get_tags({'tag_name': tag_name}, 
+                                             limit, 
+                                             offset, 
+                                             db)
+
+    if len(tags) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=messages.TAGS_NOT_FOUND)
+    return tags    
+# async def get_tags(db: Session = Depends(get_db)):
+#     tags = await repository_tags.get_tags(db)
+#     if tags:
+#         return tags
+#     raise  HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.TAGS_NOT_FOUND)
 
 
 @router.delete("/{tag_id}", dependencies=[Depends(allowed_delete)], status_code=status.HTTP_204_NO_CONTENT)

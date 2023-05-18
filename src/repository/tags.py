@@ -5,8 +5,16 @@ from sqlalchemy.orm import Session
 from src.database.models import Tag, User
 
 
-async def get_tags(db: Session) -> List[Type[Tag]]:
-    return db.query(Tag).all()
+async def get_tags(dict_values: dict, limit: int, offset: int, db: Session) -> List[Type[Tag]]:
+    # if not input params - returned all list tags
+    # else - search by parametrs: id, tag_name, user.id - returned list tags
+    tags = db.query(Tag)
+    for key, value in dict_values.items():
+        if value != None:
+            attr = getattr(Tag, key)
+            tags = tags.filter(attr.contains(value))
+    tags = tags.limit(limit).offset(offset).all()
+    return tags
 
 
 def handler_tags(tags: List):
