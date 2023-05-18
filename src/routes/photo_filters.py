@@ -18,7 +18,7 @@ allowed_delete = RoleAccess([Role.admin, Role.moderator, Role.user])
 @router.post('/', response_model=PhotoFilterDbModel,
              name='Create photo filter', status_code=status.HTTP_201_CREATED,
              dependencies=[Depends(allowed_create)])
-async def create_foto_filter(photo_filter: PhotoFilterModel,
+async def create_photo_filter(photo_filter: PhotoFilterModel,
                              db: Session = Depends(get_db),
                              user: User = Depends(auth_service.get_current_user)):
     p_filter = await photo_filters.create_photo_filter(photo_filter, user.id, db)
