@@ -29,19 +29,19 @@ async def add_photo(url: str,
     return photo
 
 
-async def get_photos(dict_values: dict,
-                    skip: int,
+async def get_photos(tag_name: str,
+                    offset: int,
                     limit: int,
                     db: Session) -> Optional[List[Photo]]:
-    photos = db.query(Photo)
-    for key, value in dict_values.items():
-        if key == "tag_name":
-          photos = await repository_tags.get_tags(key, db)  
+    tags_list = await repository_tags.get_tags(tag_name, limit, offset, db) 
+    for i in range(len(tags_list)):
+        
+     
         # if value is not None:
         #     attr = getattr(Tag, key)
         #     photos = photos.filter(attr.contains(value))
         
-    photos = photos.offset(skip).limit(limit).all()
+    # photos = photos.offset(offset).limit(limit).all()
     return photos
 
 
