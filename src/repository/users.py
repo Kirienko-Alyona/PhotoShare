@@ -1,6 +1,9 @@
+from datetime import datetime
+
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
+from src.database.db import client_redis
 from src.database.models import User, Photo
 from src.schemas.users import UserModel, UserUpdateModel
 import src.services.auth as auth
@@ -119,3 +122,13 @@ async def update_user(body: UserUpdateModel, user_id: int, user: User, db: Sessi
         if count == 1:
             return user
     return None
+
+
+async def block_token(token: str, db: Session):
+    email = auth.auth_service.verify_access_token(token)
+    user = await get_user_by_email(email, db)
+    await update_token(user, None, db)
+    expire = auth.auth_service.get_exp_by_access_token(token)
+    timedelta = expire - int(datetime.now().timestamp())
+    await client_redis.set(f'user_token:{email}', token, timedelta)
+

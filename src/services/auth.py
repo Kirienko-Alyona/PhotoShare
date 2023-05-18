@@ -137,6 +137,14 @@ class Auth:
             raise self.credentials_exception
         return email
 
+    def get_exp_by_access_token(self, access_token: str = Depends(oauth2_scheme)) -> str:
+        try:
+            payload = jwt.decode(access_token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
+            expire = payload['exp']
+        except JWTError as e:
+            raise self.credentials_exception
+        return expire
+
     async def get_current_user(self, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
         """
         The get_current_user function is a dependency that will be used in the
@@ -149,6 +157,9 @@ class Auth:
         :return: A user object
         """
         email = self.verify_access_token(token)
+        redis_token = await client_redis.get(f'user_token:{email}')
+        if redis_token and redis_token.decode() == token:
+            raise self.credentials_exception
         user = await client_redis.get(f'user:{email}')
 
         if user is None:
