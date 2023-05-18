@@ -3,6 +3,7 @@ from typing import Optional, Dict, Any, List
 from pydantic import BaseModel, Field
 
 import src.conf.constants as c
+from src.database import models
 
 
 class PhotoFilterModel(BaseModel):
@@ -23,6 +24,24 @@ class PhotoFilterModel(BaseModel):
                 ]
             }
         }
+
+
+# class PhotoFilterUpdateModel(PhotoFilterModel):
+#     user_id: int
+#
+#     class Config:
+#         schema_extra = {
+#             "example": {
+#                 "name": "Avatar",
+#                 "description": "Photo transformation preset for avatars",
+#                 "preset": [
+#                     {"gravity": "face", "height": 400, "width": 400, "crop": "crop"},
+#                     {"radius": "max"},
+#                     {"width": 200, "crop": "scale"},
+#                     {"fetch_format": "auto"}
+#                 ]
+#             }
+#         }
 
 
 class PhotoFilterDbModel(BaseModel):

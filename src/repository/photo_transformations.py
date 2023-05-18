@@ -33,7 +33,8 @@ async def get_photo_public_id(photo_id: int, db: Session) -> str:  # waiting_for
 async def additional_rights_check(photo_id: int, cur_user_id: int,
                                   cur_user_role: Role, db: Session, private=False):
     photo_user_id = await get_photo_user_id(photo_id, db)
-    allowed = photo_user_id == cur_user_id if private else (cur_user_role == Role.admin or photo_user_id == cur_user_id)
+    allowed = photo_user_id == cur_user_id if private else (cur_user_role == Role.admin or
+                                                            photo_user_id == cur_user_id)
     if not allowed:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=message.FORBIDDEN)
 
