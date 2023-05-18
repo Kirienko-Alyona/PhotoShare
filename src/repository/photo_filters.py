@@ -1,11 +1,12 @@
-from fastapi import HTTPException, status
 from typing import Optional
 
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 import src.conf.messages as message
 from src.database.models import PhotoFilter, Role
 from src.schemas.photo_filters import PhotoFilterModel, PhotoFilterDbModel
+from src.schemas.photo_transformations import TransformationModel
 
 
 async def get_filter_by_id(filter_id: int, db: Session) -> Optional[PhotoFilter]:
@@ -14,6 +15,10 @@ async def get_filter_by_id(filter_id: int, db: Session) -> Optional[PhotoFilter]
 
 async def get_photo_filter_user_id(filter_id: int, db: Session) -> int:
     return db.query(PhotoFilter.user_id).filter_by(id=filter_id).one()[0]
+
+
+async def get_filter_preset_by_id(filter_id: int, db: Session) -> Optional[TransformationModel]:
+    return db.query(PhotoFilter.preset).filter_by(id=filter_id).one()[0]
 
 
 async def additional_rights_check(filter_id: int, cur_user_id: int,

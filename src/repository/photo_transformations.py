@@ -6,12 +6,9 @@ from sqlalchemy.orm import Session
 
 import src.conf.messages as message
 from src.database.models import PhotoTransformation, Photo, Role
-from src.schemas.photo_transformations import PhotoTransformationModel, NewDescTransformationModel
+from src.repository.photo_filters import get_filter_preset_by_id
+from src.schemas.photo_transformations import PhotoTransformationModel, NewDescTransformationModel, TransformationModel
 from src.services.photo_transformations import build_transformed_url
-
-
-async def get_photo_by_id_1(photo_id: int, db: Session):
-    return db.query(Photo).get(photo_id)
 
 
 async def get_transformation_by_id(trans_id, db: Session) -> PhotoTransformation:
@@ -37,6 +34,26 @@ async def additional_rights_check(photo_id: int, cur_user_id: int,
                                                             photo_user_id == cur_user_id)
     if not allowed:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=message.FORBIDDEN)
+
+
+async def create_transformation_from_preset(filter_id: int, photo_id: int, description: NewDescTransformationModel,
+                                            user_id: int,
+                                            user_role: Role, db: Session) -> Optional[PhotoTransformation]:
+    await additional_rights_check(photo_id, user_id, user_role, db, private=True)
+
+    transformation = TransformationModel(preset=await get_filter_preset_by_id(filter_id, db))
+
+    public_id = await get_photo_public_id(photo_id, db)
+    new_transformation = PhotoTransformation()
+    new_transformation.photo_id = photo_id
+    new_transformation.transformed_url = build_transformed_url(public_id, transformation)
+    new_transformation.description = description.description
+
+    db.add(new_transformation)
+    db.commit()
+    db.refresh(new_transformation)
+
+    return new_transformation
 
 
 async def create_transformation(data: PhotoTransformationModel, user_id: int,
