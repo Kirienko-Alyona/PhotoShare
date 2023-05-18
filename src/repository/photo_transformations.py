@@ -63,6 +63,7 @@ async def change_description(trans_id: int, data: NewDescTransformationModel,
         await additional_rights_check(transformation.photo_id, user_id, user_role, db)
         count = db.query(PhotoTransformation).filter_by(id=trans_id).update(
             {'description': data.description}, synchronize_session="fetch")
+        db.commit()
         if count == 1:
             return transformation
 

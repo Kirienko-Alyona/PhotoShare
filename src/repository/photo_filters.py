@@ -43,6 +43,7 @@ async def update_photo_filter(filter_id: int, data: PhotoFilterModel,
         count = db.query(PhotoFilter).filter_by(id=filter_id).update(
             {'name': data.name, 'description': data.description, 'preset': data.preset},
             synchronize_session="fetch")
+        db.commit()
         if count == 1:
             return ph_filter
 
