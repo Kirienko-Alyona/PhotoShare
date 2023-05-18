@@ -51,7 +51,13 @@ async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
 async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)) -> dict:
     user = await repository_users.get_user_by_email(body.username, db)
 
-    if not user.roles == Role.admin:
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=messages.INVALID_EMAIL)
+    if not user.confirmed:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=messages.EMAIL_NOT_CONFIRMED)
+    if not auth_service.verify_password(body.password, user.password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=messages.INVALID_PASSWORD)
+    if not (user.active and (user.roles == Role.admin)):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=messages.FORBIDDEN)
 
     access_token: str = await auth_service.create_access_token(data={'sub': user.email})
