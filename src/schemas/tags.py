@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 
 class TagModel(BaseModel):
-    tags: List = Field(max_items=5)
+    tags: str #List = Field(max_items=5)
 
 
 class TagResponse(BaseModel):
