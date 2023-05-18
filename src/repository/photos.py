@@ -5,7 +5,7 @@ from typing import Optional, List
 import qrcode as qrcode
 from sqlalchemy.orm import Session
 
-from src.database.models import User, Photo, Tag
+from src.database.models import User, Photo, Tag, photo_m2m_tag
 from src.repository import tags as repository_tags
 from src.schemas.tags import TagModel
 
@@ -28,15 +28,13 @@ async def get_photos(tag_name: str,
                     offset: int,
                     limit: int,
                     db: Session) -> Optional[List[Photo]]:
+    photos = []
     tags_list = await repository_tags.get_tags(tag_name, limit, offset, db) 
     for i in range(len(tags_list)):
-        
-     
-        # if value is not None:
-        #     attr = getattr(Tag, key)
-        #     photos = photos.filter(attr.contains(value))
-        
-    # photos = photos.offset(offset).limit(limit).all()
+        tag_id = tags_list[i].id
+        photo_id, tag_id = db.query(photo_m2m_tag).filter(tag_id == tag_id).first()
+        photo = await get_photo_by_id_oper(photo_id, db)
+        photos.append(photo)
     return photos
 
 
