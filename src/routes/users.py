@@ -14,12 +14,23 @@ from src.conf.config import settings
 from src.schemas.users import UserDb, UserUpdateModel
 from src.services.photos import upload_photo
 from src.conf import messages
+from src.services.roles import RoleAccess
 
 router = APIRouter(prefix="/users", tags=["users"])
 
+#CRUD
+#allowed_create = RoleAccess([Role.admin, Role.moderator, Role.user]) --> in auth
+allowed_read = RoleAccess([Role.admin, Role.moderator, Role.user])
+allowed_update = RoleAccess([Role.admin, Role.moderator, Role.user])
+allowed_delete = RoleAccess([Role.admin, Role.moderator, Role.user])
 
-@router.get("/", response_model=List[UserDb])
-# accsess - only for admin, moderators
+
+allowed_read_webadmin = RoleAccess([Role.admin, Role.moderator]) #--> for admin-panel
+
+#only for admin-panel
+#---------------------------------------------------------------------------------------------
+@router.get("/", response_model=List[UserDb], dependencies=[Depends(allowed_read_webadmin)])
+# accsess - admin, мoderator
 async def read_users(first_name: str = None, 
                      username: str = None, 
                      email: str = None, 
@@ -51,8 +62,8 @@ async def read_users(first_name: str = None,
     return users
 
 
-@router.get("/{user_id}", response_model=UserDb)
-# accsess - only for admin, moderators
+@router.get("/{user_id}", response_model=UserDb, dependencies=[Depends(allowed_read_webadmin)])
+# accsess - admin, мoderator
 async def read_user_by_id(user_id: int = Path(ge=1), 
                      db: Session = Depends(get_db), 
                      _: User = Depends(auth_service.get_current_user)):
@@ -62,10 +73,11 @@ async def read_user_by_id(user_id: int = Path(ge=1),
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
     return user
+#---------------------------------------------------------------------------------------------
 
 
-@router.get("/me/", response_model=UserDb)
-# accsess - only for authenticated users
+@router.get("/me/", response_model=UserDb, dependencies=[Depends(allowed_read)])
+# accsess -  admin, мoderator, user
 async def read_user_me(current_user: User = Depends(auth_service.get_current_user),
                         db: Session = Depends(get_db)):
     quantity_photos = await repository_users.quantity_photo_by_users(current_user, db)
@@ -83,7 +95,7 @@ async def read_user_me(current_user: User = Depends(auth_service.get_current_use
     return current_user
 
 
-@router.put('/{user_id}', response_model=UserDb)
+@router.put('/{user_id}', response_model=UserDb, dependencies=[Depends(allowed_update)])
 # accsess - only for admin, moderators and  user-owner
 async def user_edit(body: UserUpdateModel,
                     user_id: int,
@@ -95,7 +107,7 @@ async def user_edit(body: UserUpdateModel,
     return user
 
 
-@router.patch('/avatar', response_model=UserDb)
+@router.patch('/avatar', response_model=UserDb, dependencies=[Depends(allowed_update)])
 # accsess - only for admin, moderators and  user-owner
 async def update_avatar_user(file: UploadFile = File(),
                              current_user: User = Depends(auth_service.get_current_user),
