@@ -21,5 +21,5 @@ allowed_delete = RoleAccess([Role.admin, Role.moderator, Role.user])
 async def create_foto_filter(photo_filter: PhotoFilterModel,
                              db: Session = Depends(get_db),
                              user: User = Depends(auth_service.get_current_user)):
-    p_filter = await photo_filters.create_foto_filter(photo_filter, user.id, db)
+    p_filter = await photo_filters.create_photo_filter(photo_filter, user.id, db)
     return p_filter

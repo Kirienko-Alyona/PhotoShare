@@ -12,7 +12,7 @@ async def get_filter_by_id(filter_id: int, db: Session) -> Optional[PhotoFilter]
     return db.query(PhotoFilter).get(filter_id)
 
 
-async def create_foto_filter(data: PhotoFilterModel, user_id: int, db: Session) -> PhotoFilterDbModel:
+async def create_photo_filter(data: PhotoFilterModel, user_id: int, db: Session) -> PhotoFilterDbModel:
     new_filter = PhotoFilter(**data.dict(), user_id=user_id)
 
     db.add(new_filter)
