@@ -14,16 +14,12 @@ from src.services.roles import RoleAccess
 
 router = APIRouter(prefix="/rating", tags=['rating'])
 
-#CRUD
-allowed_create = RoleAccess([Role.admin, Role.user])
+# CRUD
+allowed_create = RoleAccess([Role.admin, Role.moderator, Role.user])
 allowed_read = RoleAccess([Role.admin, Role.moderator])
-#allowed_update = RoleAccess([Role.admin, Role.moderator, Role.user])
+allowed_web_admin_read = RoleAccess([Role.admin, Role.moderator])
+# allowed_update = RoleAccess([Role.admin, Role.moderator, Role.user])
 allowed_delete = RoleAccess([Role.admin, Role.moderator])
-
-
-# allowed_set_rate = RoleAccess([Role.user])
-# allowed_get_detail = RoleAccess([Role.admin, Role.moderator])
-# allowed_remove_user_rate = RoleAccess([Role.admin, Role.moderator])
 
 
 @router.post("/", response_model=RateResponse, name="Set rate to photo",
@@ -54,7 +50,7 @@ async def get_rating_by_photo_id(photo_id: int = Path(ge=1), db: Session = Depen
 
 @router.get("/detail/{photo_id}", response_model=List[RateResponse],
             name="Return detail rating by photo id",
-            status_code=status.HTTP_200_OK, dependencies=[Depends(allowed_read)])
+            status_code=status.HTTP_200_OK, dependencies=[Depends(allowed_web_admin_read)])
 async def get_rating_by_photo_id(photo_id: int = Path(ge=1), db: Session = Depends(get_db),
                                  _: User = Depends(auth_service.get_current_user)):
     rates = await repository_rates.get_detail_rating_by_photo(photo_id, db)
