@@ -164,7 +164,7 @@ class Auth:
 
         if user is None:
             user = await repository_users.get_user_by_email(email, db)
-            if user is None:
+            if user is None or not user.active:
                 raise self.credentials_exception
             await client_redis.set(f'user:{email}', pickle.dumps(user), ex=7200)
         else:

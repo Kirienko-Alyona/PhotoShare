@@ -1,7 +1,5 @@
 from datetime import datetime, date
 from typing import List
-import cloudinary
-import cloudinary.uploader
 from fastapi import APIRouter, Depends, status, UploadFile, File, HTTPException, Query, Path
 
 from sqlalchemy.orm import Session
@@ -10,8 +8,7 @@ from src.database.db import get_db
 from src.database.models import User, Role
 from src.repository import users as repository_users
 from src.services.auth import auth_service
-from src.conf.config import settings
-from src.schemas.users import UserDb, UserUpdateModel
+from src.schemas.users import UserDb, UserUpdateModel, UserBanModel
 from src.services.photos import upload_photo
 from src.conf import messages
 from src.services.roles import RoleAccess
@@ -23,6 +20,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 allowed_read = RoleAccess([Role.admin, Role.moderator, Role.user])
 allowed_update = RoleAccess([Role.admin, Role.moderator, Role.user])
 allowed_delete = RoleAccess([Role.admin, Role.moderator, Role.user])
+allowed_ban = RoleAccess([Role.admin])
 
 
 allowed_read_webadmin = RoleAccess([Role.admin, Role.moderator]) #--> for admin-panel
@@ -127,4 +125,12 @@ The update_avatar_user function updates the avatar of a user.
     user = await repository_users.update_avatar(current_user.email, url, db)
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
+    return user
+
+
+@router.patch("/ban/{user_id}", response_model=UserBanModel, dependencies=[Depends(allowed_ban)], status_code=status.HTTP_202_ACCEPTED)
+async def ban_user(user_id: int, db: Session = Depends(get_db)):
+    user = await repository_users.ban_user(user_id, db)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.USER_NOT_FOUND)
     return user
