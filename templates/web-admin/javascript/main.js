@@ -49,8 +49,8 @@ async function editUser(user_id) {
 async function deleteUser(id) {
   const token = localStorage.getItem('accessToken');
 
-  const response = await fetch(`/api/users/${id}`, {
-    method: "DELETE",
+  const response = await fetch(`/api/users/ban/${id}`, {
+    method: "PATCH",
     headers: {
       "Accept": "application/json",
       Authorization: `Bearer ${token}`
