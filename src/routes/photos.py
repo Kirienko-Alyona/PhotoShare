@@ -72,10 +72,10 @@ async def get_photo_id(photo_id: int,
 @router.put("/{photo_id}", response_model=PhotoResponse, status_code=status.HTTP_200_OK, dependencies=[Depends(allowed_update)])
 # accsess - admin, user-owner
 async def update_tags_by_photo(photo_id: int,
-                               tags: TagModel = Depends(),
+                               tags: str,
                                db: Session = Depends(get_db),
                                current_user: User = Depends(auth_service.get_current_user)):
-    photo = await repository_photos.update_tags(photo_id, tags, db, current_user)
+    photo = await repository_photos.update_tags_for_photo(photo_id, tags, db, current_user)
     if photo:
         return photo
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.PHOTO_NOT_FOUND)

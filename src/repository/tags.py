@@ -5,10 +5,16 @@ from sqlalchemy.orm import Session
 
 from src.database.models import Tag, User
 from src.conf import messages
+from src.repository import photos as repository_photos
 
 
 async def get_tags(db: Session) -> List[Type[Tag]]:
     return db.query(Tag).all()
+
+
+async def get_tags_by_user_id(photo_id: int, db: Session, user: User):
+    tags = await repository_photos.get_photo_by_id(photo_id, db, user)
+    return tags
 
 
 def handler_tags(tags: str) -> List[Type[Tag]]:
@@ -16,7 +22,6 @@ def handler_tags(tags: str) -> List[Type[Tag]]:
     for i in range(len(tags_list)):
         if not tags_list[i].startswith("#"):
             tags_list[i] = '#' + tags_list[i]
-
     return tags_list if tags_list else []
 
 
@@ -49,12 +54,16 @@ async def add_tags_for_photo(tags: str, db: Session, user: User) -> List[Tag]:
     return tags_list
 
 
-async def update_tags(tags: List, db: Session, user: User) -> List[Tag]:
-    tags_ = []
-    for tag_name in tags:
-        tag = db.query(Tag).filter_by(tag_name=tag_name).first()
-        tags_.append(tag if tag else Tag(tag_name=tag_name, user_id=user.id))
-    return tags_
+async def update_tags(new_tags: str, photo_id, db: Session, user: User) -> List[Tag]:
+    new_tag_list = []
+    tags = await get_tags_by_user_id(photo_id, db, user)
+    old_tag_list = tags.tags
+    if len(old_tag_list) < 5:
+        new_tag_list = await add_tags_for_photo(new_tags, db, user)
+        old_tag_list.extend(new_tag_list)
+        if len(old_tag_list) > 5:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=messages.TOO_MANY_TAGS)
+    return old_tag_list
 
 
 async def delete_tag(tag_id: int, db: Session):

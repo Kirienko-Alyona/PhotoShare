@@ -24,13 +24,8 @@ async def add_photo(url: str,
     return photo
 
 
-async def get_photos(tag_name: str,
-                    offset: int,
-                    limit: int,
-                    db: Session) -> Optional[List[Photo]]:
-    photos = []
-    tag_id = int
-    tag = await repository_tags.get_tag_name(tag_name, db) 
+async def get_photos(tag_name: str, db: Session) -> Optional[List[Photo]]:
+    tag = await repository_tags.get_tag_name(tag_name, db)
     photo_list = tag.photos
     return photo_list
 
@@ -78,15 +73,15 @@ async def generate_qrcode(photo_url: str):
     return {'qrcode_encode': base64.b64encode(buffer.getvalue()).decode('utf-8')}
 
 
-async def update_tags(photo_id: int,
-                      tags: TagModel,
+async def update_tags_for_photo(photo_id: int,
+                      tags: str,
                       db: Session,
                       user: User):
     photo = db.query(Photo).filter_by(id=photo_id, user_id=user.id).first()
     if not photo:
         return None
-    tags_ = await repository_tags.update_tags(tags.tags, db, user)
-    photo.tags = tags_
+    new_tags_list = await repository_tags.update_tags(tags, photo_id, db, user)
+    photo.tags = new_tags_list
     db.commit()
     db.refresh(photo)
     return photo
