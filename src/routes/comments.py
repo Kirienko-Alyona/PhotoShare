@@ -13,7 +13,13 @@ from src.services.roles import RoleAccess
 
 router = APIRouter(prefix="/comments", tags=['comments'])
 
-allowed_operation_remove = RoleAccess([Role.admin, Role.moderator])
+#CRUD
+allowed_read = RoleAccess([Role.admin, Role.moderator, Role.user])
+allowed_create = RoleAccess([Role.admin, Role.moderator, Role.user])
+allowed_update = RoleAccess([Role.admin, Role.moderator, Role.user])
+allowed_delete = RoleAccess([Role.admin, Role.moderator])
+
+#allowed_operation_remove = RoleAccess([Role.admin, Role.moderator])
 
 
 @router.post("/", response_model=CommentResponse, name="Create comment to photo", status_code=status.HTTP_201_CREATED)
@@ -45,7 +51,7 @@ async def update_comment(body: CommentUpdateModel, comment_id: int = Path(ge=1),
 
 
 @router.delete("/{comment_id}", name="Delete comment by id", status_code=status.HTTP_204_NO_CONTENT,
-               dependencies=[Depends(allowed_operation_remove)])
+               dependencies=[Depends(allowed_delete)])
 async def remove_comment(comment_id: int = Path(ge=1), db: Session = Depends(get_db),
                          _: User = Depends(auth_service.get_current_user)):
     delete_count = await repository_comments.remove_comment(comment_id, db)

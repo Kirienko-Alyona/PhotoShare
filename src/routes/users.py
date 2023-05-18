@@ -14,12 +14,18 @@ from src.conf.config import settings
 from src.schemas.users import UserDb, UserUpdateModel
 from src.services.photos import upload_photo
 from src.conf import messages
+from src.services.roles import RoleAccess
 
 router = APIRouter(prefix="/users", tags=["users"])
 
+allowed_read = RoleAccess([Role.admin, Role.moderator, Role.user])
+allowed_create = RoleAccess([Role.admin, Role.moderator, Role.user])
+allowed_update = RoleAccess([Role.admin, Role.moderator, Role.user])
+allowed_delete = RoleAccess([Role.admin, Role.moderator, Role.user])
+
 
 @router.get("/", response_model=List[UserDb])
-# accsess - only for admin, moderators
+# accsess - admin, voderator, user
 async def read_users(first_name: str = None, 
                      username: str = None, 
                      email: str = None, 
@@ -52,7 +58,7 @@ async def read_users(first_name: str = None,
 
 
 @router.get("/{user_id}", response_model=UserDb)
-# accsess - only for admin, moderators
+# accsess - admin, voderator, user
 async def read_user_by_id(user_id: int = Path(ge=1), 
                      db: Session = Depends(get_db), 
                      _: User = Depends(auth_service.get_current_user)):
@@ -65,7 +71,7 @@ async def read_user_by_id(user_id: int = Path(ge=1),
 
 
 @router.get("/me/", response_model=UserDb)
-# accsess - only for authenticated users
+# accsess -  admin, voderator, user
 async def read_user_me(current_user: User = Depends(auth_service.get_current_user),
                         db: Session = Depends(get_db)):
     quantity_photos = await repository_users.quantity_photo_by_users(current_user, db)
