@@ -22,7 +22,7 @@ allowed_remove_user_rate = RoleAccess([Role.admin, Role.moderator])
              status_code=status.HTTP_201_CREATED, dependencies=[Depends(allowed_set_rate)])
 async def create_rate(body: RateModel, db: Session = Depends(get_db),
                       current_user: User = Depends(auth_service.get_current_user)):
-    photo = await repository_photos.get_photo_by_id(body.photo_id, db, current_user)
+    photo = await repository_photos.get_photo_by_id_oper(body.photo_id, db)
     if photo is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.PHOTO_NOT_FOUND)
     if photo.user_id == current_user.id:
