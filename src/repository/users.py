@@ -8,7 +8,7 @@ from src.database.models import User, Photo
 from src.schemas.users import UserModel, UserUpdateModel
 import src.services.auth as auth
 
-async def get_users(dict_values: dict, limit: int, offset: int, db: Session) -> Optional[List[User]]:    
+async def get_users(dict_values: dict, limit: int, offset: int, db: Session) -> Optional[List[User]]:
 
     # if not input params - returned all list users
     # else - search by parametrs: first_name, username, email, created_at, updated_at, avatar, roles, birthday - returned list contacts
@@ -132,3 +132,13 @@ async def block_token(token: str, db: Session):
     timedelta = expire - int(datetime.now().timestamp())
     await client_redis.set(f'user_token:{email}', token, timedelta)
 
+
+async def ban_user(user_id: int, db: Session) -> Optional[User]:
+    user = db.query(User).filter_by(id=user_id).first()
+    if user:
+        user.active = False
+        user.refresh_token = None
+        db.commit()
+        db.refresh(user)
+        await client_redis.delete(f'user:{user.email}')
+    return user

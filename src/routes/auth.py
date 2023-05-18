@@ -37,6 +37,8 @@ async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=messages.EMAIL_NOT_CONFIRMED)
     if not auth_service.verify_password(body.password, user.password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=messages.INVALID_PASSWORD)
+    if not user.active:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=messages.FORBIDDEN)
 
     access_token: str = await auth_service.create_access_token(data={'sub': user.email})
     refresh_token: str = await auth_service.create_refresh_token(data={'sub': user.email})
