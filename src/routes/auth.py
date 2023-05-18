@@ -3,16 +3,19 @@ from fastapi.security import OAuth2PasswordRequestForm, HTTPAuthorizationCredent
 from sqlalchemy.orm import Session
 
 from src.database.db import get_db
+from src.database.models import Role
 from src.schemas.users import UserModel, UserResponse, TokenModel
 from src.schemas.email import RequestEmail
 from src.repository import users as repository_users
 from src.services.auth import auth_service
+from src.services.roles import RoleAccess
 from src.services.email import send_email
 from src.conf import messages
 
 
 router = APIRouter(prefix='/auth', tags=['auth'])
 security = HTTPBearer()
+allowed_read = RoleAccess([Role.admin, Role.moderator, Role.user])
 
 
 @router.post('/login', response_model=TokenModel)
@@ -147,3 +150,12 @@ async def confirmed_email(token: str, db: Session = Depends(get_db)) -> dict:
         return {'message': messages.YOUR_EMAIL_IS_ALREADY_CONFIRMED}
     await repository_users.confirmed_email(email, db)
     return {'message': messages.EMAIL_CONFIRMED}
+
+
+@router.get("/logout", dependencies=[Depends(allowed_read)], status_code=status.HTTP_200_OK)
+async def logout(credentials: HTTPAuthorizationCredentials = Security(security),
+                 db: Session = Depends(get_db)):
+    token = credentials.credentials
+    await repository_users.block_token(token, db)
+    return {"detail": messages.EXIT_COMPLETED_SUCCESSFULLY}
+
