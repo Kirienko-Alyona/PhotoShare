@@ -14,22 +14,22 @@ from src.services.roles import RoleAccess
 router = APIRouter(prefix="/comments", tags=['comments'])
 
 #CRUD
+allowed_create = RoleAccess([Role.admin, Role.user])
 allowed_read = RoleAccess([Role.admin, Role.moderator, Role.user])
-allowed_create = RoleAccess([Role.admin, Role.moderator, Role.user])
-allowed_update = RoleAccess([Role.admin, Role.moderator, Role.user])
-allowed_delete = RoleAccess([Role.admin, Role.moderator])
+allowed_update = RoleAccess([Role.admin, Role.user])
+allowed_delete = RoleAccess([Role.admin, Role.moderator, Role.user])
 
 #allowed_operation_remove = RoleAccess([Role.admin, Role.moderator])
 
 
-@router.post("/", response_model=CommentResponse, name="Create comment to photo", status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=CommentResponse, name="Create comment to photo", status_code=status.HTTP_201_CREATED, dependencies=[Depends(allowed_create)])
 async def create_comment(body: CommentModel, db: Session = Depends(get_db),
                          current_user: User = Depends(auth_service.get_current_user)):
     comment = await repository_comments.add_comment(body, db, current_user)
     return comment
 
 
-@router.get("/{comment_id}", response_model=CommentResponse, name="Return comment by id")
+@router.get("/{comment_id}", response_model=CommentResponse, name="Return comment by id", dependencies=[Depends(allowed_read)])
 async def get_comment(comment_id: int = Path(ge=1), db: Session = Depends(get_db),
                       _: User = Depends(auth_service.get_current_user)):
     comment = await repository_comments.get_comment_by_id(comment_id, db)
@@ -38,7 +38,16 @@ async def get_comment(comment_id: int = Path(ge=1), db: Session = Depends(get_db
     return comment
 
 
-@router.put("/{comment_id}", name="Update comment by id", response_model=CommentResponse)
+@router.get("/by_photo/{photo_id}", response_model=List[CommentResponse], name="Return all comments for photo", dependencies=[Depends(allowed_read)])
+async def get_comments_by_photo(photo_id: int, db: Session = Depends(get_db),
+                                  _: User = Depends(auth_service.get_current_user)):
+    comments = await repository_comments.get_comments_by_photo(photo_id, db)
+    if comments is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
+    return comments
+
+
+@router.put("/{comment_id}", name="Update comment by id", response_model=CommentResponse, dependencies=[Depends(allowed_update)])
 async def update_comment(body: CommentUpdateModel, comment_id: int = Path(ge=1), db: Session = Depends(get_db),
                          current_user: User = Depends(auth_service.get_current_user)):
     comment = await repository_comments.get_comment_by_id(comment_id, db)
@@ -58,12 +67,3 @@ async def remove_comment(comment_id: int = Path(ge=1), db: Session = Depends(get
     if delete_count == 0:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
     return None
-
-
-@router.get("/by_photo/{photo_id}", response_model=List[CommentResponse], name="Return all comments for photo")
-async def get_comments_by_photo(photo_id: int, db: Session = Depends(get_db),
-                                  _: User = Depends(auth_service.get_current_user)):
-    comments = await repository_comments.get_comments_by_photo(photo_id, db)
-    if comments is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
-    return comments
