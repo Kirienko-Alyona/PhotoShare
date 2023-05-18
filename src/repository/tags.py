@@ -1,3 +1,4 @@
+import re
 from typing import Type, List
 
 from sqlalchemy.orm import Session
@@ -9,21 +10,32 @@ async def get_tags(db: Session) -> List[Type[Tag]]:
     return db.query(Tag).all()
 
 
-def handler_tags(tags: List):
-    tags_ = tags[0].split(",")
-    return tags_ if tags_[0] else []
+def handler_tags(tags: str):
+    tags_list = re.search(r'\w+', tags)
+    return tags_list if tags_list else []
 
 
-async def add_tags(tags: List, db: Session, user: User) -> List[Tag]:
-    tags_ = []
+# async def add_tags(tags: List, db: Session, user: User) -> List[Tag]:
+#     tags_ = []
+#     tags = handler_tags(tags)
+#     for i, tag_name in enumerate(tags):
+#         if i < 5:
+#             tag = db.query(Tag).filter_by(tag_name=tag_name).first()
+#             tags_.append(tag if tag else Tag(tag_name=tag_name, user_id=user.id))
+#         else:
+#             break
+#     return tags_
+
+async def add_tags(tags: str, db: Session, user: User) -> List[Tag]:
+    tags_list = []
     tags = handler_tags(tags)
     for i, tag_name in enumerate(tags):
         if i < 5:
             tag = db.query(Tag).filter_by(tag_name=tag_name).first()
-            tags_.append(tag if tag else Tag(tag_name=tag_name, user_id=user.id))
+            tags_list.append(tag if tag else Tag(tag_name=tag_name, user_id=user.id))
         else:
             break
-    return tags_
+    return tags_list
 
 
 async def update_tags(tags: List, db: Session, user: User) -> List[Tag]:

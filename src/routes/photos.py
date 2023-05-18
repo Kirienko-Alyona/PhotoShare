@@ -25,7 +25,7 @@ allowed_delete = RoleAccess([Role.admin, Role.moderator, Role.user])
 # accsess - admin, authenticated users
 async def create_photo(photo: UploadFile = File(),
                        description: str | None = None,
-                       tags: List | None = None,
+                       tags: str = None,
                        db: Session = Depends(get_db),
                        current_user: User = Depends(auth_service.get_current_user)):
     url, public_id = upload_photo(photo)

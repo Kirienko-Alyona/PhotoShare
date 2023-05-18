@@ -17,12 +17,7 @@ async def add_photo(url: str,
                     db: Session,
                     user: User):
     tags_ = await repository_tags.add_tags(tags, db, user)
-    photo = Photo(
-        url_photo=url,
-        cloud_public_id=public_id,
-        description=description,
-        tags=tags_,
-        user_id=user.id)
+    photo = Photo(url_photo=url, cloud_public_id=public_id, description=description, tags = tags_, user_id=user.id)  #tags=tags_,
     db.add(photo)
     db.commit()
     db.refresh(photo)
