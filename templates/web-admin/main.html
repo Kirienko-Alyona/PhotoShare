@@ -35,16 +35,26 @@
                   Enter a first name
                 </div>
               </div>
-              <div class="col-md-6">
-                <label for="last_name" class="control-label"><span style="font-weight:bold">Last name</span></label>
-                <input type="text" class="form-control" id="last_name" name="last_name" autocomplete="off" value="">
-              </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                  <label for="username" class="control-label"><span style="font-weight:bold">Last name</span></label>
+                  <input type="text" class="form-control" id="username" name="username" autocomplete="off" value="">
+                </div>
             </div>
             <div class="row">
               <div class="col-md-4">
                 <label for="birthday" class="control-label"><span style="font-weight:bold">Birthday</span></label>
                 <input type="date" class="form-control" id="birthday" name="birthday" value="">
               </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4">
+                <input type="text" class="form-control" id="roles" name="roles" value="">
+                <label for="roles" class="control-label"><span style="font-weight:bold">Roles</span></label>
+              </div>
+            </div>
+            <div class="row">
               <div class="col-md-8">
                 <label for="email" class="control-label"><span style="font-weight:bold">Email</span></label>
                 <input type="email" class="form-control" id="email" name="email" autocomplete="off" value="">
@@ -52,15 +62,8 @@
             </div>
             <div class="row">
               <div class="col-md-12">
-                <label for="phones" class="control-label"><span style="font-weight:bold">Phones</span></label>
-                <input type="text" class="form-control" id="phones" name="phones"
-                      autocomplete="off" value="" oninput="numberOnly(this)">
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-12">
-                <label for="address" class="control-label"><span style="font-weight:bold">Address</span></label>
-                <input type="text" class="form-control" id="address" name="address" autocomplete="off" value="">
+                <label for="avatar" class="control-label"><span style="font-weight:bold">Avatar</span></label>
+                <input type="text" class="form-control" id="avatar" name="avatar" autocomplete="off" value="">
               </div>
             </div>
           </div>
@@ -96,70 +99,6 @@
     </div>
     <!-- End Modal for deleting a user-->
 
-    <div class="container">
-      <div class="row mb-3">
-        <div class="col-6">
-          <h3>Додати контакт</h3>
-          <ul class="list-group" id="user"></ul>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-6">
-          <form id="userCreate">
-            <div class="mb-3">
-              <label for="name" class="form-label"
-                >Введіть ім'я контакта</label
-              >
-              <input
-                type="name"
-                class="form-control"
-                id="name"
-                name="name"
-              />
-              <label for="surname" class="form-label"
-                >Введіть прізвище контакта</label
-              >
-              <input
-                type="surname"
-                class="form-control"
-                id="surname"
-                name="surname"
-              />
-              <label for="email" class="form-label"
-                >Введіть email контакта</label
-              >
-              <input
-                type="email"
-                class="form-control"
-                id="email"
-                name="email"
-                placeholder="name@example.com"
-              />
-              <label for="phone" class="form-label"
-              >Введіть телефон контакта</label
-            >
-            <input
-              type="phone"
-              class="form-control"
-              id="phone"
-              name="phone"
-              placeholder="+38(068)-123-45-67"
-            />
-            <label for="email" class="form-label"
-            >Введіть день народження контакта</label
-          >
-          <input
-            type="born_date"
-            class="form-control"
-            id="born_date"
-            name="born_date"
-            placeholder="2023-03-29"
-          />
-            </div>
-            <button type="submit" class="btn btn-primary">Створити</button>
-          </form>
-        </div>
-      </div>
       <table id="userlist" class="table table-striped">
        
       </table>

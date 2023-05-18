@@ -1,9 +1,12 @@
 token = localStorage.getItem('accessToken')
 
 async function editUser(user_id) {
+  const first_name = document.getElementById("first_name").value;
+  const username = document.getElementById("username").value;
+  const email = document.getElementById("email").value;
+  const avatar = document.getElementById("avatar").value;
   const birthday = document.getElementById("birthday").value;
-  const last_name = document.getElementById("last_name").value;
-  const address = document.getElementById("address").value;
+  const roles = document.getElementById("roles").value;
 
   const token = localStorage.getItem('accessToken');
 
@@ -16,8 +19,11 @@ async function editUser(user_id) {
     },
     body: JSON.stringify({
       first_name: document.getElementById("first_name").value,
-      birthday: birthday ? birthday : null,
+      username: document.getElementById("username").value,
       email: document.getElementById("email").value,
+      avatar: document.getElementById("avatar").value,
+      birthday: document.getElementById("birthday").value,
+      roles: document.getElementById("roles").value
     })
   });
   if (response.ok === true) {
@@ -82,19 +88,22 @@ async function EditUserShow(user_id) {
   const modal = new bootstrap.Modal(modal_form);
   if (user_id === "") {
     modal_form.querySelector("#first_name").value = "";
-    modal_form.querySelector("#last_name").value = "";
-    modal_form.querySelector("#birthday").value = "";
+    modal_form.querySelector("#username").value = "";
     modal_form.querySelector("#email").value = "";
-    modal_form.querySelector("#phones").value = "";
-    modal_form.querySelector("#address").value = "";
+    modal_form.querySelector("#avatar").value = "";
+    modal_form.querySelector("#birthday").value = "";
+    modal_form.querySelector("#role").value = "";
   }
   else{
     const response = await getUser(user_id);
     if (response.ok === true) {
       const user = await response.json();
-      modal_form.querySelector("#first_name").value = user.first_name;
-      modal_form.querySelector("#birthday").value = user.birthday;
-      modal_form.querySelector("#email").value = user.email;
+      document.getElementById("first_name").value = user.first_name;
+      document.getElementById("username").value = user.username;
+      document.getElementById("email").value = user.email;
+      document.getElementById("avatar").value = user.avatar;
+      document.getElementById("birthday").value = user.birthday;
+      document.getElementById("roles").value = user.roles;
     } else {
       const error = await response.json();
       alert(error.detail);
@@ -131,7 +140,7 @@ function new_table_row(user) {
   tr.append(td);
   td = document.createElement("td");
   td.className = "text-start";
-  td.innerHTML = user.full_name;
+  td.innerHTML = user.username;
   tr.append(td);
   td = document.createElement("td");
   td.className = "text-start";
@@ -205,11 +214,9 @@ window.addEventListener('load', function(){
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
-      name: userCreate.name.value,
-      surname: userCreate.surname.value,
+      username: userCreate.username.value,
       email: userCreate.email.value,
-      phone: userCreate.phone.value,
-      born_date: userCreate.born_date.value
+      password: userCreate.password.value
     }),
   })
   if (response.status === 201) {
