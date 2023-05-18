@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from src.conf.allowed_operation import allowed_operation_create, allowed_operation_update, allowed_operation_delete
 import src.conf.messages as messages
 from src.database.db import get_db
 from src.database.models import User, Role

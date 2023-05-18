@@ -18,11 +18,15 @@ async def get_transformation_by_id(trans_id, db: Session) -> PhotoTransformation
     return db.query(PhotoTransformation).get(trans_id)
 
 
-async def get_photo_user_id(photo_id: int, db: Session) -> int:  # поки Микола не зробе
+async def get_photo_user_id(photo_id: int, db: Session) -> int:  # waiting_for_realization_from_Mykola
     return db.query(Photo.user_id).filter_by(id=photo_id).one()[0]
 
 
-async def get_photo_public_id(photo_id: int, db: Session) -> str:  # поки Микола не зробе
+# async def get_photo_user_id_by_trans_id(trans_id: int, db: Session) -> int:
+#     return db.query(Photo.user_id).select_from(PhotoTransformation).join(Photo).filter_by(trans_id=trans_id).one()[0]
+
+
+async def get_photo_public_id(photo_id: int, db: Session) -> str:  # waiting_for_realization_from_Mykola
     return db.query(Photo.cloud_public_id).filter_by(id=photo_id).one()[0]
 
 
