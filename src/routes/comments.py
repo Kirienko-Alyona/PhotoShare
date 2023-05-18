@@ -48,10 +48,10 @@ async def update_comment(body: CommentUpdateModel, comment_id: int = Path(ge=1),
                dependencies=[Depends(allowed_operation_remove)])
 async def remove_comment(comment_id: int = Path(ge=1), db: Session = Depends(get_db),
                          _: User = Depends(auth_service.get_current_user)):
-    comment = await repository_comments.remove_comment(comment_id, db)
-    if comment is None:
+    delete_count = await repository_comments.remove_comment(comment_id, db)
+    if delete_count == 0:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
-    return comment
+    return None
 
 
 @router.get("/by_photo/{photo_id}", response_model=List[CommentResponse], name="Return all comments for photo")

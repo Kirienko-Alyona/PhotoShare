@@ -1,11 +1,10 @@
 from typing import List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class TagModel(BaseModel):
-    tags: List
-    photo_id: int
+    tags: List = Field(max_items=5)
 
 
 class TagResponse(BaseModel):

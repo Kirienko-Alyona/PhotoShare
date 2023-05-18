@@ -6,11 +6,23 @@ import qrcode as qrcode
 from sqlalchemy.orm import Session
 
 from src.database.models import User, Photo, Tag
+from src.repository import tags as repository_tags
+from src.schemas.tags import TagModel
 
 
-async def add_photo(url: str, public_id: str, description: str, db: Session, user: User):
-
-    photo = Photo(url_photo=url, cloud_public_id=public_id, description=description, user_id=user.id)
+async def add_photo(url: str,
+                    public_id: str,
+                    description: str,
+                    tags: List,
+                    db: Session,
+                    user: User):
+    tags_ = await repository_tags.add_tags(tags, db, user)
+    photo = Photo(
+        url_photo=url,
+        cloud_public_id=public_id,
+        description=description,
+        tags=tags_,
+        user_id=user.id)
     db.add(photo)
     db.commit()
     db.refresh(photo)
@@ -66,3 +78,31 @@ async def generate_qrcode(photo_url: str):
     buffer = io.BytesIO()
     img.save(buffer)
     return {'qrcode_encode': base64.b64encode(buffer.getvalue()).decode('utf-8')}
+
+
+async def update_tags(photo_id: int,
+                      tags: TagModel,
+                      db: Session,
+                      user: User):
+    photo = db.query(Photo).filter_by(id=photo_id, user_id=user.id).first()
+    if not photo:
+        return None
+    tags_ = await repository_tags.update_tags(tags.tags, db, user)
+    photo.tags = tags_
+    db.commit()
+    db.refresh(photo)
+    return photo
+
+
+async def untach_tag(photo_id: int,
+                     tag_name: str,
+                     db: Session,
+                     user: User):
+    photo = db. query(Photo).filter_by(id=photo_id, user_id=user.id).first()
+    if not photo:
+        return None
+    tags = photo.tags
+    [photo.tags.remove(tag_) for tag_ in tags if tag_name in tag_.tag_name]
+    db.commit()
+    db.refresh(photo)
+    return photo
