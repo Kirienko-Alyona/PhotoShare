@@ -29,13 +29,10 @@ async def get_photos(tag_name: str,
                     limit: int,
                     db: Session) -> Optional[List[Photo]]:
     photos = []
-    tags_list = await repository_tags.get_tags(tag_name, limit, offset, db) 
-    for i in range(len(tags_list)):
-        tag_id = tags_list[i].id
-        photo_id, tag_id = db.query(photo_m2m_tag).filter(tag_id == tag_id).first()
-        photo = await get_photo_by_id_oper(photo_id, db)
-        photos.append(photo)
-    return photos
+    tag_id = int
+    tag = await repository_tags.get_tag_name(tag_name, db) 
+    photo_list = tag.photos
+    return photo_list
 
 
 async def get_photo_by_id(photo_id: int, db: Session, user: User):

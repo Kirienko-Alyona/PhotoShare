@@ -47,7 +47,7 @@ async def get_photos(skip: int = 0, limit: int = Query(default=10, ge=1, le=50),
                      tag_name: Optional[str] = Query(default=None),
                      user: User = Depends(auth_service.get_current_user),
                      db: Session = Depends(get_db)):
-    photos = await repository_photos.get_photos({'tag_name': tag_name},
+    photos = await repository_photos.get_photos(tag_name,
                                                 skip,
                                                 limit,
                                                 db)

@@ -7,16 +7,8 @@ from src.database.models import Tag, User
 from src.conf import messages
 
 
-async def get_tags(dict_values: dict, limit: int, offset: int, db: Session) -> List[Type[Tag]]:
-    # if not input params - returned all list tags
-    # else - search by parametrs: id, tag_name, user.id - returned list tags
-    tags = db.query(Tag)
-    for key, value in dict_values.items():
-        if value != None:
-            attr = getattr(Tag, key)
-            tags = tags.filter(attr.contains(value))
-    tags = tags.limit(limit).offset(offset).all()
-    return tags
+async def get_tags(db: Session) -> List[Type[Tag]]:
+    return db.query(Tag).all()
 
 
 def handler_tags(tags: str) -> List[Type[Tag]]:
@@ -29,7 +21,8 @@ def handler_tags(tags: str) -> List[Type[Tag]]:
 
 
 async def get_tag_name(tag_name: str, db: Session):
-    tag = db.query(Tag).filter(Tag.tag_name==tag_name).first()
+    attr = getattr(Tag, 'tag_name')
+    tag = db.query(Tag).filter(attr.contains(tag_name)).first()
     return tag
     
     
