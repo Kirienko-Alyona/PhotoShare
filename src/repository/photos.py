@@ -46,6 +46,11 @@ async def get_photo_by_id(photo_id: int, db: Session, user: User):
     return db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).first()
 
 
+# operational function for Vadym and Yuriy
+async def get_photo_by_id_oper(photo_id: int, db: Session):
+    return db.query(Photo).filter(Photo.id == photo_id).first()
+
+
 async def description_update(new_description: str,
                              photo_id: int,
                              db: Session,
