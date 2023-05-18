@@ -37,7 +37,7 @@ async def add_tags_for_photo(tags: str, db: Session, user: User) -> List[Tag]:
     tags_list = []
     tags_ = handler_tags(tags)
     if len(tags_) > 5:
-        raise HTTPException(status_code=status.HTTP_400_BAD_RAQUEST, detail=messages.TOO_MANY_TAGS)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=messages.TOO_MANY_TAGS)
     
     for tag_name in tags_:
         tag = await get_tag_name(tag_name, db)
