@@ -21,7 +21,7 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     first_name = Column(String, nullable=True)
     # last_name = Column(String, nullable=True)
-    username = Column(String(30), nullable=False)
+    username = Column(String(30), nullable=False, unique=True, index=True)
     email = Column(String(50), nullable=False, unique=True, index=True)
     password = Column(String(255), nullable=False)
     # phone = Column(String(18), nullable=True)
@@ -33,7 +33,6 @@ class User(Base):
     active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-    __table_args__ = (UniqueConstraint('username', 'email', 'id', name='unique_user_username_email_id'),)
 
 
 photo_m2m_tag = Table(
@@ -58,10 +57,9 @@ class Photo(Base):
 class Tag(Base):
     __tablename__ = 'tags'
     id = Column(Integer, primary_key=True)
-    tag_name = Column(String, nullable=True)
+    tag_name = Column(String, nullable=True, unique=True)
     photos = relationship('Photo', secondary=photo_m2m_tag, back_populates='tags')
     user_id = Column(ForeignKey('users.id'), default=None)
-    __table_args__ = (UniqueConstraint('tag_name', name='unique_tags_name'),)
 
 
 class Comment(Base):
@@ -80,11 +78,12 @@ class PhotoFilter(Base):
     __tablename__ = 'photo_filters'
     id = Column(Integer, primary_key=True)
     user_id = Column(ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
-    name = Column(String(128), nullable=False, unique=True, index=True)
+    name = Column(String(128), nullable=False, index=True)
     description = Column(String(255), nullable=True)
     preset = Column(JSONB, nullable=False)  # [{'radius': "max"}, {'width': 200, 'crop': "scale"},]
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    __table_args__ = (UniqueConstraint('name', 'user_id', name='unique_name'),)
 
 
 class PhotoTransformation(Base):
