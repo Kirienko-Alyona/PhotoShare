@@ -29,7 +29,7 @@ allowed_read_webadmin = RoleAccess([Role.admin, Role.moderator]) #--> for admin-
 
 #only for admin-panel
 #---------------------------------------------------------------------------------------------
-@router.get("/", response_model=List[UserDb])
+@router.get("/", response_model=List[UserDb], dependencies=[Depends(allowed_read_webadmin)])
 # accsess - admin, мoderator
 async def read_users(first_name: str = None, 
                      username: str = None, 
@@ -60,11 +60,10 @@ async def read_users(first_name: str = None,
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
     return users
-#---------------------------------------------------------------------------------------------
 
 
-@router.get("/{user_id}", response_model=UserDb)
-# accsess - admin, мoderator, user
+@router.get("/{user_id}", response_model=UserDb, dependencies=[Depends(allowed_read_webadmin)])
+# accsess - admin, мoderator
 async def read_user_by_id(user_id: int = Path(ge=1), 
                      db: Session = Depends(get_db), 
                      _: User = Depends(auth_service.get_current_user)):
@@ -74,9 +73,10 @@ async def read_user_by_id(user_id: int = Path(ge=1),
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
     return user
+#---------------------------------------------------------------------------------------------
 
 
-@router.get("/me/", response_model=UserDb)
+@router.get("/me/", response_model=UserDb, dependencies=[Depends(allowed_read)])
 # accsess -  admin, мoderator, user
 async def read_user_me(current_user: User = Depends(auth_service.get_current_user),
                         db: Session = Depends(get_db)):
@@ -95,7 +95,7 @@ async def read_user_me(current_user: User = Depends(auth_service.get_current_use
     return current_user
 
 
-@router.put('/{user_id}', response_model=UserDb)
+@router.put('/{user_id}', response_model=UserDb, dependencies=[Depends(allowed_update)])
 # accsess - only for admin, moderators and  user-owner
 async def user_edit(body: UserUpdateModel,
                     user_id: int,
@@ -107,7 +107,7 @@ async def user_edit(body: UserUpdateModel,
     return user
 
 
-@router.patch('/avatar', response_model=UserDb)
+@router.patch('/avatar', response_model=UserDb, dependencies=[Depends(allowed_update)])
 # accsess - only for admin, moderators and  user-owner
 async def update_avatar_user(file: UploadFile = File(),
                              current_user: User = Depends(auth_service.get_current_user),
