@@ -15,7 +15,7 @@ class PhotoResponse(BaseModel):
     url_photo: HttpUrl
     description: str | None = Field(
         default=None, title="The description of the Photo", max_length=constants.MAX_LENGTH_PHOTO_DESCRIPTION)
-    tags: str #Optional[List[TagResponse]]
+    tags: Optional[List[TagResponse]]
 
     class Config:
         orm_mode = True

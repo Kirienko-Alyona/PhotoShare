@@ -25,3 +25,4 @@ COULD_NOT_FIND_FOTO_TRANSFORMATION_BY_ID = "Could not find photo transformation 
 DUPLICATE_RATING = "You have already rated this photo"
 BAD_REQUEST = "Bad request"
 EXIT_COMPLETED_SUCCESSFULLY = "Exit completed successfully"
+TOO_MANY_TAGS = "Too many tags"
