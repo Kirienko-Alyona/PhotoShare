@@ -19,7 +19,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.get("/", response_model=List[UserDb])
-# доступ - адмін, модератор
+# accsess - only for admin, moderators
 async def read_users(first_name: str = None, 
                      username: str = None, 
                      email: str = None, 
@@ -52,7 +52,7 @@ async def read_users(first_name: str = None,
 
 
 @router.get("/{user_id}", response_model=UserDb)
-# доступ - адмін, модератор
+# accsess - only for admin, moderators
 async def read_user_by_id(user_id: int = Path(ge=1), 
                      db: Session = Depends(get_db), 
                      _: User = Depends(auth_service.get_current_user)):
@@ -65,7 +65,7 @@ async def read_user_by_id(user_id: int = Path(ge=1),
 
 
 @router.get("/me/", response_model=UserDb)
-# доступ - усі зареєстровані
+# accsess - only for authenticated users
 async def read_user_me(current_user: User = Depends(auth_service.get_current_user),
                         db: Session = Depends(get_db)):
     quantity_photos = await repository_users.quantity_photo_by_users(current_user, db)
@@ -84,7 +84,7 @@ async def read_user_me(current_user: User = Depends(auth_service.get_current_use
 
 
 @router.put('/{user_id}', response_model=UserDb)
-# доступ - адмін, модератор, власник-юзер
+# accsess - only for admin, moderators and  user-owner
 async def user_edit(body: UserUpdateModel,
                     user_id: int,
                     current_user: User = Depends(auth_service.get_current_user),
@@ -96,7 +96,7 @@ async def user_edit(body: UserUpdateModel,
 
 
 @router.patch('/avatar', response_model=UserDb)
-# доступ - адмін, модератор, власник-юзер
+# accsess - only for admin, moderators and  user-owner
 async def update_avatar_user(file: UploadFile = File(),
                              current_user: User = Depends(auth_service.get_current_user),
                              db: Session = Depends(get_db)):
