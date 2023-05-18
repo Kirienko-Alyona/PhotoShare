@@ -15,7 +15,7 @@ async def add_rate(body: RateModel, db: Session, user: User):
 
 
 async def get_rate_photo_by_user(photo_id: int, db: Session, user: User):
-    rate = db.query(Rate).filter(Photo.id == photo_id, User.id == user.id).first()
+    rate = db.query(Rate).filter(Rate.photo_id == photo_id, Rate.user_id == user.id).first()
     return rate
 
 
