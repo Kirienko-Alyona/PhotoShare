@@ -15,6 +15,7 @@ router = APIRouter(prefix='/photos', tags=['photos'])
 
 
 @router.post('/', response_model=PhotoResponse, name='Create photo', status_code=status.HTTP_201_CREATED)
+# accsess - only for authenticated users
 async def create_photo(photo: UploadFile = File(),
                        description: str | None = None,
                        tags: List | None = None,
@@ -26,6 +27,7 @@ async def create_photo(photo: UploadFile = File(),
 
 
 @router.get('/', response_model=list[PhotoResponse], name="Get photos by request ")
+# accsess - only for authenticated users
 async def get_photos(skip: int = 0, limit: int = Query(default=10, ge=1, le=50),
                      tag_name: Optional[str] = Query(default=None),
                      user: User = Depends(auth_service.get_current_user),
@@ -41,6 +43,7 @@ async def get_photos(skip: int = 0, limit: int = Query(default=10, ge=1, le=50),
 
 
 @router.get('/{photo_id}', response_model=PhotoResponse, name="Get photos by id ")
+# accsess - only for authenticated users
 async def get_photo_id(photo_id: int,
                        db: Session = Depends(get_db),
                        user: User = Depends(auth_service.get_current_user)):
@@ -52,6 +55,7 @@ async def get_photo_id(photo_id: int,
 
 
 @router.patch('/{photo_id}', response_model=PhotoResponse, name="Update photo's description")
+# accsess - only for admin, moderators and  user-owner
 async def photo_description_update(
         new_description: str,
         photo_id: int,
@@ -68,6 +72,7 @@ async def photo_description_update(
 
 
 @router.delete('/{photo_id}', status_code=status.HTTP_204_NO_CONTENT)
+# accsess - only for admin, moderators and  user-owner
 async def photo_remove(
         photo_id: int,
         db: Session = Depends(get_db),
@@ -82,12 +87,14 @@ async def photo_remove(
 
 @router.post('/qrcode/', response_model=PhotoQRCodeResponse, name='Generate QRCode by url',
              status_code=status.HTTP_201_CREATED)
+# accsess - only for authenticated users
 async def generate_qrcode(photo_url: str, _: User = Depends(auth_service.get_current_user)):
     qrcode_encode = await repository_photos.generate_qrcode(photo_url)
     return qrcode_encode
 
 
 @router.put("/{photo_id}", response_model=PhotoResponse, status_code=status.HTTP_200_OK)
+# accsess - only for admin, moderators and  user-owner
 async def update_tags_by_photo(photo_id: int,
                                tags: TagModel = Depends(),
                                db: Session = Depends(get_db),
@@ -99,6 +106,7 @@ async def update_tags_by_photo(photo_id: int,
 
 
 @router.patch("/untach/{photo_id}", response_model=PhotoResponse, status_code=status.HTTP_200_OK)
+# accsess - only for admin, moderators and  user-owner
 async def untach_tag_photo(photo_id: int,
                            tag_name: str,
                            db: Session = Depends(get_db),
