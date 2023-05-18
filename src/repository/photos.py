@@ -34,24 +34,9 @@ async def get_photo_by_id(photo_id: int, db: Session, user: User):
     return db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).first()
 
 
-# operational function for Vadym and Yuriy
+# operational function for backend
 async def get_photo_by_id_oper(photo_id: int, db: Session):
     return db.query(Photo).filter(Photo.id == photo_id).first()
-
-
-async def description_update(new_description: str,
-                             photo_id: int,
-                             db: Session,
-                             user: User):
-    photo = await get_photo_by_id(photo_id, db, user)
-    if photo:
-        count = db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).update({
-            'description': new_description
-        })
-        db.commit()
-        if count == 1:
-            return photo
-    return None
 
 
 async def delete_photo(photo_id: int,
@@ -73,15 +58,21 @@ async def generate_qrcode(photo_url: str):
     return {'qrcode_encode': base64.b64encode(buffer.getvalue()).decode('utf-8')}
 
 
-async def update_tags_for_photo(photo_id: int,
-                      tags: str,
-                      db: Session,
-                      user: User):
+async def update_tags_descriptions_for_photo(photo_id: int, 
+                                            dict_values: dict,
+                                            #  new_description: str,
+                                            #  tags: str,
+                                             db: Session,
+                                             user: User):
     photo = db.query(Photo).filter_by(id=photo_id, user_id=user.id).first()
     if not photo:
         return None
-    new_tags_list = await repository_tags.update_tags(tags, photo_id, db, user)
-    photo.tags = new_tags_list
+    for key, value in dict_values.items():
+        if key == 'tags' and value != None:
+            new_tags_list = await repository_tags.update_tags(dict_values['tags'], photo_id, db, user)
+            photo.tags = new_tags_list
+        if key == 'new_description' and value != None:    
+            photo.description = dict_values['new_description']
     db.commit()
     db.refresh(photo)
     return photo

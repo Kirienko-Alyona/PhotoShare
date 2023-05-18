@@ -5,7 +5,7 @@ from typing import Optional, List
 from src.database.db import get_db
 from src.database.models import User, Role
 from src.repository import photos as repository_photos
-from src.schemas.photos import PhotoResponse, PhotoQRCodeResponse
+from src.schemas.photos import PhotoResponse, PhotoUpdate, PhotoQRCodeResponse
 from src.schemas.tags import TagModel
 from src.services.auth import auth_service
 from src.services.photos import upload_photo
@@ -72,30 +72,19 @@ async def get_photo_id(photo_id: int,
 @router.put("/{photo_id}", response_model=PhotoResponse, status_code=status.HTTP_200_OK, dependencies=[Depends(allowed_update)])
 # accsess - admin, user-owner
 async def update_tags_by_photo(photo_id: int,
-                               tags: str,
+                               new_description: str | None = None,
+                               tags: str = None,
                                db: Session = Depends(get_db),
                                current_user: User = Depends(auth_service.get_current_user)):
-    photo = await repository_photos.update_tags_for_photo(photo_id, tags, db, current_user)
+    photo = await repository_photos.update_tags_descriptions_for_photo(
+                                photo_id, {
+                                'new_description': new_description, 
+                                'tags': tags}, 
+                                db, 
+                                current_user)
     if photo:
         return photo
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.PHOTO_NOT_FOUND)
-
-
-@router.patch('/{photo_id}', response_model=PhotoResponse, name="Update photo's description", dependencies=[Depends(allowed_update)])
-# accsess - admin,  user-owner
-async def photo_description_update(
-        new_description: str,
-        photo_id: int,
-        db: Session = Depends(get_db),
-        current_user: User = Depends(auth_service.get_current_user)
-):
-    updated_photo = await repository_photos.description_update(new_description,
-                                                               photo_id,
-                                                               db,
-                                                               current_user)
-    if updated_photo is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
-    return updated_photo
 
 
 @router.patch("/untach/{photo_id}", response_model=PhotoResponse, status_code=status.HTTP_200_OK, dependencies=[Depends(allowed_update)])
