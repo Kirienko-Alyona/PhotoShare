@@ -19,14 +19,18 @@ from src.services.roles import RoleAccess
 router = APIRouter(prefix="/users", tags=["users"])
 
 #CRUD
-allowed_create = RoleAccess([Role.admin, Role.moderator, Role.user])
+#allowed_create = RoleAccess([Role.admin, Role.moderator, Role.user]) --> in auth
 allowed_read = RoleAccess([Role.admin, Role.moderator, Role.user])
 allowed_update = RoleAccess([Role.admin, Role.moderator, Role.user])
 allowed_delete = RoleAccess([Role.admin, Role.moderator, Role.user])
 
 
+allowed_read_webadmin = RoleAccess([Role.admin, Role.moderator]) #--> for admin-panel
+
+#only for admin-panel
+#---------------------------------------------------------------------------------------------
 @router.get("/", response_model=List[UserDb])
-# accsess - admin, voderator, user
+# accsess - admin, мoderator
 async def read_users(first_name: str = None, 
                      username: str = None, 
                      email: str = None, 
@@ -56,10 +60,11 @@ async def read_users(first_name: str = None,
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
     return users
+#---------------------------------------------------------------------------------------------
 
 
 @router.get("/{user_id}", response_model=UserDb)
-# accsess - admin, voderator, user
+# accsess - admin, мoderator, user
 async def read_user_by_id(user_id: int = Path(ge=1), 
                      db: Session = Depends(get_db), 
                      _: User = Depends(auth_service.get_current_user)):
@@ -72,7 +77,7 @@ async def read_user_by_id(user_id: int = Path(ge=1),
 
 
 @router.get("/me/", response_model=UserDb)
-# accsess -  admin, voderator, user
+# accsess -  admin, мoderator, user
 async def read_user_me(current_user: User = Depends(auth_service.get_current_user),
                         db: Session = Depends(get_db)):
     quantity_photos = await repository_users.quantity_photo_by_users(current_user, db)
