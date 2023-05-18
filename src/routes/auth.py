@@ -3,16 +3,19 @@ from fastapi.security import OAuth2PasswordRequestForm, HTTPAuthorizationCredent
 from sqlalchemy.orm import Session
 
 from src.database.db import get_db
+from src.database.models import Role
 from src.schemas.users import UserModel, UserResponse, TokenModel
 from src.schemas.email import RequestEmail
 from src.repository import users as repository_users
 from src.services.auth import auth_service
+from src.services.roles import RoleAccess
 from src.services.email import send_email
 from src.conf import messages
 
 
 router = APIRouter(prefix='/auth', tags=['auth'])
 security = HTTPBearer()
+allowed_read = RoleAccess([Role.admin, Role.moderator, Role.user])
 
 
 @router.post('/login', response_model=TokenModel)
@@ -34,6 +37,28 @@ async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=messages.EMAIL_NOT_CONFIRMED)
     if not auth_service.verify_password(body.password, user.password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=messages.INVALID_PASSWORD)
+    if not user.active:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=messages.FORBIDDEN)
+
+    access_token: str = await auth_service.create_access_token(data={'sub': user.email})
+    refresh_token: str = await auth_service.create_refresh_token(data={'sub': user.email})
+    await auth_service.get_current_user(access_token, db)
+    await repository_users.update_token(user, refresh_token, db)
+    return {'access_token': access_token, 'refresh_token': refresh_token, 'token_type': 'bearer'}
+
+
+@router.post('/admin_login', response_model=TokenModel)
+async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)) -> dict:
+    user = await repository_users.get_user_by_email(body.username, db)
+
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=messages.INVALID_EMAIL)
+    if not user.confirmed:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=messages.EMAIL_NOT_CONFIRMED)
+    if not auth_service.verify_password(body.password, user.password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=messages.INVALID_PASSWORD)
+    if not (user.active and (user.roles == Role.admin)):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=messages.FORBIDDEN)
 
     access_token: str = await auth_service.create_access_token(data={'sub': user.email})
     refresh_token: str = await auth_service.create_refresh_token(data={'sub': user.email})
@@ -147,3 +172,12 @@ async def confirmed_email(token: str, db: Session = Depends(get_db)) -> dict:
         return {'message': messages.YOUR_EMAIL_IS_ALREADY_CONFIRMED}
     await repository_users.confirmed_email(email, db)
     return {'message': messages.EMAIL_CONFIRMED}
+
+
+@router.get("/logout", dependencies=[Depends(allowed_read)], status_code=status.HTTP_200_OK)
+async def logout(credentials: HTTPAuthorizationCredentials = Security(security),
+                 db: Session = Depends(get_db)):
+    token = credentials.credentials
+    await repository_users.block_token(token, db)
+    return {"detail": messages.EXIT_COMPLETED_SUCCESSFULLY}
+

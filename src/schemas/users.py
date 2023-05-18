@@ -70,3 +70,7 @@ class UserUpdateModel(BaseModel):
     # roles: Role
     birthday: date = None  # '2023-03-29'
     password: str = Field(min_length=PASSWORD_MIN_LEN, max_length=PASSWORD_MAX_LEN)
+
+
+class UserBanModel(UserDb):
+    active: bool
