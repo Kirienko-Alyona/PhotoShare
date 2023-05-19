@@ -1,3 +1,5 @@
+from typing import List, Optional
+
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 
@@ -16,9 +18,9 @@ allowed_update = RoleAccess([Role.admin, Role.moderator, Role.user])
 allowed_delete = RoleAccess([Role.admin, Role.moderator, Role.user])
 
 
-# @router.get('/', response_model=List[PhotoFilterDbModel],
-#              name='Create photo filter', status_code=status.HTTP_201_CREATED,
-#              dependencies=[Depends(allowed_create)])
+# @router.get('/', response_model=Optional[List[PhotoFilterDbModel]],
+#             name='Create photo filter', status_code=status.HTTP_201_CREATED,
+#             dependencies=[Depends(allowed_create)])
 # async def create_photo_filter(photo_filter: PhotoFilterModel,
 #                               db: Session = Depends(get_db),
 #                               user: User = Depends(auth_service.get_current_user)):
