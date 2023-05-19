@@ -20,7 +20,9 @@ allowed_update = RoleAccess([Role.admin, Role.moderator, Role.user])
 allowed_delete = RoleAccess([Role.admin, Role.moderator])
 
 
-@router.post("/", response_model=CommentResponse, name="Create comment to photo", status_code=status.HTTP_201_CREATED,
+@router.post("/", name="Create Comment To Photo", 
+             response_model=CommentResponse, 
+             status_code=status.HTTP_201_CREATED,
              dependencies=[Depends(allowed_create)])
 async def create_comment(body: CommentModel, db: Session = Depends(get_db),
                          current_user: User = Depends(auth_service.get_current_user)):
@@ -28,7 +30,8 @@ async def create_comment(body: CommentModel, db: Session = Depends(get_db),
     return comment
 
 
-@router.get("/{comment_id}", response_model=CommentResponse, name="Return comment by id",
+@router.get("/{comment_id}", name="Return Comment By Id", 
+            response_model=CommentResponse, 
             dependencies=[Depends(allowed_read)])
 async def get_comment(comment_id: int = Path(ge=1), db: Session = Depends(get_db),
                       _: User = Depends(auth_service.get_current_user)):
@@ -38,7 +41,8 @@ async def get_comment(comment_id: int = Path(ge=1), db: Session = Depends(get_db
     return comment
 
 
-@router.get("/by_photo/{photo_id}", response_model=List[CommentResponse], name="Return all comments for photo",
+@router.get("/by_photo/{photo_id}", name="Return All Comments For Photo", 
+            response_model=List[CommentResponse],
             dependencies=[Depends(allowed_read)])
 async def get_comments_by_photo(photo_id: int, db: Session = Depends(get_db),
                                 _: User = Depends(auth_service.get_current_user)):
@@ -48,7 +52,8 @@ async def get_comments_by_photo(photo_id: int, db: Session = Depends(get_db),
     return comments
 
 
-@router.put("/{comment_id}", name="Update comment by id", response_model=CommentResponse,
+@router.put("/{comment_id}", name="Update Comment By Id", 
+            response_model=CommentResponse,
             dependencies=[Depends(allowed_update)])
 async def update_comment(body: CommentUpdateModel, comment_id: int = Path(ge=1), db: Session = Depends(get_db),
                          current_user: User = Depends(auth_service.get_current_user)):
@@ -61,7 +66,8 @@ async def update_comment(body: CommentUpdateModel, comment_id: int = Path(ge=1),
     return comment
 
 
-@router.delete("/{comment_id}", name="Delete comment by id", status_code=status.HTTP_204_NO_CONTENT,
+@router.delete("/{comment_id}", name="Delete Comment By Id", 
+               status_code=status.HTTP_204_NO_CONTENT,
                dependencies=[Depends(allowed_delete)])
 async def remove_comment(comment_id: int = Path(ge=1), db: Session = Depends(get_db),
                          _: User = Depends(auth_service.get_current_user)):
