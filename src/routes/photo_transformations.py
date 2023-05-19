@@ -24,7 +24,7 @@ allowed_delete = RoleAccess([Role.admin, Role.moderator, Role.user])
 
 
 @router.get('/{photo_id}', response_model=List[PhotoTransformationModelDb],
-            name='Get photo transformations by photo id', status_code=status.HTTP_201_CREATED,
+            name='Get photo transformations by photo id',
             dependencies=[Depends(allowed_read)])
 async def get_transformed_photos(photo_id: int,
                                  db: Session = Depends(get_db),

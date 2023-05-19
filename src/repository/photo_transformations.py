@@ -1,18 +1,20 @@
-from typing import Optional, Type
+from typing import Optional, Type, List
+
+from fastapi import HTTPException, status
 
 from sqlalchemy.orm import Session
 
+import src.conf.messages as message
 from src.database.models import PhotoTransformation, Photo, Role
-# from src.repository.functions import advanced_rights_check
 from src.repository.photo_filters import get_filter_preset_by_id
 from src.schemas.photo_transformations import (
     PhotoTransformationModel, NewDescTransformationModel, TransformationModel)
 from src.services.photo_transformations import build_transformed_url
 
-# advanced_roles_create = []
-# advanced_roles_read = []
-# advanced_roles_update = [Role.admin]
-# advanced_roles_delete = [Role.admin]
+advanced_roles_create = []
+advanced_roles_read = []
+advanced_roles_update = [Role.admin]
+advanced_roles_delete = [Role.admin]
 
 
 async def get_transformation_by_id(trans_id, db: Session) -> PhotoTransformation:
@@ -27,16 +29,27 @@ async def get_photo_public_id(photo_id: int, db: Session) -> str:  # waiting_for
     return db.query(Photo.cloud_public_id).filter_by(id=photo_id).one()[0]
 
 
+async def advanced_rights_check(photo_id: int,
+                                cur_user_id: int,
+                                cur_user_role: Role,
+                                advanced_roles: List[Role],
+                                db: Session):
+    owner_id = await get_photo_user_id(photo_id, db)
+    allowed = cur_user_role in advanced_roles or owner_id == cur_user_id
+    if not allowed:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=message.FORBIDDEN)
+
+
 async def get_transformed_photos(photo_id: int, user_id: int, user_role: Role,
                                  db: Session) -> list[Type[PhotoTransformation]]:
-    # await advanced_rights_check("photos", photo_id, user_id, user_role, advanced_roles_create, db)
+    await advanced_rights_check(photo_id, user_id, user_role, advanced_roles_create, db)
     return db.query(PhotoTransformation).filter_by(photo_id=photo_id).order_by(PhotoTransformation.description).all()
 
 
 async def create_transformation_from_preset(filter_id: int, photo_id: int, description: NewDescTransformationModel,
                                             user_id: int,
                                             user_role: Role, db: Session) -> Optional[PhotoTransformation]:
-    # await advanced_rights_check("photos", photo_id, user_id, user_role, advanced_roles_create, db)
+    await advanced_rights_check(photo_id, user_id, user_role, advanced_roles_create, db)
 
     transformation = TransformationModel(preset=await get_filter_preset_by_id(filter_id, db))
 
@@ -55,7 +68,7 @@ async def create_transformation_from_preset(filter_id: int, photo_id: int, descr
 
 async def create_transformation(data: PhotoTransformationModel, user_id: int,
                                 user_role: Role, db: Session) -> Optional[PhotoTransformation]:
-    # await advanced_rights_check("photos", data.photo_id, user_id, user_role, advanced_roles_create, db)
+    await advanced_rights_check(data.photo_id, user_id, user_role, advanced_roles_create, db)
 
     public_id = await get_photo_public_id(data.photo_id, db)
     new_transformation = PhotoTransformation()
@@ -74,8 +87,8 @@ async def change_description(trans_id: int, data: NewDescTransformationModel,
                              user_id: int, user_role: Role, db: Session) -> Optional[PhotoTransformation]:
     transformation = await get_transformation_by_id(trans_id, db)
     if transformation:
-        # await advanced_rights_check("photos", transformation.photo_id, user_id, user_role,
-        #                             advanced_roles_update, db)
+        await advanced_rights_check(transformation.photo_id, user_id, user_role,
+                                    advanced_roles_update, db)
         count = db.query(PhotoTransformation).filter_by(id=trans_id).update(
             {'description': data.description}, synchronize_session="fetch")
         db.commit()
@@ -86,8 +99,8 @@ async def change_description(trans_id: int, data: NewDescTransformationModel,
 async def remove_transformation(trans_id: int, user_id: int, user_role: Role, db: Session) -> Optional[int]:
     transformation = await get_transformation_by_id(trans_id, db)
     if transformation:
-        # await advanced_rights_check("photos", transformation.photo_id, user_id, user_role,
-        #                             advanced_roles_delete, db)
+        await advanced_rights_check(transformation.photo_id, user_id, user_role,
+                                    advanced_roles_delete, db)
         db.query(PhotoTransformation).filter_by(id=trans_id).delete(synchronize_session="fetch")
         db.commit()
         return transformation.id
