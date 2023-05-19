@@ -82,7 +82,6 @@ async def untach_tag(photo_id: int,
                      tags: str,
                      db: Session,
                      user: User):
-    #old_tags = []
     photo = await get_photo_by_id(photo_id, db, user)
     if not photo:
         return None
