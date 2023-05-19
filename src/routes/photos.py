@@ -43,14 +43,10 @@ async def generate_qrcode(photo_url: str, _: User = Depends(auth_service.get_cur
 
 @router.get('/', response_model=list[PhotoResponse], name="Get photos by request ", dependencies=[Depends(allowed_read)])
 # accsess - admin, authenticated users
-async def get_photos(skip: int = 0, limit: int = Query(default=10, ge=1, le=50),
-                     tag_name: Optional[str] = Query(default=None),
+async def get_photos(tag_name: Optional[str] = Query(default=None),
                      user: User = Depends(auth_service.get_current_user),
                      db: Session = Depends(get_db)):
-    photos = await repository_photos.get_photos(tag_name,
-                                                skip,
-                                                limit,
-                                                db)
+    photos = await repository_photos.get_photos(tag_name, db)
     if len(photos) == 0:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
