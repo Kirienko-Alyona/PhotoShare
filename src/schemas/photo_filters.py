@@ -9,7 +9,7 @@ from src.schemas.photo_transformations import TransformationModel
 class PhotoFilterModel(BaseModel):
     name: str = Field(min_lenght=c.MIN_LEN_PHOTO_FILTER_NAME, max_length=c.MAX_LEN_PHOTO_FILTER_NAME)
     description: Optional[str] = Field(max_length=c.MAX_LEN_PHOTO_FILTER_DESC)
-    preset: TransformationModel
+    preset: List[Dict[str, Any]]
 
     class Config:
         schema_extra = {
