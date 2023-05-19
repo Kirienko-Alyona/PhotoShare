@@ -44,22 +44,14 @@ async def get_photo_by_id(photo_id: int, db: Session, user: User):
 async def get_photo_by_id_oper(photo_id: int, db: Session):
     return db.query(Photo).filter(Photo.id == photo_id).first()
 
-
 async def delete_photo(photo_id: int,
-                       db: Session,
-                       user: User):
+                                db: Session,
+                                user: User):
     photo = await get_photo_by_id_oper(photo_id, db)
-    role_req = db.query(User.roles).filter(User.id == user.id).first()
-    if photo:
-        user_request = db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).delete()
-        if user_request == 1:
-            db.commit()
-            return photo
-        if role_req[0] == Role.admin:
-            admin_request = db.query(Photo).filter(Photo.id == photo_id).delete()
-            if admin_request == 1:
-                db.commit()
-                return photo
+    if photo and ((photo.user_id == user.id) or (user.roles == Role.admin) or (user.roles == Role.moderator)):
+        db.query(Photo).filter(Photo.id == photo_id).delete()
+        db.commit()
+        return photo
     return None
 
 
@@ -79,7 +71,6 @@ async def update_tags_descriptions_for_photo(photo_id: int,
     role_req = db.query(User.roles).filter(User.id == user.id).first()
     if not photo:
         return None
-    print(f'User branch')
     if tags is not None:
         new_tags_list = await repository_tags.update_tags(tags, photo_id, db, user)
         photo.tags = new_tags_list
@@ -89,7 +80,6 @@ async def update_tags_descriptions_for_photo(photo_id: int,
     db.commit()
     db.refresh(photo)
     if role_req[0] == Role.admin:
-        print(role_req[0], f'Admin branch')
         if tags is not None:
             new_tags_list = await repository_tags.update_tags(tags, photo_id, db, user=Photo.user_id)
             photo.tags = new_tags_list

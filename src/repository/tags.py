@@ -61,7 +61,10 @@ async def add_tags_for_photo(tags: str, db: Session, user: User) -> List[Tag]:
 async def update_tags(new_tags: str, photo_id, db: Session, user: User) -> List[Tag]:
     new_tag_list = []
     tags = await get_tags_by_user_id(photo_id, db, user)
-    old_tag_list = tags.tags
+    try:
+        old_tag_list = tags.tags
+    except AttributeError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=messages.NOT_FOUND)
     if len(old_tag_list) < 5:
         new_tag_list = await add_tags_for_photo(new_tags, db, user)
         old_tag_list.extend(new_tag_list)
