@@ -83,7 +83,8 @@ async def update_tags_by_photo(photo_id: int,
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.PHOTO_NOT_FOUND)
 
 
-@router.patch("/untach_tag/{photo_id}", response_model=PhotoResponse, status_code=status.HTTP_200_OK, dependencies=[Depends(allowed_update)])
+@router.patch("/untach_tag/{photo_id}", response_model=PhotoResponse, status_code=status.HTTP_200_OK,
+              dependencies=[Depends(allowed_update)])
 # accsess - admin, user-owner
 async def untach_tag_photo(photo_id: int,
                            tags: str,
