@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -14,11 +16,24 @@ from src.services.roles import RoleAccess
 
 router = APIRouter(prefix="/photos/transformed", tags=['photo transformations'])
 
-#CRUD
+
 allowed_create = RoleAccess([Role.admin, Role.moderator, Role.user])
-#allowed_read = RoleAccess([Role.admin, Role.moderator, Role.user])
+allowed_read = RoleAccess([Role.admin, Role.moderator, Role.user])
 allowed_update = RoleAccess([Role.admin, Role.moderator, Role.user])
 allowed_delete = RoleAccess([Role.admin, Role.moderator, Role.user])
+
+
+@router.get('/{photo_id}', response_model=List[PhotoTransformationModelDb],
+            name='Get photo transformations by photo id',
+            dependencies=[Depends(allowed_read)])
+async def get_transformed_photos(photo_id: int,
+                                 db: Session = Depends(get_db),
+                                 user: User = Depends(auth_service.get_current_user)):
+    photos = await repository_transformations.get_transformed_photos(photo_id, user.id, user.roles, db)
+    if not photos:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
+    return photos
 
 
 @router.post('/', response_model=PhotoTransformationModelDb,
@@ -28,6 +43,20 @@ async def create_transformation(transformation: PhotoTransformationModel,
                                 db: Session = Depends(get_db),
                                 user: User = Depends(auth_service.get_current_user)):
     transformation = await repository_transformations.create_transformation(transformation, user.id, user.roles, db)
+    if transformation is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.COULD_NOT_FIND_FOTO)
+    return transformation
+
+
+@router.post('/{photo_id}', response_model=PhotoTransformationModelDb,
+             name='Create photo transformation from preset', status_code=status.HTTP_201_CREATED,
+             dependencies=[Depends(allowed_create)])
+async def create_transformation_from_preset(photo_id: int, filter_id: int, description: NewDescTransformationModel,
+                                            db: Session = Depends(get_db),
+                                            user: User = Depends(auth_service.get_current_user)):
+    transformation = await \
+        repository_transformations.create_transformation_from_preset(filter_id, photo_id, description,
+                                                                     user.id, user.roles, db)
     if transformation is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.COULD_NOT_FIND_FOTO)
     return transformation

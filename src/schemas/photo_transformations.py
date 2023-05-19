@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 
 from pydantic import BaseModel, Field, HttpUrl
 
@@ -10,7 +10,7 @@ class NewDescTransformationModel(BaseModel):
 
 
 class TransformationModel(BaseModel):
-    preset: List[dict]
+    preset: List[Dict[str, Any]]
 
     class Config:
         schema_extra = {

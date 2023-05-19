@@ -1,3 +1,5 @@
+from typing import List, Optional
+
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 
@@ -12,18 +14,18 @@ from src.services.roles import RoleAccess
 router = APIRouter(prefix="/photos/filters", tags=['photo filters'])
 
 allowed_create = RoleAccess([Role.admin, Role.moderator, Role.user])
+allowed_read = RoleAccess([Role.admin, Role.moderator, Role.user])
 allowed_update = RoleAccess([Role.admin, Role.moderator, Role.user])
 allowed_delete = RoleAccess([Role.admin, Role.moderator, Role.user])
 
 
-# @router.get('/', response_model=List[PhotoFilterDbModel],
-#              name='Create photo filter', status_code=status.HTTP_201_CREATED,
-#              dependencies=[Depends(allowed_create)])
-# async def create_photo_filter(photo_filter: PhotoFilterModel,
-#                               db: Session = Depends(get_db),
-#                               user: User = Depends(auth_service.get_current_user)):
-#     ph_filter = await photo_filters.create_photo_filter(photo_filter, user.id, db)
-#     return ph_filter
+@router.get('/', response_model=Optional[List[PhotoFilterDbModel]],
+            name='Get photo filters by user',
+            dependencies=[Depends(allowed_read)])
+async def get_photos_filters(db: Session = Depends(get_db),
+                             user: User = Depends(auth_service.get_current_user)):
+    ph_filter = await photo_filters.get_photos_filters(user.id, db)
+    return ph_filter
 
 
 @router.post('/', response_model=PhotoFilterDbModel,
