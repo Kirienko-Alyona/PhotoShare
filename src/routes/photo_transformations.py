@@ -26,14 +26,10 @@ allowed_delete = RoleAccess([Role.admin, Role.moderator, Role.user])
              dependencies=[Depends(allowed_create)])
 async def create_transformation(transformation: PhotoTransformationModel,
                                 db: Session = Depends(get_db),
-                                _: User = Depends(auth_service.get_current_user)):
-    try:
-        transformation = await repository_transformations.create_transformation(transformation, db)
-    except repository_transformations.RecordNotFound as err:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f'{messages.COULD_NOT_FIND_FOTO_BY_ID} {str(err)}')
-    except Exception:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=messages.BAD_REQUEST)
+                                user: User = Depends(auth_service.get_current_user)):
+    transformation = await repository_transformations.create_transformation(transformation, user.id, user.roles, db)
+    if transformation is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.COULD_NOT_FIND_FOTO)
     return transformation
 
 
@@ -42,14 +38,12 @@ async def create_transformation(transformation: PhotoTransformationModel,
               dependencies=[Depends(allowed_update)])
 async def change_description(trans_id: int, data: NewDescTransformationModel,
                              db: Session = Depends(get_db),
-                             _: User = Depends(auth_service.get_current_user)):
-    try:
-        transformation = await repository_transformations.change_description(trans_id, data, db)
-    except repository_transformations.RecordNotFound as err:
+                             user: User = Depends(auth_service.get_current_user)):
+
+    transformation = await repository_transformations.change_description(trans_id, data, user.id, user.roles, db)
+    if transformation is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f'{messages.COULD_NOT_FIND_FOTO_TRANSFORMATION_BY_ID} {str(err)}')
-    except Exception:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=messages.BAD_REQUEST)
+                            detail=messages.COULD_NOT_FIND_FOTO_TRANSFORMATION)
     return transformation
 
 
@@ -58,11 +52,8 @@ async def change_description(trans_id: int, data: NewDescTransformationModel,
                status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(allowed_delete)])
 async def delete_transformation(trans_id: int,
                                 db: Session = Depends(get_db),
-                                _: User = Depends(auth_service.get_current_user)):
-    try:
-        await repository_transformations.remove_transformation(trans_id, db)
-    except repository_transformations.RecordNotFound as err:
+                                user: User = Depends(auth_service.get_current_user)):
+    id_ = await repository_transformations.remove_transformation(trans_id, user.id, user.roles, db)
+    if id_ is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f'{messages.COULD_NOT_FIND_FOTO_TRANSFORMATION_BY_ID} {str(err)}')
-    except Exception:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=messages.BAD_REQUEST)
+                            detail=f'{messages.COULD_NOT_FIND_FOTO_TRANSFORMATION}')

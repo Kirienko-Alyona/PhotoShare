@@ -47,6 +47,26 @@ async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
     return {'access_token': access_token, 'refresh_token': refresh_token, 'token_type': 'bearer'}
 
 
+@router.post('/admin_login', response_model=TokenModel)
+async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)) -> dict:
+    user = await repository_users.get_user_by_email(body.username, db)
+
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=messages.INVALID_EMAIL)
+    if not user.confirmed:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=messages.EMAIL_NOT_CONFIRMED)
+    if not auth_service.verify_password(body.password, user.password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=messages.INVALID_PASSWORD)
+    if not (user.active and (user.roles == Role.admin)):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=messages.FORBIDDEN)
+
+    access_token: str = await auth_service.create_access_token(data={'sub': user.email})
+    refresh_token: str = await auth_service.create_refresh_token(data={'sub': user.email})
+    await auth_service.get_current_user(access_token, db)
+    await repository_users.update_token(user, refresh_token, db)
+    return {'access_token': access_token, 'refresh_token': refresh_token, 'token_type': 'bearer'}
+
+
 @router.post('/request_email')
 async def request_email(body: RequestEmail,
                         background_tasks: BackgroundTasks,
