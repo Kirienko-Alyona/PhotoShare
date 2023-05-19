@@ -3,6 +3,7 @@ from typing import List, Optional
 from pydantic import BaseModel, HttpUrl, Field
 
 from src.schemas.tags import TagResponse
+from src.schemas.rates import PhotoRatingResponse
 import src.conf.constants as constants
 
 
@@ -16,6 +17,15 @@ class PhotoResponse(BaseModel):
     description: str | None = Field(
         default=None, title="The description of the Photo", max_length=constants.MAX_LENGTH_PHOTO_DESCRIPTION)
     tags: Optional[List[TagResponse]]
+    rating: Optional[PhotoRatingResponse] = None
+
+    class Config:
+        orm_mode = True
+
+
+class PhotoResponseRating(BaseModel):
+    photos: list[PhotoResponse] | PhotoResponse
+    rating: str = None
 
     class Config:
         orm_mode = True

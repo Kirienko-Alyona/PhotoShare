@@ -5,7 +5,7 @@ from typing import Optional, List
 import qrcode as qrcode
 from sqlalchemy.orm import Session
 
-from src.database.models import User, Photo, Tag
+from src.database.models import User, Photo, Tag, Rate, Role
 from src.repository import tags as repository_tags
 from src.schemas.tags import TagModel
 
@@ -30,9 +30,9 @@ async def add_photo(url: str,
 
 
 async def get_photos(dict_values: dict,
-                    skip: int,
-                    limit: int,
-                    db: Session) -> Optional[List[Photo]]:
+                     skip: int,
+                     limit: int,
+                     db: Session) -> Optional[List[Photo]]:
     photos = db.query(Photo)
     for key, value in dict_values.items():
         if value is not None:
@@ -41,6 +41,9 @@ async def get_photos(dict_values: dict,
     photos = photos.offset(skip).limit(limit).all()
     return photos
 
+
+# session.query(Student.fullname, func.round(func.avg(Grade.grade), 2).label('avg_grade'))\
+#         .select_from(Grade).join(Student).group_by(Student.id).order_by(desc('avg_grade')).limit(5).all()
 
 async def get_photo_by_id(photo_id: int, db: Session, user: User):
     return db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).first()
@@ -55,13 +58,22 @@ async def description_update(new_description: str,
                              photo_id: int,
                              db: Session,
                              user: User):
-    photo = await get_photo_by_id(photo_id, db, user)
+    photo = await get_photo_by_id_oper(photo_id, db)
+    role_req = db.query(User.roles).filter(User.id == user.id).first()
+    # print(role_req, type(role_req), f'1st' )
+    # print(role_req[0], type(role_req[0]), f'2nd')
+    # print(role_req[0].admin, f'3rd')
     if photo:
-        count = db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).update({
-            'description': new_description
-        })
-        db.commit()
-        if count == 1:
+        user_request = db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).update({
+            'description': new_description})
+        if user_request == 1:
+            db.commit()
+            return photo
+    if role_req[0] == Role.admin:
+        admin_request = db.query(Photo).filter(Photo.id == photo_id).update({
+            'description': new_description})
+        if admin_request == 1:
+            db.commit()
             return photo
     return None
 
@@ -69,12 +81,18 @@ async def description_update(new_description: str,
 async def delete_photo(photo_id: int,
                        db: Session,
                        user: User):
-    photo = await get_photo_by_id(photo_id, db, user)
+    photo = await get_photo_by_id_oper(photo_id, db)
+    role_req = db.query(User.roles).filter(User.id == user.id).first()
     if photo:
-        count = db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).delete()
-        db.commit()
-        if count == 1:
+        user_request = db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).delete()
+        if user_request == 1:
+            db.commit()
             return photo
+        if role_req[0] == Role.admin:
+            admin_request = db.query(Photo).filter(Photo.id == photo_id).delete()
+            if admin_request == 1:
+                db.commit()
+                return photo
     return None
 
 
@@ -103,7 +121,7 @@ async def untach_tag(photo_id: int,
                      tag_name: str,
                      db: Session,
                      user: User):
-    photo = db. query(Photo).filter_by(id=photo_id, user_id=user.id).first()
+    photo = db.query(Photo).filter_by(id=photo_id, user_id=user.id).first()
     if not photo:
         return None
     tags = photo.tags
