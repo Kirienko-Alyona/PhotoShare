@@ -1,14 +1,15 @@
 from typing import List
 
-from fastapi import Depends, status, APIRouter, HTTPException
+from fastapi import Depends, status, APIRouter, HTTPException, Query, Path
 from sqlalchemy.orm import Session
 
 from src.database.db import get_db
-from src.database.models import Role
+from src.database.models import Role, User
 from src.repository import tags as repository_tags
 from src.services.roles import RoleAccess
 from src.conf import messages
 from src.schemas.tags import TagResponse
+from src.services.auth import auth_service
 
 
 router = APIRouter(prefix="/tags", tags=['tags'])
