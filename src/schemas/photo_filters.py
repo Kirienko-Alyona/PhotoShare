@@ -3,6 +3,7 @@ from typing import Optional, Dict, Any, List
 from pydantic import BaseModel, Field
 
 import src.conf.constants as c
+from src.schemas.photo_transformations import TransformationModel
 
 
 class PhotoFilterModel(BaseModel):

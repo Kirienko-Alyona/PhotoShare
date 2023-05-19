@@ -1,7 +1,7 @@
 import base64
 import io
 from typing import Optional, List
-from fastapi import HTTPException, status
+from fastapi import HTTPException, Query, status
 from src.conf import messages
 
 import qrcode as qrcode
@@ -26,10 +26,13 @@ async def add_photo(url: str,
     return photo
 
 
-async def get_photos(tag_name: str, db: Session) -> Optional[List[Photo]]:
-    tag = await repository_tags.get_tag_name(tag_name, db)
-    photo_list = tag.photos
-    return photo_list
+async def get_photos_by_tag_name(tag_name: str, limit: int, offset: int, db: Session) -> Optional[List[Photo]]:
+    if tag_name is not None:
+        tag = await repository_tags.get_tag_name(tag_name, db)
+        photo_list = tag.photos
+        return photo_list
+    photos = db.query(Photo).limit(limit).offset(offset).all()
+    return photos
 
 
 async def get_photo_by_id(photo_id: int, db: Session, user: User):
