@@ -22,7 +22,8 @@ def handler_tags(tags: str) -> List[Type[Tag]]:
     for i in range(len(tags_list)):
         if not tags_list[i].startswith("#"):
             tags_list[i] = '#' + tags_list[i]
-    return tags_list if tags_list else []
+    unique_tags_list = list(set(tags_list))        
+    return unique_tags_list if unique_tags_list else []
 
 
 async def get_tag_name(tag_name: str, db: Session):
