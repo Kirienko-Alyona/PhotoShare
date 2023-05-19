@@ -65,8 +65,8 @@ async def update_tags(new_tags: str, photo_id, db: Session, user: User) -> List[
     if len(old_tag_list) < 5:
         new_tag_list = await add_tags_for_photo(new_tags, db, user)
         old_tag_list.extend(new_tag_list)
-        if len(old_tag_list) > 5:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=messages.TOO_MANY_TAGS)
+    if len(old_tag_list) >= 5:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=messages.TOO_MANY_TAGS_UNDER_THE_PHOTO)
     return old_tag_list
 
 
