@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from src.database.models import Comment, User, Photo
+from src.database.models import Comment, User
 
 from src.schemas.comments import CommentModel, CommentUpdateModel
 
@@ -19,7 +19,7 @@ async def get_comment_by_id(comment_id: int, db: Session):
 
 
 async def get_comments_by_photo(photo_id: int, db: Session):
-    comments = db.query(Comment).join(Photo).filter(Photo.id == photo_id).all()
+    comments = db.query(Comment).filter(Comment.photo_id == photo_id).all()
     return comments
 
 
