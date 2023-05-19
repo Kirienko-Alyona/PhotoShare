@@ -23,8 +23,9 @@ allowed_update = RoleAccess([Role.admin, Role.moderator, Role.user])
 allowed_delete = RoleAccess([Role.admin, Role.moderator, Role.user])
 
 
-@router.get('/{photo_id}', response_model=List[PhotoTransformationModelDb],
-            name='Get photo transformations by photo id',
+@router.get('/{photo_id}', 
+            name='Get Transformations By Photo Id',
+            response_model=List[PhotoTransformationModelDb],
             dependencies=[Depends(allowed_read)])
 async def get_transformed_photos(photo_id: int,
                                  db: Session = Depends(get_db),
@@ -36,8 +37,10 @@ async def get_transformed_photos(photo_id: int,
     return photos
 
 
-@router.post('/', response_model=PhotoTransformationModelDb,
-             name='Create photo transformation', status_code=status.HTTP_201_CREATED,
+@router.post('/', 
+             name='Create Photo Transformation', 
+             response_model=PhotoTransformationModelDb,
+             status_code=status.HTTP_201_CREATED,
              dependencies=[Depends(allowed_create)])
 async def create_transformation(transformation: PhotoTransformationModel,
                                 db: Session = Depends(get_db),
@@ -48,10 +51,14 @@ async def create_transformation(transformation: PhotoTransformationModel,
     return transformation
 
 
-@router.post('/{photo_id}', response_model=PhotoTransformationModelDb,
-             name='Create photo transformation from preset', status_code=status.HTTP_201_CREATED,
+@router.post('/{photo_id}', 
+             response_model=PhotoTransformationModelDb,
+             name='Create Photo Transformation From Preset', 
+             status_code=status.HTTP_201_CREATED,
              dependencies=[Depends(allowed_create)])
-async def create_transformation_from_preset(photo_id: int, filter_id: int, description: NewDescTransformationModel,
+async def create_transformation_from_preset(photo_id: int, 
+                                            filter_id: int, 
+                                            description: NewDescTransformationModel,
                                             db: Session = Depends(get_db),
                                             user: User = Depends(auth_service.get_current_user)):
     transformation = await \
@@ -63,12 +70,12 @@ async def create_transformation_from_preset(photo_id: int, filter_id: int, descr
 
 
 @router.patch('/{trans_id}', response_model=PhotoTransformationModelDb,
-              name='Changing description of transformation', status_code=status.HTTP_200_OK,
+              name='Changing Description Of Transformation', 
+              status_code=status.HTTP_200_OK,
               dependencies=[Depends(allowed_update)])
 async def change_description(trans_id: int, data: NewDescTransformationModel,
                              db: Session = Depends(get_db),
                              user: User = Depends(auth_service.get_current_user)):
-
     transformation = await repository_transformations.change_description(trans_id, data, user.id, user.roles, db)
     if transformation is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -77,8 +84,9 @@ async def change_description(trans_id: int, data: NewDescTransformationModel,
 
 
 @router.delete("/{trans_id}",
-               name='Delete photo transformation',
-               status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(allowed_delete)])
+               name='Delete Photo Transformation',
+               status_code=status.HTTP_204_NO_CONTENT, 
+               dependencies=[Depends(allowed_delete)])
 async def delete_transformation(trans_id: int,
                                 db: Session = Depends(get_db),
                                 user: User = Depends(auth_service.get_current_user)):
