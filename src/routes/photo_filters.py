@@ -25,6 +25,9 @@ allowed_delete = RoleAccess([Role.admin, Role.moderator, Role.user])
 async def get_photos_filters(db: Session = Depends(get_db),
                              user: User = Depends(auth_service.get_current_user)):
     ph_filter = await photo_filters.get_photos_filters(user.id, db)
+    if not ph_filter:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'{messages.COULD_NOT_FIND_FOTO_FILTER}')
     return ph_filter
 
 
