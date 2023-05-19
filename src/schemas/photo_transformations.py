@@ -1,6 +1,6 @@
 from typing import Optional, List
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 
 from src.conf.constants import MAX_LENGTH_PHOTO_DESCRIPTION
 
@@ -50,7 +50,7 @@ class PhotoTransformationModel(BaseModel):
 class PhotoTransformationModelDb(BaseModel):
     id: int
     photo_id: int
-    transformed_url: str
+    transformed_url: HttpUrl
     description: Optional[str] = None
 
     class Config:
