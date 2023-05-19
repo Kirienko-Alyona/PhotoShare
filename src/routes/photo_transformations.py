@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -19,6 +21,19 @@ allowed_create = RoleAccess([Role.admin, Role.moderator, Role.user])
 allowed_read = RoleAccess([Role.admin, Role.moderator, Role.user])
 allowed_update = RoleAccess([Role.admin, Role.moderator, Role.user])
 allowed_delete = RoleAccess([Role.admin, Role.moderator, Role.user])
+
+
+@router.get('/{photo_id}', response_model=List[PhotoTransformationModelDb],
+            name='Get photo transformations by photo id', status_code=status.HTTP_201_CREATED,
+            dependencies=[Depends(allowed_read)])
+async def get_transformed_photos(photo_id: int,
+                                 db: Session = Depends(get_db),
+                                 user: User = Depends(auth_service.get_current_user)):
+    photos = await repository_transformations.get_transformed_photos(photo_id, user.id, user.roles, db)
+    if not photos:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
+    return photos
 
 
 @router.post('/', response_model=PhotoTransformationModelDb,

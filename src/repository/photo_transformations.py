@@ -1,14 +1,16 @@
-from typing import Optional
+from typing import Optional, List
 
 from sqlalchemy.orm import Session
 
 from src.database.models import PhotoTransformation, Photo, Role
 from src.repository.functions import advanced_rights_check
 from src.repository.photo_filters import get_filter_preset_by_id
-from src.schemas.photo_transformations import PhotoTransformationModel, NewDescTransformationModel, TransformationModel
+from src.schemas.photo_transformations import (
+    PhotoTransformationModel, NewDescTransformationModel, TransformationModel, PhotoTransformationModelDb)
 from src.services.photo_transformations import build_transformed_url
 
 advanced_roles_create = []
+advanced_roles_read = []
 advanced_roles_update = [Role.admin]
 advanced_roles_delete = [Role.admin]
 
@@ -23,6 +25,12 @@ async def get_photo_user_id(photo_id: int, db: Session) -> int:  # waiting_for_r
 
 async def get_photo_public_id(photo_id: int, db: Session) -> str:  # waiting_for_realization_from_Mykola
     return db.query(Photo.cloud_public_id).filter_by(id=photo_id).one()[0]
+
+
+async def get_transformed_photos(photo_id: int, user_id: int, user_role: Role,
+                                 db: Session) -> List[PhotoTransformationModelDb]:
+    await advanced_rights_check("photos", photo_id, user_id, user_role, advanced_roles_create, db)
+    return db.query(PhotoTransformation).filter_by(photo_id=photo_id).order_by(PhotoTransformation.description).all()
 
 
 async def create_transformation_from_preset(filter_id: int, photo_id: int, description: NewDescTransformationModel,
