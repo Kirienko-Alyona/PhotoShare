@@ -18,7 +18,7 @@ security = HTTPBearer()
 allowed_read = RoleAccess([Role.admin, Role.moderator, Role.user])
 
 
-@router.post('/login', response_model=TokenModel)
+@router.post('/login', name="Login", response_model=TokenModel)
 async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)) -> dict:
     """
     The login function is used to authenticate a user.
@@ -47,7 +47,7 @@ async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
     return {'access_token': access_token, 'refresh_token': refresh_token, 'token_type': 'bearer'}
 
 
-@router.post('/admin_login', response_model=TokenModel)
+@router.post('/admin_login', name="Admin Login", response_model=TokenModel)
 async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)) -> dict:
     user = await repository_users.get_user_by_email(body.username, db)
 
@@ -67,7 +67,7 @@ async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
     return {'access_token': access_token, 'refresh_token': refresh_token, 'token_type': 'bearer'}
 
 
-@router.post('/request_email')
+@router.post('/request_email', name="Request Email")
 async def request_email(body: RequestEmail,
                         background_tasks: BackgroundTasks,
                         request: Request,
@@ -97,7 +97,7 @@ async def request_email(body: RequestEmail,
     return {'message': messages.CHECK_YOUR_EMAIL_FOR_CONFIRMATION}
 
 
-@router.post('/singup', response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post('/singup', name="SignUp", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def singup(body: UserModel,
                  background_tasks: BackgroundTasks,
                  request: Request,
@@ -125,7 +125,7 @@ async def singup(body: UserModel,
     return {'user': new_user, 'detail': messages.USER_SUCCESSFULLY_CREATED}
 
 
-@router.get('/refresh_token', response_model=TokenModel)
+@router.get('/refresh_token', name="Refresh Token", response_model=TokenModel)
 async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(security),
                         db: Session = Depends(get_db)) -> dict:
     """
@@ -149,7 +149,7 @@ async def refresh_token(credentials: HTTPAuthorizationCredentials = Security(sec
     return {'access_token': access_token, 'refresh_token': refresh_token, 'token_type': 'bearer'}
 
 
-@router.get('/confirmed_email/{token}')
+@router.get('/confirmed_email/{token}', name="Confirmed Email")
 async def confirmed_email(token: str, db: Session = Depends(get_db)) -> dict:
     """
     The confirmed_email function is used to confirm a user's email address.
@@ -174,7 +174,7 @@ async def confirmed_email(token: str, db: Session = Depends(get_db)) -> dict:
     return {'message': messages.EMAIL_CONFIRMED}
 
 
-@router.get("/logout", dependencies=[Depends(allowed_read)], status_code=status.HTTP_200_OK)
+@router.get("/logout", name="Logout", dependencies=[Depends(allowed_read)], status_code=status.HTTP_200_OK)
 async def logout(credentials: HTTPAuthorizationCredentials = Security(security),
                  db: Session = Depends(get_db)):
     token = credentials.credentials
