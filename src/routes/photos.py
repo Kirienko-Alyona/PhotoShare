@@ -55,7 +55,7 @@ async def get_photos(tag_name: Optional[str] = Query(default=None),
     return photos
 
 
-@router.get('/{photo_id}', response_model=PhotoResponse, name="Get photos by id ", dependencies=[Depends(allowed_read)])
+@router.get('/{photo_id}', response_model=PhotoResponse, name="Get photos by id", dependencies=[Depends(allowed_read)])
 # accsess - admin, authenticated users
 async def get_photo_id(photo_id: int,
                        db: Session = Depends(get_db),
@@ -67,7 +67,11 @@ async def get_photo_id(photo_id: int,
     return photo
 
 
-@router.put("/{photo_id}", response_model=PhotoResponse, status_code=status.HTTP_200_OK, dependencies=[Depends(allowed_update)])
+@router.put("/{photo_id}", 
+            response_model=PhotoResponse, 
+            name="Update Photo", 
+            status_code=status.HTTP_200_OK, 
+            dependencies=[Depends(allowed_update)])
 # accsess - admin, user-owner
 async def update_tags_by_photo(photo_id: int,
                                new_description: str | None = None,
@@ -85,7 +89,10 @@ async def update_tags_by_photo(photo_id: int,
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.PHOTO_NOT_FOUND)
 
 
-@router.patch("/untach_tag/{photo_id}", response_model=PhotoResponse, status_code=status.HTTP_200_OK,
+@router.patch("/untach_tag/{photo_id}", 
+              response_model=PhotoResponse,  
+              name="Untach Tag From Photo",
+              status_code=status.HTTP_200_OK,
               dependencies=[Depends(allowed_update)])
 # accsess - admin, user-owner
 async def untach_tag_photo(photo_id: int,
@@ -98,7 +105,10 @@ async def untach_tag_photo(photo_id: int,
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.PHOTO_NOT_FOUND)
 
 
-@router.delete('/{photo_id}', status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(allowed_delete)])
+@router.delete('/{photo_id}', 
+               name="Remove Photo",
+               status_code=status.HTTP_204_NO_CONTENT, 
+               dependencies=[Depends(allowed_delete)])
 # accsess - admin, moderator, user-owner
 async def photo_remove(
         photo_id: int,
