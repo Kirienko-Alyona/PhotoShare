@@ -7,7 +7,7 @@ from src.conf import messages
 import qrcode as qrcode
 from sqlalchemy.orm import Session
 
-from src.database.models import User, Photo, Tag, photo_m2m_tag
+from src.database.models import User, Photo, Tag, photo_m2m_tag, Role
 from src.repository import tags as repository_tags
 from src.schemas.tags import TagModel
 
@@ -19,7 +19,7 @@ async def add_photo(url: str,
                     db: Session,
                     user: User):
     tags_list = await repository_tags.add_tags_for_photo(tags, db, user)
-    photo = Photo(url_photo=url, cloud_public_id=public_id, description=description, tags = tags_list, user_id=user.id)
+    photo = Photo(url_photo=url, cloud_public_id=public_id, description=description, tags=tags_list, user_id=user.id)
     db.add(photo)
     db.commit()
     db.refresh(photo)
@@ -39,6 +39,7 @@ async def get_photo_by_id(photo_id: int, db: Session, user: User):
     photo = db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).first()
     return photo
 
+
 # operational function for backend
 async def get_photo_by_id_oper(photo_id: int, db: Session):
     return db.query(Photo).filter(Photo.id == photo_id).first()
@@ -47,12 +48,18 @@ async def get_photo_by_id_oper(photo_id: int, db: Session):
 async def delete_photo(photo_id: int,
                        db: Session,
                        user: User):
-    photo = await get_photo_by_id(photo_id, db, user)
+    photo = await get_photo_by_id_oper(photo_id, db)
+    role_req = db.query(User.roles).filter(User.id == user.id).first()
     if photo:
-        count = db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).delete()
-        db.commit()
-        if count == 1:
+        user_request = db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).delete()
+        if user_request == 1:
+            db.commit()
             return photo
+        if role_req[0] == Role.admin:
+            admin_request = db.query(Photo).filter(Photo.id == photo_id).delete()
+            if admin_request == 1:
+                db.commit()
+                return photo
     return None
 
 
@@ -63,21 +70,33 @@ async def generate_qrcode(photo_url: str):
     return {'qrcode_encode': base64.b64encode(buffer.getvalue()).decode('utf-8')}
 
 
-async def update_tags_descriptions_for_photo(photo_id: int, 
+async def update_tags_descriptions_for_photo(photo_id: int,
                                              new_description: str,
                                              tags: str,
                                              db: Session,
                                              user: User):
-    photo = db.query(Photo).filter_by(id=photo_id, user_id=user.id).first()
+    photo = await get_photo_by_id_oper(photo_id, db)
+    role_req = db.query(User.roles).filter(User.id == user.id).first()
     if not photo:
         return None
-    if tags != None:
+    print(f'User branch')
+    if tags is not None:
         new_tags_list = await repository_tags.update_tags(tags, photo_id, db, user)
         photo.tags = new_tags_list
-    if new_description != None:    
-        photo.description = new_description
+    if new_description is not None:
+        db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).update({
+            'description': new_description})
     db.commit()
     db.refresh(photo)
+    if role_req[0] == Role.admin:
+        print(role_req[0], f'Admin branch')
+        if tags is not None:
+            new_tags_list = await repository_tags.update_tags(tags, photo_id, db, user=Photo.user_id)
+            photo.tags = new_tags_list
+        if new_description is not None:
+            db.query(Photo).filter(Photo.id == photo_id,).update({'description': new_description})
+        db.commit()
+        db.refresh(photo)
     return photo
 
 
