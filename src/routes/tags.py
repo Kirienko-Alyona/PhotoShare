@@ -20,11 +20,10 @@ allowed_read = RoleAccess([Role.admin, Role.moderator, Role.user])
 #allowed_update = RoleAccess([Role.admin, Role.moderator, Role.user]) --> in photos
 allowed_delete = RoleAccess([Role.admin, Role.moderator])
 
-# allowed_get_tags = RoleAccess([Role.admin, Role.moderator, Role.user])
-# allowed_remove_tag = RoleAccess([Role.admin, Role.moderator])
 
-
-@router.get("/", response_model=List[TagResponse],
+@router.get("/", 
+            name="Get Tags",
+            response_model=List[TagResponse],
             dependencies=[Depends(allowed_read)],
             status_code=status.HTTP_200_OK)
 async def get_tags(db: Session = Depends(get_db)):
@@ -34,7 +33,10 @@ async def get_tags(db: Session = Depends(get_db)):
     raise  HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.TAGS_NOT_FOUND)
 
 #-->delete the tag from DB
-@router.delete("/{tag_id}", dependencies=[Depends(allowed_delete)], status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{tag_id}", 
+               name="Delete Tag From BD",
+               dependencies=[Depends(allowed_delete)], 
+               status_code=status.HTTP_204_NO_CONTENT)
 async def delete_tag(tag_id: int, db: Session = Depends(get_db)):
     count = await repository_tags.delete_tag(tag_id, db)
     if not count:
