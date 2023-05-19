@@ -16,7 +16,7 @@ router = APIRouter(prefix="/rating", tags=['rating'])
 
 # CRUD
 allowed_create = RoleAccess([Role.admin, Role.moderator, Role.user])
-allowed_read = RoleAccess([Role.admin, Role.moderator])
+allowed_read = RoleAccess([Role.admin, Role.moderator, Role.user])
 allowed_web_admin_read = RoleAccess([Role.admin, Role.moderator])
 # allowed_update = RoleAccess([Role.admin, Role.moderator, Role.user])
 allowed_delete = RoleAccess([Role.admin, Role.moderator])
