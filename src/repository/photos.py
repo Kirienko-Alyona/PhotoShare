@@ -1,6 +1,8 @@
 import base64
 import io
 from typing import Optional, List
+from fastapi import HTTPException, status
+from src.conf import messages
 
 import qrcode as qrcode
 from sqlalchemy.orm import Session
@@ -31,8 +33,8 @@ async def get_photos(tag_name: str, db: Session) -> Optional[List[Photo]]:
 
 
 async def get_photo_by_id(photo_id: int, db: Session, user: User):
-    return db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).first()
-
+    photo = db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).first()
+    return photo
 
 # operational function for backend
 async def get_photo_by_id_oper(photo_id: int, db: Session):
@@ -77,14 +79,21 @@ async def update_tags_descriptions_for_photo(photo_id: int,
 
 
 async def untach_tag(photo_id: int,
-                     tag_name: str,
+                     tags: str,
                      db: Session,
                      user: User):
-    photo = db. query(Photo).filter_by(id=photo_id, user_id=user.id).first()
+    #old_tags = []
+    photo = await get_photo_by_id(photo_id, db, user)
     if not photo:
         return None
-    tags = photo.tags
-    [photo.tags.remove(tag_) for tag_ in tags if tag_name in tag_.tag_name]
-    db.commit()
-    db.refresh(photo)
+    tag_list_to_del = repository_tags.handler_tags(tags)
+    old_list_tags = photo.tags
+    for tag_name in tag_list_to_del:
+        tag = await repository_tags.get_tag_name(tag_name, db)
+        if tag:
+            [photo.tags.remove(tag_) for tag_ in old_list_tags if tag_name in tag_.tag_name]
+            db.commit()
+            db.refresh(photo)
+        else:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.TAG_NOT_FOUND)
     return photo
