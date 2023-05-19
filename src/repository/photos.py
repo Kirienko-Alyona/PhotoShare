@@ -68,25 +68,16 @@ async def update_tags_descriptions_for_photo(photo_id: int,
                                              db: Session,
                                              user: User):
     photo = await get_photo_by_id_oper(photo_id, db)
-    role_req = db.query(User.roles).filter(User.id == user.id).first()
-    if not photo:
+    if not photo and ((photo.user_id != user.id) or (user.roles != Role.admin)):
         return None
     if tags is not None:
-        new_tags_list = await repository_tags.update_tags(tags, photo_id, db, user)
+        new_tags_list = await repository_tags.update_tags(tags, photo_id, db, user=user)
         photo.tags = new_tags_list
     if new_description is not None:
-        db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).update({
+        db.query(Photo).filter(Photo.id == photo_id).update({
             'description': new_description})
     db.commit()
     db.refresh(photo)
-    if role_req[0] == Role.admin:
-        if tags is not None:
-            new_tags_list = await repository_tags.update_tags(tags, photo_id, db, user=Photo.user_id)
-            photo.tags = new_tags_list
-        if new_description is not None:
-            db.query(Photo).filter(Photo.id == photo_id,).update({'description': new_description})
-        db.commit()
-        db.refresh(photo)
     return photo
 
 
