@@ -21,7 +21,10 @@ allowed_update = RoleAccess([Role.admin, Role.user])
 allowed_delete = RoleAccess([Role.admin, Role.moderator, Role.user])
 
 
-@router.post('/', response_model=PhotoResponse, name='Create photo', status_code=status.HTTP_201_CREATED, dependencies=[Depends(allowed_create)])
+@router.post('/', name='Create Photo', 
+             response_model=PhotoResponse, 
+             status_code=status.HTTP_201_CREATED, 
+             dependencies=[Depends(allowed_create)])
 # accsess - admin, authenticated users
 async def create_photo(photo: UploadFile = File(),
                        description: str | None = None,
@@ -33,15 +36,20 @@ async def create_photo(photo: UploadFile = File(),
     return photo
 
 
-@router.post('/qrcode/', response_model=PhotoQRCodeResponse, name='Generate QRCode by url',
-             status_code=status.HTTP_201_CREATED, dependencies=[Depends(allowed_create)])
+@router.post('/qrcode/', 
+             name='Generate QRCode By Url',
+             response_model=PhotoQRCodeResponse, 
+             status_code=status.HTTP_201_CREATED, 
+             dependencies=[Depends(allowed_create)])
 # accsess - admin, authenticated users
 async def generate_qrcode(photo_url: str, _: User = Depends(auth_service.get_current_user)):
     qrcode_encode = await repository_photos.generate_qrcode(photo_url)
     return qrcode_encode
 
 
-@router.get('/', response_model=list[PhotoResponse], name="Get photos by request ", dependencies=[Depends(allowed_read)])
+@router.get('/', name="Get Photos By Request ", 
+            response_model=list[PhotoResponse], 
+            dependencies=[Depends(allowed_read)])
 # accsess - admin, authenticated users
 async def get_photos(tag_name: Optional[str] = Query(default=None),
                      limit: int = Query(default=10, ge=1, le=50), 
@@ -55,7 +63,9 @@ async def get_photos(tag_name: Optional[str] = Query(default=None),
     return photos
 
 
-@router.get('/{photo_id}', response_model=PhotoResponse, name="Get photos by id", dependencies=[Depends(allowed_read)])
+@router.get('/{photo_id}', name="Get Photos By Id", 
+            response_model=PhotoResponse, 
+            dependencies=[Depends(allowed_read)])
 # accsess - admin, authenticated users
 async def get_photo_id(photo_id: int,
                        db: Session = Depends(get_db),
@@ -68,8 +78,8 @@ async def get_photo_id(photo_id: int,
 
 
 @router.put("/{photo_id}", 
-            response_model=PhotoResponse, 
             name="Update Photo", 
+            response_model=PhotoResponse, 
             status_code=status.HTTP_200_OK, 
             dependencies=[Depends(allowed_update)])
 # accsess - admin, user-owner
@@ -90,8 +100,8 @@ async def update_tags_by_photo(photo_id: int,
 
 
 @router.patch("/untach_tag/{photo_id}", 
-              response_model=PhotoResponse,  
               name="Untach Tag From Photo",
+              response_model=PhotoResponse,  
               status_code=status.HTTP_200_OK,
               dependencies=[Depends(allowed_update)])
 # accsess - admin, user-owner
