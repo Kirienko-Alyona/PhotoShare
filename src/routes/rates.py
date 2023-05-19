@@ -26,7 +26,8 @@ allowed_delete = RoleAccess([Role.admin, Role.moderator])
              response_model=RateResponse,
              status_code=status.HTTP_201_CREATED, 
              dependencies=[Depends(allowed_create)])
-async def create_rate(body: RateModel, db: Session = Depends(get_db),
+async def create_rate(body: RateModel, 
+                      db: Session = Depends(get_db),
                       current_user: User = Depends(auth_service.get_current_user)):
     photo = await repository_photos.get_photo_by_id_oper(body.photo_id, db)
     if photo is None:
@@ -44,7 +45,8 @@ async def create_rate(body: RateModel, db: Session = Depends(get_db),
             response_model=PhotoRatingResponse, 
             status_code=status.HTTP_200_OK, 
             dependencies=[Depends(allowed_read)])
-async def get_rating_by_photo_id(photo_id: int = Path(ge=1), db: Session = Depends(get_db),
+async def get_rating_by_photo_id(photo_id: int = Path(ge=1), 
+                                 db: Session = Depends(get_db),
                                  _: User = Depends(auth_service.get_current_user)):
     rating = await repository_rates.get_rating_by_photo_id(photo_id, db)
     if rating is None:
@@ -56,7 +58,8 @@ async def get_rating_by_photo_id(photo_id: int = Path(ge=1), db: Session = Depen
             response_model=List[RateResponse],
             status_code=status.HTTP_200_OK, 
             dependencies=[Depends(allowed_web_admin_read)])
-async def get_rating_by_photo_id(photo_id: int = Path(ge=1), db: Session = Depends(get_db),
+async def get_rating_by_photo_id(photo_id: int = Path(ge=1), 
+                                 db: Session = Depends(get_db),
                                  _: User = Depends(auth_service.get_current_user)):
     rates = await repository_rates.get_detail_rating_by_photo(photo_id, db)
     if rates is None:
@@ -67,7 +70,8 @@ async def get_rating_by_photo_id(photo_id: int = Path(ge=1), db: Session = Depen
 @router.delete("/detail", name="Delete User's Photo Rating", 
                status_code=status.HTTP_204_NO_CONTENT,
                dependencies=[Depends(allowed_delete)])
-async def remove_rate(body: RateDeleteModel, db: Session = Depends(get_db),
+async def remove_rate(body: RateDeleteModel, 
+                      db: Session = Depends(get_db),
                       _: User = Depends(auth_service.get_current_user)):
     deleted_count = await repository_rates.remove_rating(body, db)
     if deleted_count == 0:

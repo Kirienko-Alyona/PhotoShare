@@ -27,7 +27,9 @@ allowed_read_webadmin = RoleAccess([Role.admin, Role.moderator]) #--> for admin-
 
 #only for admin-panel
 #---------------------------------------------------------------------------------------------
-@router.get("/", response_model=List[UserDb], dependencies=[Depends(allowed_read_webadmin)])
+@router.get("/", name="Read Users", 
+            response_model=List[UserDb], 
+            dependencies=[Depends(allowed_read_webadmin)])
 # accsess - admin, мoderator
 async def read_users(first_name: str = None, 
                      username: str = None, 
@@ -60,7 +62,10 @@ async def read_users(first_name: str = None,
     return users
 
 
-@router.get("/{user_id}", response_model=UserDb, dependencies=[Depends(allowed_read_webadmin)])
+@router.get("/{user_id}",  
+            name="Read User By Id", 
+            response_model=UserDb, 
+            dependencies=[Depends(allowed_read_webadmin)])
 # accsess - admin, мoderator
 async def read_user_by_id(user_id: int = Path(ge=1), 
                      db: Session = Depends(get_db), 
@@ -74,7 +79,10 @@ async def read_user_by_id(user_id: int = Path(ge=1),
 #---------------------------------------------------------------------------------------------
 
 
-@router.get("/me/", response_model=UserDb, dependencies=[Depends(allowed_read)])
+@router.get("/me/", 
+            name="Read User Me",
+            response_model=UserDb, 
+            dependencies=[Depends(allowed_read)])
 # accsess -  admin, мoderator, user
 async def read_user_me(current_user: User = Depends(auth_service.get_current_user),
                         db: Session = Depends(get_db)):
@@ -93,7 +101,10 @@ async def read_user_me(current_user: User = Depends(auth_service.get_current_use
     return current_user
 
 
-@router.put('/{user_id}', response_model=UserDb, dependencies=[Depends(allowed_update)])
+@router.put('/{user_id}', 
+            name="Edit User",
+            response_model=UserDb, 
+            dependencies=[Depends(allowed_update)])
 # accsess - only for admin, moderators and  user-owner
 async def user_edit(body: UserUpdateModel,
                     user_id: int,
@@ -105,7 +116,10 @@ async def user_edit(body: UserUpdateModel,
     return user
 
 
-@router.patch('/avatar', response_model=UserDb, dependencies=[Depends(allowed_update)])
+@router.patch('/avatar', 
+              name="Update Avatar User",
+              response_model=UserDb, 
+              dependencies=[Depends(allowed_update)])
 # accsess - only for admin, moderators and  user-owner
 async def update_avatar_user(file: UploadFile = File(),
                              current_user: User = Depends(auth_service.get_current_user),
@@ -128,7 +142,11 @@ The update_avatar_user function updates the avatar of a user.
     return user
 
 
-@router.patch("/ban/{user_id}", response_model=UserBanModel, dependencies=[Depends(allowed_ban)], status_code=status.HTTP_202_ACCEPTED)
+@router.patch("/ban/{user_id}", 
+              name="Ban User",
+              response_model=UserBanModel, 
+              dependencies=[Depends(allowed_ban)], 
+              status_code=status.HTTP_202_ACCEPTED)
 async def ban_user(user_id: int, db: Session = Depends(get_db)):
     user = await repository_users.ban_user(user_id, db)
     if not user:

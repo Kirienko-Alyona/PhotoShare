@@ -42,7 +42,8 @@ async def create_photo(photo: UploadFile = File(),
              status_code=status.HTTP_201_CREATED, 
              dependencies=[Depends(allowed_create)])
 # accsess - admin, authenticated users
-async def generate_qrcode(photo_url: str, _: User = Depends(auth_service.get_current_user)):
+async def generate_qrcode(photo_url: str, 
+                          _: User = Depends(auth_service.get_current_user)):
     qrcode_encode = await repository_photos.generate_qrcode(photo_url)
     return qrcode_encode
 
