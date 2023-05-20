@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 
 import src.conf.messages as message
 from src.database.models import PhotoTransformation, Photo, Role
-from src.repository.photo_filters import get_filter_preset_by_id
+from src.repository.photo_filters import get_filter_preset_by_id, create_photo_filter
+from src.schemas.photo_filters import PhotoFilterModel
 from src.schemas.photo_transformations import (
     PhotoTransformationModel, NewDescTransformationModel, TransformationModel)
 from src.services.photo_transformations import build_transformed_url
@@ -66,9 +67,19 @@ async def create_transformation_from_preset(filter_id: int, photo_id: int, descr
     return new_transformation
 
 
-async def create_transformation(data: PhotoTransformationModel, user_id: int,
+async def create_transformation(data: PhotoTransformationModel,
+                                save_filter: bool,
+                                filter_name: Optional[str],
+                                filter_description: Optional[str],
+                                user_id: int,
                                 user_role: Role, db: Session) -> Optional[PhotoTransformation]:
     await advanced_rights_check(data.photo_id, user_id, user_role, advanced_roles_create, db)
+
+    if save_filter:
+        if not filter_name:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=message.BAD_REQUEST)
+        ph_filter = PhotoFilterModel(name=filter_name, description=filter_description, preset=data.transformation.preset)
+        await create_photo_filter(ph_filter, user_id, db)
 
     public_id = await get_photo_public_id(data.photo_id, db)
     new_transformation = PhotoTransformation()

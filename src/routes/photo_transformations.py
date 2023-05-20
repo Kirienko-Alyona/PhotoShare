@@ -1,6 +1,6 @@
-from typing import List
+from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 import src.conf.messages as messages
@@ -43,9 +43,16 @@ async def get_transformed_photos(photo_id: int,
              status_code=status.HTTP_201_CREATED,
              dependencies=[Depends(allowed_create)])
 async def create_transformation(transformation: PhotoTransformationModel,
+                                save_filter: bool = Query(default=False),
+                                filter_name: Optional[str] = Query(default=None),
+                                filter_description: Optional[str] = Query(default=None),
                                 db: Session = Depends(get_db),
                                 user: User = Depends(auth_service.get_current_user)):
-    transformation = await repository_transformations.create_transformation(transformation, user.id, user.roles, db)
+    transformation = await repository_transformations.create_transformation(transformation,
+                                                                            save_filter,
+                                                                            filter_name,
+                                                                            filter_description,
+                                                                            user.id, user.roles, db)
     if transformation is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.COULD_NOT_FIND_FOTO)
     return transformation
