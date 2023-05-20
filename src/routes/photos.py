@@ -1,6 +1,7 @@
 from fastapi import Depends, status, APIRouter, File, UploadFile, Query, HTTPException
 from sqlalchemy.orm import Session
 from typing import Optional, List
+from src.repository.photo_transformations import create_transformation
 
 from src.database.db import get_db
 from src.database.models import User, Role
@@ -12,6 +13,10 @@ from src.services.photos import upload_photo
 import src.conf.messages as messages
 from src.services.roles import RoleAccess
 from src.repository import rates as repository_rates
+from src.schemas.photo_transformations import (
+    PhotoTransformationModelDb,
+    PhotoTransformationModel,
+    NewDescTransformationModel)
 
 router = APIRouter(prefix='/photos', tags=['photos'])
 
@@ -22,17 +27,52 @@ allowed_update = RoleAccess([Role.admin, Role.user])
 allowed_delete = RoleAccess([Role.admin, Role.moderator, Role.user])
 
 
+default_transf = {
+  "photo_id": 1,
+  "description": "Photo with cool effect",
+  "transformation": {
+    "preset": [
+      {
+        "gravity": "face",
+        "height": 400,
+        "width": 400,
+        "crop": "crop"
+      },
+      {
+        "radius": "max"
+      },
+      {
+        "width": 200,
+        "crop": "scale"
+      },
+      {
+        "fetch_format": "auto"
+      }
+    ]
+  }
+}
+
 @router.post('/', name='Create Photo',
-             response_model=PhotoResponse,
+             response_model=PhotoResponse, 
              status_code=status.HTTP_201_CREATED,
              dependencies=[Depends(allowed_create)])
 # accsess - admin, authenticated users
 async def create_photo(photo: UploadFile = File(),
                        description: str | None = None,
                        tags: str = None,
+                       transformation: str = default_transf,
+                       save_filter: bool = Query(default=False),
+                       filter_name: Optional[str] = Query(default=None),
+                       filter_description: Optional[str] = Query(default=None),
                        db: Session = Depends(get_db),
                        current_user: User = Depends(auth_service.get_current_user)):
     url, public_id = upload_photo(photo)
+    url_transf = await create_transformation(transformation,
+                                save_filter,
+                                filter_name,
+                                filter_description,
+                                current_user.id,
+                                current_user.role) 
     photo = await repository_photos.add_photo(url, public_id, description, tags, db, current_user)
     return photo
 
