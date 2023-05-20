@@ -1,25 +1,21 @@
 import json
 import types
 from fastapi import Depends, status, APIRouter, File, UploadFile, Query, HTTPException
-from pydantic import Field, Json
 from sqlalchemy.orm import Session
-from typing import Annotated, Optional, List, ClassVar, Type
+from typing import Optional
 from src.repository.photo_transformations import create_transformation
 
 from src.database.db import get_db
 from src.database.models import User, Role
 from src.repository import photos as repository_photos
-from src.schemas.photos import PhotoResponse, PhotoUpdate, PhotoQRCodeResponse
-from src.schemas.tags import TagModel
+from src.schemas.photos import PhotoResponse, PhotoQRCodeResponse
 from src.services.auth import auth_service
 from src.services.photos import upload_photo
 import src.conf.messages as messages
 from src.services.roles import RoleAccess
 from src.repository import rates as repository_rates
-from src.schemas.photo_transformations import (
-    PhotoTransformationModelDb,
-    PhotoTransformationModel,
-    NewDescTransformationModel)
+from src.schemas.photo_transformations import PhotoTransformationModel
+    
 
 router = APIRouter(prefix='/photos', tags=['photos'])
 
