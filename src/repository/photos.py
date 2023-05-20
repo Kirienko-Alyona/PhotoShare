@@ -83,21 +83,22 @@ async def update_tags_descriptions_for_photo(photo_id: int,
     db.refresh(photo)
     return photo
 
+
 async def untach_tag(photo_id: int,
                      tags: str,
                      db: Session,
                      user: User):
-    photo = await get_photo_by_id(photo_id, db, user)
-    if not photo:
-        return None
-    tag_list_to_del = repository_tags.handler_tags(tags)
-    old_list_tags = photo.tags
-    for tag_name in tag_list_to_del:
-        tag = await repository_tags.get_tag_name(tag_name, db)
-        if tag:
-            [photo.tags.remove(tag_) for tag_ in old_list_tags if tag_name in tag_.tag_name]
-            db.commit()
-            db.refresh(photo)
-        else:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.TAG_NOT_FOUND)
-    return photo
+    photo = await get_photo_by_id_oper(photo_id, db)
+    if photo and ((photo.user_id == user.id) or (user.roles == Role.admin)):
+        tag_list_to_del = repository_tags.handler_tags(tags)
+        old_list_tags = photo.tags
+        for tag_name in tag_list_to_del:
+            tag = await repository_tags.get_tag_name(tag_name, db)
+            if tag:
+                [photo.tags.remove(tag_) for tag_ in old_list_tags if tag_name in tag_.tag_name]
+                db.commit()
+                db.refresh(photo)
+            else:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.TAG_NOT_FOUND)
+        return photo
+    return None
