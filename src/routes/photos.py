@@ -30,31 +30,6 @@ allowed_update = RoleAccess([Role.admin, Role.user])
 allowed_delete = RoleAccess([Role.admin, Role.moderator, Role.user])
 
 
-default_transf = {
-  "photo_id": 1,
-  "description": "Photo with cool effect",
-  "transformation": {
-    "preset": [
-      {
-        "gravity": "face",
-        "height": 400,
-        "width": 400,
-        "crop": "crop"
-      },
-      {
-        "radius": "max"
-      },
-      {
-        "width": 200,
-        "crop": "scale"
-      },
-      {
-        "fetch_format": "auto"
-      }
-    ]
-  }
-}
-
 @router.post('/', name='Create Photo',
              response_model=PhotoResponse, 
              status_code=status.HTTP_201_CREATED,
@@ -64,8 +39,6 @@ async def create_photo(photo: UploadFile = File(),
                        description: str | None = None,
                        tags: str = None,
                        data: str = PhotoTransformationModel.Config.schema_extra["example"],
-                        #transformation: str = Field(default=default_transf),
-                       #transformation: str = Json[PhotoTransformationModel.Config],
                        save_filter: bool = Query(default=False),
                        filter_name: Optional[str] = Query(default=None),
                        filter_description: Optional[str] = Query(default=None),
