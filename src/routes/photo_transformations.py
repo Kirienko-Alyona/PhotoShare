@@ -51,9 +51,9 @@ async def create_transformation(transformation: PhotoTransformationModel,
     return transformation
 
 
-@router.post('/{photo_id}', 
+@router.post('/filter_by/{photo_id}', 
              response_model=PhotoTransformationModelDb,
-             name='Create Photo Transformation From Preset', 
+             name='Create Photo Transformation From Filter ', 
              status_code=status.HTTP_201_CREATED,
              dependencies=[Depends(allowed_create)])
 async def create_transformation_from_preset(photo_id: int, 
