@@ -36,8 +36,10 @@ async def get_photos_by_tag_name(tag_name: str, limit: int, offset: int, db: Ses
 
 
 async def get_photo_by_id(photo_id: int, db: Session, user: User):
-    photo = db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).first()
-    return photo
+    photo = await get_photo_by_id_oper(photo_id, db)
+    if photo and ((photo.user_id == user.id) or (user.roles == Role.admin)):
+        return photo
+    return None
 
 
 # operational function for backend
@@ -69,33 +71,34 @@ async def update_tags_descriptions_for_photo(photo_id: int,
                                              db: Session,
                                              user: User):
     photo = await get_photo_by_id_oper(photo_id, db)
-    if not photo and ((photo.user_id != user.id) or (user.roles != Role.admin)):
-        return None
-    if tags is not None:
-        new_tags_list = await repository_tags.update_tags(tags, photo_id, db, user=user)
-        photo.tags = new_tags_list
-    if new_description is not None:
-        db.query(Photo).filter(Photo.id == photo_id).update({
-            'description': new_description})
-    db.commit()
-    db.refresh(photo)
-    return photo
+    if photo and ((photo.user_id == user.id) or (user.roles == Role.admin)):
+        if tags is not None:
+            new_tags_list = await repository_tags.update_tags(tags, photo_id, db, user=user)
+            photo.tags = new_tags_list
+        if new_description is not None:
+            db.query(Photo).filter(Photo.id == photo_id).update({
+                'description': new_description})
+        db.commit()
+        db.refresh(photo)
+        return photo
+    return None
+
 
 async def untach_tag(photo_id: int,
                      tags: str,
                      db: Session,
                      user: User):
-    photo = await get_photo_by_id(photo_id, db, user)
-    if not photo:
-        return None
-    tag_list_to_del = repository_tags.handler_tags(tags)
-    old_list_tags = photo.tags
-    for tag_name in tag_list_to_del:
-        tag = await repository_tags.get_tag_name(tag_name, db)
-        if tag:
-            [photo.tags.remove(tag_) for tag_ in old_list_tags if tag_name in tag_.tag_name]
-            db.commit()
-            db.refresh(photo)
-        else:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.TAG_NOT_FOUND)
-    return photo
+    photo = await get_photo_by_id_oper(photo_id, db)
+    if photo and ((photo.user_id == user.id) or (user.roles == Role.admin)):
+        tag_list_to_del = repository_tags.handler_tags(tags)
+        old_list_tags = photo.tags
+        for tag_name in tag_list_to_del:
+            tag = await repository_tags.get_tag_name(tag_name, db)
+            if tag:
+                [photo.tags.remove(tag_) for tag_ in old_list_tags if tag_name in tag_.tag_name]
+                db.commit()
+                db.refresh(photo)
+            else:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.TAG_NOT_FOUND)
+        return photo
+    return None
