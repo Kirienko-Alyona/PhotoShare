@@ -1,3 +1,4 @@
+from datetime import date
 from fastapi import Depends, status, APIRouter, File, UploadFile, Query, HTTPException
 from sqlalchemy.orm import Session
 from typing import Optional, List
@@ -54,27 +55,21 @@ async def generate_qrcode(photo_url: str,
             dependencies=[Depends(allowed_read)])
 # accsess - admin, authenticated users
 async def get_photos(tag_name: Optional[str] = Query(default=None),
+                     rate_min: Optional[float] = Query(default=None),
+                     rate_max: Optional[float] = Query(default=None),
+                     created_at_min: Optional[date] = Query(default=None),
+                     created_at_max: Optional[date] = Query(default=None),
                      limit: int = Query(default=10, ge=1, le=50),
                      offset: int = 0,
                      _: User = Depends(auth_service.get_current_user),
                      db: Session = Depends(get_db)):
-    photos = await repository_photos.get_photos_by_tag_name(tag_name, limit, offset, db)
-    photos_num = len(photos)
-    if photos_num == 0:
+    photos = await repository_photos.get_photos(tag_name, rate_min,
+                                                rate_max, created_at_min, created_at_max,
+                                                limit, offset, db)
+    if len(photos) == 0:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
-    result = []
-    for photo in photos:
-        photo_rating = await repository_rates.get_rating_by_photo_id(photo.id, db)
-        photo_data = {
-            'id': photo.id,
-            'url_photo': photo.url_photo,
-            'description': photo.description,
-            'tags': photo.tags,
-            'rating': photo_rating['average_rate']
-        }
-        result.append(photo_data)
-    return result
+    return photos
 
 
 @router.get('/{photo_id}', name="Get Photos By Id",

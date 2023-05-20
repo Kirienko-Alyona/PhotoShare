@@ -1,3 +1,4 @@
+from datetime import date
 import base64
 import io
 from typing import Optional, List
@@ -5,10 +6,12 @@ from fastapi import HTTPException, Query, status
 from src.conf import messages
 
 import qrcode as qrcode
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
-from src.database.models import User, Photo, Tag, photo_m2m_tag, Role
+from src.database.models import User, Photo, Tag, photo_m2m_tag, Role, Rate
 from src.repository import tags as repository_tags
+from src.schemas.photos import PhotoResponse
 from src.schemas.tags import TagModel
 
 
@@ -26,13 +29,40 @@ async def add_photo(url: str,
     return photo
 
 
-async def get_photos_by_tag_name(tag_name: str, limit: int, offset: int, db: Session) -> Optional[List[Photo]]:
-    if tag_name is not None:
-        tag = await repository_tags.get_tag_name(tag_name, db)
-        photo_list = tag.photos
-        return photo_list
-    photos = db.query(Photo).limit(limit).offset(offset).all()
-    return photos
+async def get_photos(tag_name: str,
+                     rate_min: float ,
+                     rate_max: float,
+                     created_at_min: date,
+                     created_at_max: date,
+                     limit: int, offset: int, db: Session) -> Optional[List[PhotoResponse]]:
+    if tag_name is None:
+        photos = db.query(Photo.id,
+                          Photo.url_photo,
+                          Photo.description,
+                          func.avg(Rate.rate)) \
+            .outerjoin(Rate)\
+            .group_by(Photo.id, Photo.url_photo, Photo.description)
+    else:
+        photos = db.query(Photo.id,
+                          Photo.url_photo,
+                          Photo.description,
+                          func.avg(Rate.rate)) \
+            .join(Tag.photos).outerjoin(Rate) \
+            .filter(Tag.tag_name == tag_name) \
+            .group_by(Photo.id, Photo.url_photo, Photo.description)
+    if created_at_min and created_at_max:
+        photos = photos.filter(func.DATE(Photo.created_at) >= created_at_min).\
+            filter(func.DATE(Photo.created_at) <= created_at_max)
+    if rate_min and rate_max:
+        photos = photos.having(func.avg(Rate.rate).between(rate_min, rate_max))
+
+    tmp_result = photos.limit(limit).offset(offset).all()
+    result = []
+    for row in tmp_result:
+        ph = PhotoResponse(id=row[0], url_photo=row[1], description=row[2], rating=row[3])
+        ph.tags = db.query(Tag.id, Tag.tag_name).select_from(Photo).join(Tag.photos).filter(Photo.id == row[0]).all()
+        result.append(ph)
+    return result
 
 
 async def get_photo_by_id(photo_id: int, db: Session, user: User):
