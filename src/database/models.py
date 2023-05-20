@@ -52,6 +52,8 @@ class Photo(Base):
     description = Column(String(255), nullable=True)
     transformations = relationship('PhotoTransformation', cascade='all, delete-orphan', back_populates='original_photo')
     tags = relationship('Tag', secondary=photo_m2m_tag, back_populates='photos')
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
 
 class Tag(Base):
