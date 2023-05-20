@@ -19,7 +19,7 @@ allowed_update = RoleAccess([Role.admin, Role.moderator, Role.user])
 allowed_delete = RoleAccess([Role.admin, Role.moderator, Role.user])
 
 
-@router.get('/', response_model=Optional[List[PhotoFilterDbModel]],
+@router.get('/me/', response_model=Optional[List[PhotoFilterDbModel]],
             name='Get photo filters by user',
             dependencies=[Depends(allowed_read)])
 async def get_photos_filters(db: Session = Depends(get_db),
