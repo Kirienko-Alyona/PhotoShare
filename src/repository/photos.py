@@ -36,8 +36,10 @@ async def get_photos_by_tag_name(tag_name: str, limit: int, offset: int, db: Ses
 
 
 async def get_photo_by_id(photo_id: int, db: Session, user: User):
-    photo = db.query(Photo).filter(Photo.id == photo_id, Photo.user_id == user.id).first()
-    return photo
+    photo = await get_photo_by_id_oper(photo_id, db)
+    if photo and ((photo.user_id == user.id) or (user.roles == Role.admin)):
+        return photo
+    return None
 
 
 # operational function for backend
