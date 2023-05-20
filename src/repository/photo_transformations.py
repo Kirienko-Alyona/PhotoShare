@@ -3,6 +3,7 @@ from typing import Optional, Type, List
 from fastapi import HTTPException, status
 
 from sqlalchemy.orm import Session
+from src.repository.photos import get_photo_by_id_oper
 
 import src.conf.messages as message
 from src.database.models import PhotoTransformation, Photo, Role

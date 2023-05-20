@@ -1,6 +1,9 @@
+import json
+import types
 from fastapi import Depends, status, APIRouter, File, UploadFile, Query, HTTPException
+from pydantic import Field, Json
 from sqlalchemy.orm import Session
-from typing import Optional, List
+from typing import Annotated, Optional, List, ClassVar, Type
 from src.repository.photo_transformations import create_transformation
 
 from src.database.db import get_db
@@ -60,20 +63,31 @@ default_transf = {
 async def create_photo(photo: UploadFile = File(),
                        description: str | None = None,
                        tags: str = None,
-                       transformation: str = default_transf,
+                       data: str = PhotoTransformationModel.Config.schema_extra["example"],
+                        #transformation: str = Field(default=default_transf),
+                       #transformation: str = Json[PhotoTransformationModel.Config],
                        save_filter: bool = Query(default=False),
                        filter_name: Optional[str] = Query(default=None),
                        filter_description: Optional[str] = Query(default=None),
                        db: Session = Depends(get_db),
                        current_user: User = Depends(auth_service.get_current_user)):
     url, public_id = upload_photo(photo)
-    url_transf = await create_transformation(transformation,
+    try:
+        if type(data) == str:
+            data = json.loads(data)
+        data = types.SimpleNamespace(**data)
+        data.transformation = types.SimpleNamespace(**data.transformation)
+    except:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=messages.BAD_REQUEST)   
+    photo = await repository_photos.add_photo(url, public_id, description, tags, db, current_user)
+    data.photo_id = photo.id
+    url_transf = await create_transformation(data,
                                 save_filter,
                                 filter_name,
                                 filter_description,
                                 current_user.id,
-                                current_user.role) 
-    photo = await repository_photos.add_photo(url, public_id, description, tags, db, current_user)
+                                current_user.roles.value,
+                                db) 
     return photo
 
 
