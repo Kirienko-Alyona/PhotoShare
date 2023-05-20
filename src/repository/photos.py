@@ -29,6 +29,48 @@ async def add_photo(url: str,
     return photo
 
 
+async def get_photos_by_user(user_id: int, cur_user_role: Role,
+                             tag_name: str,
+                             rate_min: float,
+                             rate_max: float,
+                             created_at_min: date,
+                             created_at_max: date,
+                             limit: int, offset: int, db: Session) -> Optional[List[PhotoResponse]]:
+    if cur_user_role not in [Role.admin, Role.moderator]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=messages.FORBIDDEN)
+
+    if tag_name is None:
+        photos = db.query(Photo.id,
+                          Photo.url_photo,
+                          Photo.description,
+                          func.avg(Rate.rate)) \
+            .outerjoin(Rate) \
+            .filter(Photo.user_id == user_id) \
+            .group_by(Photo.id, Photo.url_photo, Photo.description)
+    else:
+        tag_name = tag_name.lower()
+        photos = db.query(Photo.id,
+                          Photo.url_photo,
+                          Photo.description,
+                          func.avg(Rate.rate)) \
+            .join(Tag.photos).outerjoin(Rate) \
+            .filter(Photo.user_id == user_id).filter(func.lower(Tag.tag_name) == tag_name) \
+            .group_by(Photo.id, Photo.url_photo, Photo.description)
+    if created_at_min and created_at_max:
+        photos = photos.filter(func.DATE(Photo.created_at) >= created_at_min).\
+            filter(func.DATE(Photo.created_at) <= created_at_max)
+    if rate_min and rate_max:
+        photos = photos.having(func.avg(Rate.rate).between(rate_min, rate_max))
+
+    tmp_result = photos.limit(limit).offset(offset).all()
+    result = []
+    for row in tmp_result:
+        ph = PhotoResponse(id=row[0], url_photo=row[1], description=row[2], rating=row[3])
+        ph.tags = db.query(Tag.id, Tag.tag_name).select_from(Photo).join(Tag.photos).filter(Photo.id == row[0]).all()
+        result.append(ph)
+    return result
+
+
 async def get_photos(tag_name: str,
                      rate_min: float ,
                      rate_max: float,
