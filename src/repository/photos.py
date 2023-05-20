@@ -1,15 +1,14 @@
 import base64
 import io
 from typing import Optional, List
-from fastapi import HTTPException, Query, status
+from fastapi import HTTPException, status
 from src.conf import messages
 
 import qrcode as qrcode
 from sqlalchemy.orm import Session
 
-from src.database.models import User, Photo, Tag, photo_m2m_tag, Role
+from src.database.models import User, Photo, Role
 from src.repository import tags as repository_tags
-from src.schemas.tags import TagModel
 
 
 async def add_photo(url: str,
