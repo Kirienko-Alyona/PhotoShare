@@ -17,7 +17,7 @@ class PhotoResponse(BaseModel):
     description: str | None = Field(
         default=None, title="The description of the Photo", max_length=constants.MAX_LENGTH_PHOTO_DESCRIPTION)
     tags: Optional[List[TagResponse]]
-    rating: Optional[PhotoRatingResponse] = None
+    rating: float = None
 
     class Config:
         orm_mode = True
