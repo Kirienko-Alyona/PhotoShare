@@ -12,11 +12,6 @@ async def get_tags(db: Session) -> List[Type[Tag]]:
     return db.query(Tag).all()
 
 
-async def get_tags_by_user_id(photo_id: int, db: Session, user: User):
-    tags = await repository_photos.get_photo_by_id(photo_id, db, user)
-    return tags
-
-
 def handler_tags(tags: str) -> List[Type[Tag]]:
     tags_list = tags.lower().replace(r", ", " ").replace(r",", " ").strip().split(" ")
     for i in range(len(tags_list)):
@@ -60,8 +55,8 @@ async def add_tags_for_photo(tags: str, db: Session, user: User) -> List[Tag]:
 
 async def update_tags(new_tags: str, photo_id, db: Session, user: User) -> List[Tag]:
     new_tag_list = []
-    tags = await get_tags_by_user_id(photo_id, db, user)
-    old_tag_list = tags.tags
+    photo = await repository_photos.get_photo_by_id(photo_id, db, user)
+    old_tag_list = photo.tags
     if len(old_tag_list) < 5:
         new_tag_list = await add_tags_for_photo(new_tags, db, user)
         old_tag_list.extend(new_tag_list)
