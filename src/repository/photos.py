@@ -43,12 +43,13 @@ async def get_photos(tag_name: str,
             .outerjoin(Rate)\
             .group_by(Photo.id, Photo.url_photo, Photo.description)
     else:
+        tag_name = tag_name.lower()
         photos = db.query(Photo.id,
                           Photo.url_photo,
                           Photo.description,
                           func.avg(Rate.rate)) \
             .join(Tag.photos).outerjoin(Rate) \
-            .filter(Tag.tag_name == tag_name) \
+            .filter(func.lower(Tag.tag_name) == tag_name) \
             .group_by(Photo.id, Photo.url_photo, Photo.description)
     if created_at_min and created_at_max:
         photos = photos.filter(func.DATE(Photo.created_at) >= created_at_min).\
