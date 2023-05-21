@@ -58,7 +58,8 @@ async def create_transformation_from_preset(filter_id: int, photo_id: int, descr
     new_transformation = PhotoTransformation()
     new_transformation.photo_id = photo_id
     new_transformation.transformed_url = build_transformed_url(public_id, transformation)
-    new_transformation.description = description.description
+    if description is not None:
+        new_transformation.description = description.description
 
     db.add(new_transformation)
     db.commit()
@@ -78,7 +79,8 @@ async def create_transformation(data: PhotoTransformationModel,
     if save_filter:
         if not filter_name:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=message.BAD_REQUEST)
-        ph_filter = PhotoFilterModel(name=filter_name, description=filter_description, preset=data.transformation.preset)
+        ph_filter = PhotoFilterModel(name=filter_name, description=filter_description,
+                                     preset=data.transformation.preset)
         await create_photo_filter(ph_filter, user_id, db)
 
     public_id = await get_photo_public_id(data.photo_id, db)
