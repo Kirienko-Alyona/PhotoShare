@@ -34,29 +34,35 @@ allowed_delete = RoleAccess([Role.admin, Role.moderator, Role.user])
 async def create_photo(photo: UploadFile = File(),
                        description: str | None = None,
                        tags: str = None,
-                       data: str = PhotoTransformationModel.Config.schema_extra["example"],
+                       has_trans: bool = False,
+                       transformation: str = PhotoTransformationModel.Config.schema_extra['example'],
                        save_filter: bool = Query(default=False),
                        filter_name: Optional[str] = Query(default=None),
                        filter_description: Optional[str] = Query(default=None),
                        db: Session = Depends(get_db),
                        current_user: User = Depends(auth_service.get_current_user)):
     url, public_id = upload_photo(photo)
-    try:
-        if type(data) == str:
-            data = json.loads(data)
-        data = types.SimpleNamespace(**data)
-        data.transformation = types.SimpleNamespace(**data.transformation)
-    except:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=messages.BAD_REQUEST)   
     photo = await repository_photos.add_photo(url, public_id, description, tags, db, current_user)
-    data.photo_id = photo.id
-    url_transf = await create_transformation(data,
-                                save_filter,
-                                filter_name,
-                                filter_description,
-                                current_user.id,
-                                current_user.roles.value,
-                                db) 
+    if has_trans:
+        try:
+            if type(transformation) == str:
+                transformation = transformation.replace('\'', '\"')
+                transformation = json.loads(transformation)
+            if transformation.get("transformation"):
+                transformation_obj = types.SimpleNamespace(**transformation)
+                transformation_obj.transformation = types.SimpleNamespace(**transformation_obj.transformation)
+            
+                transformation_obj.photo_id = photo.id
+                url_transf = await create_transformation(transformation_obj,
+                                    save_filter,
+                                    filter_name,
+                                    filter_description,
+                                    current_user.id,
+                                    current_user.roles.value,
+                                    db) 
+        except:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=messages.BAD_REQUEST)   
+        
     return photo
 
 
