@@ -8,11 +8,30 @@ from src.conf import messages
 import qrcode as qrcode
 from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.query import Query
 
 from src.database.models import User, Photo, Tag, photo_m2m_tag, Role, Rate
 from src.repository import tags as repository_tags
 from src.schemas.photos import PhotoResponse
 from src.schemas.tags import TagModel
+
+
+class PhotoFilteringOptions:
+    def __init__(self, rate_min: float = None,
+                 rate_max: float = None, created_at_min: date = None, created_at_max: date = None):
+        self.rate_min = rate_min
+        self.rate_max = rate_max
+        self.created_at_min = created_at_min
+        self.created_at_max = created_at_max
+
+
+async def filter_for_photo_query(photo_query: Query, f_o: PhotoFilteringOptions) -> Query:
+    if f_o.created_at_min and f_o.created_at_max:
+        photo_query = photo_query.filter(func.DATE(Photo.created_at) >= f_o.created_at_min).\
+            filter(func.DATE(Photo.created_at) <= f_o.created_at_max)
+    if f_o.rate_min and f_o.rate_max:
+        photo_query = photo_query.having(func.avg(Rate.rate).between(f_o.rate_min, f_o.rate_max))
+    return photo_query
 
 
 async def add_photo(url: str,
@@ -29,15 +48,21 @@ async def add_photo(url: str,
     return photo
 
 
-async def get_photos_by_user(user_id: int, cur_user_role: Role,
+async def get_photos_by_user(user_id: int,
+                             cur_user_id,
+                             cur_user_role: Role,
                              tag_name: str,
                              rate_min: float,
                              rate_max: float,
                              created_at_min: date,
                              created_at_max: date,
                              limit: int, offset: int, db: Session) -> Optional[List[PhotoResponse]]:
-    if cur_user_role not in [Role.admin, Role.moderator]:
+    allowed = cur_user_role in [Role.admin, Role.moderator] or user_id == cur_user_id
+
+    if not allowed:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=messages.FORBIDDEN)
+
+    f_o = PhotoFilteringOptions(rate_min, rate_max, created_at_min, created_at_max)
 
     if tag_name is None:
         photos = db.query(Photo.id,
@@ -56,11 +81,8 @@ async def get_photos_by_user(user_id: int, cur_user_role: Role,
             .join(Tag.photos).outerjoin(Rate) \
             .filter(Photo.user_id == user_id).filter(func.lower(Tag.tag_name) == tag_name) \
             .group_by(Photo.id, Photo.url_photo, Photo.description)
-    if created_at_min and created_at_max:
-        photos = photos.filter(func.DATE(Photo.created_at) >= created_at_min).\
-            filter(func.DATE(Photo.created_at) <= created_at_max)
-    if rate_min and rate_max:
-        photos = photos.having(func.avg(Rate.rate).between(rate_min, rate_max))
+
+    photos = await(filter_for_photo_query(photos, f_o))
 
     tmp_result = photos.limit(limit).offset(offset).all()
     result = []
@@ -93,11 +115,9 @@ async def get_photos(tag_name: str,
             .join(Tag.photos).outerjoin(Rate) \
             .filter(func.lower(Tag.tag_name) == tag_name) \
             .group_by(Photo.id, Photo.url_photo, Photo.description)
-    if created_at_min and created_at_max:
-        photos = photos.filter(func.DATE(Photo.created_at) >= created_at_min).\
-            filter(func.DATE(Photo.created_at) <= created_at_max)
-    if rate_min and rate_max:
-        photos = photos.having(func.avg(Rate.rate).between(rate_min, rate_max))
+
+    f_o = PhotoFilteringOptions(rate_min, rate_max, created_at_min, created_at_max)
+    photos = await(filter_for_photo_query(photos, f_o))
 
     tmp_result = photos.limit(limit).offset(offset).all()
     result = []

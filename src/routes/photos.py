@@ -86,7 +86,7 @@ async def get_photos_by_user(user_id: int,
                              offset: int = 0,
                              cur_user: User = Depends(auth_service.get_current_user),
                              db: Session = Depends(get_db)):
-    photos = await repository_photos.get_photos_by_user(user_id, cur_user.roles, tag_name, rate_min,
+    photos = await repository_photos.get_photos_by_user(user_id, cur_user.id, cur_user.roles, tag_name, rate_min,
                                                         rate_max, created_at_min, created_at_max,
                                                         limit, offset, db)
     if len(photos) == 0:
