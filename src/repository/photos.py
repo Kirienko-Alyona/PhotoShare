@@ -1,14 +1,52 @@
+from datetime import date
 import base64
 import io
-from typing import Optional, List
-from fastapi import HTTPException, status
+from typing import Optional, List, Tuple
+from fastapi import HTTPException, Query, status
 from src.conf import messages
 
 import qrcode as qrcode
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.query import Query
 
-from src.database.models import User, Photo, Role
+from src.database.models import User, Photo, Role, Rate
 from src.repository import tags as repository_tags
+from src.repository.tags import handler_tags
+from src.schemas.photos import PhotoResponse
+from src.schemas.tags import TagModel
+
+
+class PhotoFilteringOptions:
+    def __init__(self, user_id: int, rate_min: float = None,
+                 rate_max: float = None, created_at_min: date = None, created_at_max: date = None):
+        self.user_id = user_id
+        self.rate_min = rate_min
+        self.rate_max = rate_max
+        self.created_at_min = created_at_min
+        self.created_at_max = created_at_max
+
+
+async def filter_for_photo_query(photo_query: Query, filter_options: PhotoFilteringOptions) -> Query:
+    if filter_options.user_id:
+        photo_query = photo_query.filter(Photo.user_id == filter_options.user_id)
+    if filter_options.created_at_min and filter_options.created_at_max:
+        photo_query = photo_query.filter(func.DATE(Photo.created_at) >= filter_options.created_at_min).\
+            filter(func.DATE(Photo.created_at) <= filter_options.created_at_max)
+    if filter_options.rate_min and filter_options.rate_max:
+        photo_query = photo_query.having(func.avg(Rate.rate).between(filter_options.rate_min, filter_options.rate_max))
+    return photo_query
+
+
+async def foto_response_create(photos: List[Tuple], db: Session) -> Optional[List[PhotoResponse]]:
+    result = []
+    if photos:
+        for row in photos:
+            ph = PhotoResponse(id=row[0], url_photo=row[1], description=row[2], rating=row[3])
+            ph.tags = db.query(Tag.id, Tag.tag_name).select_from(Photo).join(Tag.photos)\
+                .filter(Photo.id == row[0]).all()
+            result.append(ph)
+    return result
 
 
 async def add_photo(url: str,
@@ -25,13 +63,44 @@ async def add_photo(url: str,
     return photo
 
 
-async def get_photos_by_tag_name(tag_name: str, limit: int, offset: int, db: Session) -> Optional[List[Photo]]:
-    if tag_name is not None:
-        tag = await repository_tags.get_tag_name(tag_name, db)
-        photo_list = tag.photos
-        return photo_list
-    photos = db.query(Photo).limit(limit).offset(offset).all()
-    return photos
+async def get_photos(user_id: int,
+                     cur_user_id,
+                     cur_user_role: Role,
+                     tag_name: str,
+                     rate_min: float,
+                     rate_max: float,
+                     created_at_min: date,
+                     created_at_max: date,
+                     limit: int, offset: int, db: Session) -> Optional[List[PhotoResponse]]:
+    if user_id:
+        allowed = cur_user_role in [Role.admin, Role.moderator] or user_id == cur_user_id
+
+        if not allowed:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=messages.FORBIDDEN)
+
+    filter_options = PhotoFilteringOptions(user_id, rate_min, rate_max, created_at_min, created_at_max)
+
+    if tag_name is None:
+        photos = db.query(Photo.id,
+                          Photo.url_photo,
+                          Photo.description,
+                          func.avg(Rate.rate)) \
+            .outerjoin(Rate) \
+            .group_by(Photo.id, Photo.url_photo, Photo.description)
+    else:
+        tag_name = handler_tags(tag_name)[0]
+
+        photos = db.query(Photo.id,
+                          Photo.url_photo,
+                          Photo.description,
+                          func.avg(Rate.rate)) \
+            .join(Tag.photos).outerjoin(Rate) \
+            .filter(func.lower(Tag.tag_name) == tag_name) \
+            .group_by(Photo.id, Photo.url_photo, Photo.description)
+
+    photos = await(filter_for_photo_query(photos, filter_options))
+
+    return await foto_response_create(photos.limit(limit).offset(offset).all(), db)
 
 
 async def get_photo_by_id(photo_id: int, db: Session, user: User):

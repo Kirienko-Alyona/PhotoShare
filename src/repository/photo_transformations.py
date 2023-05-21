@@ -79,7 +79,8 @@ async def create_transformation(data: PhotoTransformationModel,
     if save_filter:
         if not filter_name:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=message.BAD_REQUEST)
-        ph_filter = PhotoFilterModel(name=filter_name, description=filter_description, preset=data.transformation.preset)
+        ph_filter = PhotoFilterModel(name=filter_name, description=filter_description,
+                                     preset=data.transformation.preset)
         await create_photo_filter(ph_filter, user_id, db)
 
     public_id = await get_photo_public_id(data.photo_id, db)
