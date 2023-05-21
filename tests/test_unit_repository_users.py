@@ -20,10 +20,17 @@ class TestContacts(unittest.IsolatedAsyncioTestCase):
         self.assertIsInstance(result, list)
         self.assertEqual(result, users)
 
-    async def test_get_users_by_id(self):
+    async def test_get_user_by_id(self):
         user = User(id=1, username="test")
         self.session.query().filter().first.return_value = user
         result = await repository_users.get_user_by_id(id=user.id, db=self.session)
         self.assertEqual(result.id, user.id)
         self.assertEqual(result.username, user.username)
+
+    async def test_get_user_by_email(self):
+        user = User(id=1, email="test")
+        self.session.query().filter().first.return_value = user
+        result = await repository_users.get_user_by_email(email=user.email, db=self.session)
+        self.assertEqual(result.id, user.id)
+        self.assertEqual(result.email, user.email)
 
