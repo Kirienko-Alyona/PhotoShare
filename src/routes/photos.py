@@ -54,41 +54,19 @@ async def generate_qrcode(photo_url: str,
             response_model=list[PhotoResponse],
             dependencies=[Depends(allowed_read)])
 # accsess - admin, authenticated users
-async def get_photos(tag_name: Optional[str] = Query(default=None),
+async def get_photos(user_id: Optional[int] = Query(default=None),
+                     tag_name: Optional[str] = Query(default=None),
                      rate_min: Optional[float] = Query(default=None),
                      rate_max: Optional[float] = Query(default=None),
                      created_at_min: Optional[date] = Query(default=None),
                      created_at_max: Optional[date] = Query(default=None),
                      limit: int = Query(default=10, ge=1, le=50),
                      offset: int = 0,
-                     _: User = Depends(auth_service.get_current_user),
+                     cur_user: User = Depends(auth_service.get_current_user),
                      db: Session = Depends(get_db)):
-    photos = await repository_photos.get_photos(tag_name, rate_min,
+    photos = await repository_photos.get_photos(user_id, cur_user.id, cur_user.roles, tag_name, rate_min,
                                                 rate_max, created_at_min, created_at_max,
                                                 limit, offset, db)
-    if len(photos) == 0:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
-    return photos
-
-
-@router.get('/{user_id}', name="Get Photos By user id",
-            response_model=list[PhotoResponse],
-            dependencies=[Depends(allowed_read)])
-# accsess - admin, authenticated users
-async def get_photos_by_user(user_id: int,
-                             tag_name: Optional[str] = Query(default=None),
-                             rate_min: Optional[float] = Query(default=None),
-                             rate_max: Optional[float] = Query(default=None),
-                             created_at_min: Optional[date] = Query(default=None),
-                             created_at_max: Optional[date] = Query(default=None),
-                             limit: int = Query(default=10, ge=1, le=50),
-                             offset: int = 0,
-                             cur_user: User = Depends(auth_service.get_current_user),
-                             db: Session = Depends(get_db)):
-    photos = await repository_photos.get_photos_by_user(user_id, cur_user.id, cur_user.roles, tag_name, rate_min,
-                                                        rate_max, created_at_min, created_at_max,
-                                                        limit, offset, db)
     if len(photos) == 0:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
