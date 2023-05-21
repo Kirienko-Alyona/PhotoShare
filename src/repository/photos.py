@@ -10,7 +10,7 @@ from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.query import Query
 
-from src.database.models import User, Photo, Tag, photo_m2m_tag, Role, Rate
+from src.database.models import User, Photo, Tag, Role, Rate
 from src.repository import tags as repository_tags
 from src.repository.tags import handler_tags
 from src.schemas.photos import PhotoResponse
