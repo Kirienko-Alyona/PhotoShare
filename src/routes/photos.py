@@ -95,8 +95,6 @@ async def get_photos_by_user(user_id: int,
     return photos
 
 
-
-
 @router.get('/{photo_id}', name="Get Photos By Id",
             response_model=PhotoResponse,
             dependencies=[Depends(allowed_read)])
