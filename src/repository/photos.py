@@ -88,7 +88,6 @@ async def get_photos(user_id: int,
             .outerjoin(Rate) \
             .group_by(Photo.id, Photo.url_photo, Photo.description)
     else:
-        # tag_name = (tag_name if tag_name.startswith("#") else '#' + tag_name).lower()
         tag_name = handler_tags(tag_name)[0]
 
         photos = db.query(Photo.id,
