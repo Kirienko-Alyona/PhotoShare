@@ -121,7 +121,7 @@ async def singup(body: UserModel,
 
     background_tasks.add_task(send_email, new_user.email,
                               new_user.username,
-                              request.base_url) #subject='Confirm email', template_name='email_template.html'
+                              request.base_url)
     return {'user': new_user, 'detail': messages.USER_SUCCESSFULLY_CREATED}
 
 
