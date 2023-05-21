@@ -7,6 +7,7 @@ from fastapi.exceptions import HTTPException
 from src.database.models import User, Role
 from src.conf import messages
 from src.repository import users as repository_users
+from src.schemas.users import UserModel
 
 
 class TestContacts(unittest.IsolatedAsyncioTestCase):
@@ -33,4 +34,12 @@ class TestContacts(unittest.IsolatedAsyncioTestCase):
         result = await repository_users.get_user_by_email(email=user.email, db=self.session)
         self.assertEqual(result.id, user.id)
         self.assertEqual(result.email, user.email)
+
+    async def test_create_user(self):
+        body = UserModel(username="username", email="test@mail.com", password="123456")
+        result = await repository_users.create_user(body, db=self.session)
+        self.assertEqual(result.username, body.username)
+        self.assertEqual(result.email, body.email)
+        self.assertEqual(result.password, body.password)
+        self.assertTrue(hasattr(result, "id"))
 
