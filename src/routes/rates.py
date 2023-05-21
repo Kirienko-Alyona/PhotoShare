@@ -67,7 +67,7 @@ async def get_rating_by_photo_id(photo_id: int = Path(ge=1),
     return rates
 
 
-@router.delete("/detail", name="Delete User's Photo Rating", 
+@router.delete("/", name="Delete User's Photo Rating", 
                status_code=status.HTTP_204_NO_CONTENT,
                dependencies=[Depends(allowed_delete)])
 async def remove_rate(body: RateDeleteModel, 

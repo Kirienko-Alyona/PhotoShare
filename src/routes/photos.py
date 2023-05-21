@@ -106,7 +106,7 @@ async def get_photos(user_id: Optional[int] = Query(default=None),
     photos = await repository_photos.get_photos(user_id, cur_user.id, cur_user.roles, tag_name, rate_min,
                                                 rate_max, created_at_min, created_at_max,
                                                 limit, offset, db)
-    if len(photos) == 0:
+    if not photos:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
     return photos

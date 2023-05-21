@@ -8,7 +8,6 @@ from src.database.models import Tag, User, Photo, Role
 from src.conf import messages
 from src.repository.tags import (
     get_tags,
-    get_tags_by_user_id,
     handler_tags,
     get_tag_name,
     add_tag,
@@ -27,13 +26,6 @@ class TestContacts(unittest.IsolatedAsyncioTestCase):
         self.session.query().all.return_value = tags
         result = await get_tags(db=self.session)
         self.assertEqual(result, tags)
-
-    async def test_get_tags_by_user_id(self):
-        photo = Photo(id=1)
-        user = User(id=1, roles=Role.admin)
-        self.session.query().filter().first.return_value = photo
-        result = await get_tags_by_user_id(photo_id=1, db=self.session, user=user)
-        self.assertEqual(result, photo)
 
     def test_handler_tags(self):
         result = handler_tags("test1")
@@ -92,13 +84,23 @@ class TestContacts(unittest.IsolatedAsyncioTestCase):
 
     async def test_update_tags_to_many_tags(self):
         tag_name = "test"
+        tag = Tag()
         photo = Photo(id=1, tags=[Tag() for _ in range(5)])
         user = User(id=1, roles=Role.admin)
-        self.session.query().filter().first.return_value = photo
+        self.session.query(Photo).filter().first.return_value = photo
         try:
             await update_tags(new_tags=tag_name, photo_id=photo.id, db=self.session, user=user)
         except HTTPException as error:
             self.assertEqual(error.detail, messages.TOO_MANY_TAGS_UNDER_THE_PHOTO)
+
+    async def test_update_tags(self):
+        tag_name = "test2"
+        tag = Tag()
+        photo = Photo()
+        user = User(id=1, roles=Role.admin)
+        self.session.side_effect = [photo, tag]
+        result = await update_tags(new_tags=tag_name, photo_id=photo.id, db=self.session, user=user)
+        self.assertIsInstance(result, MagicMock)
 
     async def test_delete_tag(self):
         number = 1
