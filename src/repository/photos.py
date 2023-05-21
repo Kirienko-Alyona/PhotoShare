@@ -27,14 +27,14 @@ class PhotoFilteringOptions:
         self.created_at_max = created_at_max
 
 
-async def filter_for_photo_query(photo_query: Query, f_o: PhotoFilteringOptions) -> Query:
-    if f_o.user_id:
-        photo_query = photo_query.filter(Photo.user_id == f_o.user_id)
-    if f_o.created_at_min and f_o.created_at_max:
-        photo_query = photo_query.filter(func.DATE(Photo.created_at) >= f_o.created_at_min).\
-            filter(func.DATE(Photo.created_at) <= f_o.created_at_max)
-    if f_o.rate_min and f_o.rate_max:
-        photo_query = photo_query.having(func.avg(Rate.rate).between(f_o.rate_min, f_o.rate_max))
+async def filter_for_photo_query(photo_query: Query, filter_options: PhotoFilteringOptions) -> Query:
+    if filter_options.user_id:
+        photo_query = photo_query.filter(Photo.user_id == filter_options.user_id)
+    if filter_options.created_at_min and filter_options.created_at_max:
+        photo_query = photo_query.filter(func.DATE(Photo.created_at) >= filter_options.created_at_min).\
+            filter(func.DATE(Photo.created_at) <= filter_options.created_at_max)
+    if filter_options.rate_min and filter_options.rate_max:
+        photo_query = photo_query.having(func.avg(Rate.rate).between(filter_options.rate_min, filter_options.rate_max))
     return photo_query
 
 
