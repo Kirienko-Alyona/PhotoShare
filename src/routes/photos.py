@@ -3,7 +3,7 @@ import types
 from fastapi import Depends, status, APIRouter, File, UploadFile, Query, HTTPException
 from sqlalchemy.orm import Session
 from typing import Optional
-from src.repository.photo_transformations import create_transformation
+from src.repository.photo_transformations import create_transformation, create_transformation_from_preset
 
 from src.database.db import get_db
 from src.database.models import User, Role
@@ -39,6 +39,7 @@ async def create_photo(photo: UploadFile = File(),
                        save_filter: bool = Query(default=False),
                        filter_name: Optional[str] = Query(default=None),
                        filter_description: Optional[str] = Query(default=None),
+                       filter_id: int = None,
                        db: Session = Depends(get_db),
                        current_user: User = Depends(auth_service.get_current_user)):
     url, public_id = upload_photo(photo)
@@ -61,7 +62,16 @@ async def create_photo(photo: UploadFile = File(),
                                     current_user.roles.value,
                                     db) 
         except:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=messages.BAD_REQUEST)   
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=messages.BAD_REQUEST)  
+    if filter_id:
+        photo_id = photo.id
+        transformation = await \
+        create_transformation_from_preset(filter_id, 
+                                          photo_id, 
+                                          filter_description,
+                                          current_user.id,
+                                          current_user.roles.value, 
+                                          db)     
         
     return photo
 

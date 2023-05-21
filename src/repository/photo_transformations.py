@@ -58,7 +58,8 @@ async def create_transformation_from_preset(filter_id: int, photo_id: int, descr
     new_transformation = PhotoTransformation()
     new_transformation.photo_id = photo_id
     new_transformation.transformed_url = build_transformed_url(public_id, transformation)
-    new_transformation.description = description.description
+    if description is not None:
+        new_transformation.description = description.description
 
     db.add(new_transformation)
     db.commit()
