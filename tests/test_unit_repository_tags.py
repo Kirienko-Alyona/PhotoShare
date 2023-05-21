@@ -84,7 +84,6 @@ class TestContacts(unittest.IsolatedAsyncioTestCase):
 
     async def test_update_tags_to_many_tags(self):
         tag_name = "test"
-        tag = Tag()
         photo = Photo(id=1, tags=[Tag() for _ in range(5)])
         user = User(id=1, roles=Role.admin)
         self.session.query(Photo).filter().first.return_value = photo
