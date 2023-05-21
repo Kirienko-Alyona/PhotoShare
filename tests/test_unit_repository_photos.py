@@ -1,9 +1,11 @@
+import io
 import unittest
 from unittest.mock import MagicMock
 from sqlalchemy.orm import Session
 from src.database.models import Photo, User, Role
 from src.schemas.photos import PhotoResponse
 from src.repository import tags as repository_tags
+import qrcode as qrcode
 from src.repository.photos import (
     add_photo,
     get_photos_by_tag_name,
@@ -106,13 +108,14 @@ class TestContacts(unittest.IsolatedAsyncioTestCase):
                                        user=user)
         self.assertEqual(result, photo)
 
+    # need check
     async def test_update_tags_descriptions_for_photo(self):
         photo = self.photo_test = Photo(
             id=1,
             user_id=self.user.id,
             cloud_public_id=f'ca4598c8749b4237a5f4b9d2583e4045',
             url_photo=f'https://res.cloudinary.com/web9storage/image/upload/v1684580219/ca4598c8749b4237a5f4b9d2583e4045.jpg',
-            description=f'Man jump over a hill',
+            description='New jump',
             tags=[],
         )
         new_descr = 'New jump'
@@ -125,6 +128,30 @@ class TestContacts(unittest.IsolatedAsyncioTestCase):
                                                           tags=tag,
                                                           db=self.session,
                                                           user=self.user)
+        self.assertEqual(result, photo)
+
+    # need check
+    async def test_generate_qrcode(self):
+        qrcode.make = MagicMock(spec=qrcode)
+        io.BytesIO = MagicMock()
+        photo = self.photo_test
+        img = qrcode.make(photo.url_photo)
+        buffer = io.BytesIO
+        # img.save(buffer)
+        result = await generate_qrcode(photo_url=photo.url_photo)
+        self.assertEqual(result['qrcode_encode'], img)
+
+    async def test_untach_tag(self):
+        photo = Photo(
+            id=1,
+            user_id=self.user.id,
+            cloud_public_id=f'ca4598c8749b4237a5f4b9d2583e4045',
+            url_photo=f'https://res.cloudinary.com/web9storage/image/upload/v1684580219/ca4598c8749b4237a5f4b9d2583e4045.jpg',
+            description=f'Man jump over a hill',
+            tags=[],
+        )
+        self.session.query().filter().first.return_value = photo
+        result = await untach_tag(photo_id=photo.id, tags='test', db=self.session, user=self.user)
         self.assertEqual(result, photo)
 
 
