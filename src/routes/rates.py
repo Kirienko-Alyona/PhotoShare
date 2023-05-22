@@ -41,7 +41,7 @@ async def create_rate(body: RateModel,
     return rate
 
 
-@router.get("/{photo_id}",  name="Return Detail Rating By Photo Id",
+@router.get("/{photo_id}",  name="Return Rating By Photo Id",
             response_model=List[RateResponse],
             status_code=status.HTTP_200_OK, 
             dependencies=[Depends(allowed_web_admin_read)])
