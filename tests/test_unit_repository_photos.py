@@ -1,3 +1,4 @@
+import base64
 import io
 import unittest
 from unittest.mock import MagicMock
@@ -18,7 +19,7 @@ from src.repository.photos import (
 )
 
 
-class TestContacts(unittest.IsolatedAsyncioTestCase):
+class TestPhotos(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         self.session = MagicMock(spec=Session)
         self.user = User(id=1,
@@ -132,14 +133,13 @@ class TestContacts(unittest.IsolatedAsyncioTestCase):
 
     # need check
     async def test_generate_qrcode(self):
-        qrcode.make = MagicMock(spec=qrcode)
-        io.BytesIO = MagicMock()
-        photo = self.photo_test
-        img = qrcode.make(photo.url_photo)
-        buffer = io.BytesIO
-        # img.save(buffer)
-        result = await generate_qrcode(photo_url=photo.url_photo)
-        self.assertEqual(result['qrcode_encode'], img)
+        img = qrcode.make(self.photo_test.url_photo)
+        buffer = io.BytesIO()
+        img.save(buffer)
+        qr_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        result = await generate_qrcode(photo_url=self.photo_test.url_photo)
+        self.assertIsInstance(result, dict)
+        self.assertEqual(result["qrcode_encode"], qr_base64)
 
     async def test_untach_tag(self):
         photo = Photo(
@@ -167,8 +167,13 @@ class TestContacts(unittest.IsolatedAsyncioTestCase):
 
     # need check
     async def test_get_photos(self):
-        photos = [self.photo_test]
-        self.session.query().filter().limit().offset().all.return_value = photos
+        photos = [(
+            self.photo_test.id,
+            self.photo_test.url_photo,
+            self.photo_test.description,
+            None
+        )]
+        self.session.query().outerjoin().group_by().limit().offset().all.return_value = photos
         result = await get_photos(user_id=None,
                                   cur_user_id=None,
                                   cur_user_role=Role.user,
@@ -181,7 +186,11 @@ class TestContacts(unittest.IsolatedAsyncioTestCase):
                                   offset=0,
                                   db=self.session
                                   )
-        self.assertEqual(photos, result)
+        self.assertIsInstance(result, list)
+        self.assertEqual(result[0].id, self.photo_test.id)
+        self.assertEqual(result[0].url_photo, self.photo_test.url_photo)
+        self.assertEqual(result[0].description, self.photo_test.description)
+        self.assertIsNone(result[0].rating)
 
 
 if __name__ == '__main__':
