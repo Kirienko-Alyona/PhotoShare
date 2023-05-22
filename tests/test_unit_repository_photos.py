@@ -8,7 +8,7 @@ from src.repository import tags as repository_tags
 import qrcode as qrcode
 from src.repository.photos import (
     add_photo,
-    get_photos_by_tag_name,
+    get_photos,
     get_photo_by_id,
     get_photo_by_id_oper,
     delete_photo,
@@ -153,6 +153,35 @@ class TestContacts(unittest.IsolatedAsyncioTestCase):
         self.session.query().filter().first.return_value = photo
         result = await untach_tag(photo_id=photo.id, tags='test', db=self.session, user=self.user)
         self.assertEqual(result, photo)
+
+    # need check
+    async def test_add_photo(self):
+        photo = self.photo_test
+        result = await add_photo(url=photo.url_photo,
+                                 public_id=photo.cloud_public_id,
+                                 description=photo.description,
+                                 tags=[],
+                                 db=self.session,
+                                 user=self.user)
+        self.assertEqual(result.url_photo, photo.url_photo)
+
+    # need check
+    async def test_get_photos(self):
+        photos = [self.photo_test]
+        self.session.query().filter().limit().offset().all.return_value = photos
+        result = await get_photos(user_id=None,
+                                  cur_user_id=None,
+                                  cur_user_role=Role.user,
+                                  tag_name=None,
+                                  rate_min=None,
+                                  rate_max=None,
+                                  created_at_min=None,
+                                  created_at_max=None,
+                                  limit=10,
+                                  offset=0,
+                                  db=self.session
+                                  )
+        self.assertEqual(photos, result)
 
 
 if __name__ == '__main__':
