@@ -8,7 +8,7 @@ from src.repository import users as repository_users
 from src.schemas.users import UserModel, UserUpdateModel
 
 
-class TestContacts(unittest.IsolatedAsyncioTestCase):
+class TestUser(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         self.session = MagicMock(spec=Session)
 
