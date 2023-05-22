@@ -41,7 +41,7 @@ async def get_comment(comment_id: int = Path(ge=1), db: Session = Depends(get_db
     return comment
 
 
-@router.get("/by_photo/{photo_id}", name="Return All Comments For Photo", 
+@router.get("/", name="Return All Comments For Photo",
             response_model=List[CommentResponse],
             dependencies=[Depends(allowed_read)])
 async def get_comments_by_photo(photo_id: int, db: Session = Depends(get_db),
