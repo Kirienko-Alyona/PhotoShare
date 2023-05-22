@@ -12,3 +12,4 @@ sqlalchemy
 pydantic[dotenv]
 uvicorn[standard]
 jinja2
+qrcode
