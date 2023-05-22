@@ -26,14 +26,14 @@ def get_db():
 client_redis = redis.Redis(
     host=settings.redis_host,
     port=settings.redis_port,
-    # password=settings.redis_password,    #only alex
+    password=settings.redis_password,
     db=0,
 )
 
 client_redis_for_main = redis.Redis(
     host=settings.redis_host,
     port=settings.redis_port,
-    # password=settings.redis_password,    #only alex
+    password=settings.redis_password,
     db=0,
     encoding="utf-8",
     decode_responses=True
