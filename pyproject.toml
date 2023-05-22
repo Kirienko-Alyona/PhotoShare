@@ -15,13 +15,13 @@ alembic = "^1.10.4"
 sqlalchemy = "^2.0.12"
 psycopg2 = "^2.9.6"
 python-multipart = "^0.0.6"
-redis = "^4.5.5"
 cloudinary = "^1.32.0"
 fastapi-limiter = "^0.1.5"
 fastapi-mail = "^1.2.8"
 qrcode = "^7.4.2"
 pydantic = {extras = ["dotenv"], version = "^1.10.7"}
 jinja2 = "^3.1.2"
+asyncio-redis = "^0.16.0"
 
 
 [tool.poetry.group.dev.dependencies]
