@@ -1,12 +1,12 @@
 import pathlib
 import time
-from ipaddress import ip_address
-from typing import Callable
+#from ipaddress import ip_address
+#from typing import Callable
 import uvicorn
 import redis.asyncio as redis
 
-from fastapi import Depends, FastAPI, HTTPException, Request, status
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi import Depends, FastAPI, HTTPException, Request#, status
+from fastapi.responses import HTMLResponse#, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -14,9 +14,9 @@ from fastapi_limiter import FastAPILimiter
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from starlette.middleware.authentication import AuthenticationMiddleware
+#from starlette.middleware.authentication import AuthenticationMiddleware
 
-from src.database.db import get_db, client_redis_for_main
+from src.database.db import get_db#, client_redis_for_main
 from src.routes import photos, auth, users, comments, tags, photo_transformations, rates, photo_filters
 
 from src.conf.config import settings
