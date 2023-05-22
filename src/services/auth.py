@@ -142,13 +142,13 @@ class Auth:
             raise self.credentials_exception
         return email
 
-    def get_exp_by_access_token(self, access_token: str = Depends(oauth2_scheme)) -> str:
-        try:
-            payload = jwt.decode(access_token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
-            expire = payload['exp']
-        except JWTError as e:
-            raise self.credentials_exception
-        return expire
+    # def get_exp_by_access_token(self, access_token: str = Depends(oauth2_scheme)) -> str:
+    #     try:
+    #         payload = jwt.decode(access_token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
+    #         expire = payload['exp']
+    #     except JWTError as e:
+    #         raise self.credentials_exception
+    #     return expire
 
     # async def get_current_user(self, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
     #     """

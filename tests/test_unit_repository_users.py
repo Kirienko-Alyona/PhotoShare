@@ -105,7 +105,7 @@ class TestContacts(unittest.IsolatedAsyncioTestCase):
         user = User(id=1, refresh_token=token)
         time = 1
         repository_users.auth.auth_service.verify_access_token = MagicMock()
-        repository_users.auth.auth_service.get_exp_by_access_token = MagicMock(return_value=time)
+        # repository_users.auth.auth_service.get_exp_by_access_token = MagicMock(return_value=time)
         #repository_users.client_redis = AsyncMock()
         auth_servise.redis_cache = AsyncMock()
         self.session.query().filter().first.return_value = user
