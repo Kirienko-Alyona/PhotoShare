@@ -3,7 +3,8 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
-from src.database.db import client_redis
+#from src.database.db import client_redis
+from src.services.auth import auth_servise
 from src.database.models import User, Photo
 from src.schemas.users import UserModel, UserUpdateModel
 import src.services.auth as auth
@@ -130,7 +131,7 @@ async def block_token(token: str, db: Session):
     await update_token(user, None, db)
     expire = auth.auth_service.get_exp_by_access_token(token)
     timedelta = expire - int(datetime.now().timestamp())
-    await client_redis.set(f'user_token:{email}', token, timedelta)
+    auth_servise.redis_cache.set(f'user_token:{email}', token, timedelta)
 
 
 async def ban_user(user_id: int, db: Session) -> Optional[User]:
@@ -140,5 +141,5 @@ async def ban_user(user_id: int, db: Session) -> Optional[User]:
         user.refresh_token = None
         db.commit()
         db.refresh(user)
-        await client_redis.delete(f'user:{user.email}')
+        auth_servise.redis_cache.delete(f'user:{user.email}')
     return user
