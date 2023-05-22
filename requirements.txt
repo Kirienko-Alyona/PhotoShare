@@ -6,7 +6,7 @@ alembic
 sqlalchemy
 psycopg2
 python-multipart
-asyncio-redis
+redis
 cloudinary
 fastapi-limiter
 fastapi-mail
