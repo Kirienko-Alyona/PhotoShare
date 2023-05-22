@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 from sqlalchemy.orm import Session
 
 from src.database.models import Rate, User, Photo
-from src.schemas.rates import RateModel, RateResponse, RateDeleteModel, PhotoRatingResponse
+from src.schemas.rates import RateModel, RateResponse, PhotoRatingResponse
 from src.repository.rates import (
     add_rate,
     get_rate_photo_by_user,
@@ -48,7 +48,6 @@ class TestRate(unittest.IsolatedAsyncioTestCase):
 
     #
     async def test_remove_rating(self):
-        body = RateDeleteModel(photo_id=1, user_id=1)
         self.session.query().filter().delete.return_value = 1
-        result = await remove_rating(body, self.session)
+        result = await remove_rating(1, 1, self.session)
         self.assertEqual(result, 1)
