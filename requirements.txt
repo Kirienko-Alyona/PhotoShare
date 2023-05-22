@@ -1,4 +1,3 @@
-python
 python-jose[cryptography]
 passlib[bcrypt]
 fastapi
