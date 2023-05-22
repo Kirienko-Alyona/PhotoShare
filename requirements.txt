@@ -14,3 +14,4 @@ fastapi-mail
 qrcode
 pydantic[dotenv]
 jinja2
+postgres
