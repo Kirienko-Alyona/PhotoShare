@@ -1,5 +1,5 @@
 fastapi
-psycopg2-binary
+psycopg2
 python-jose[cryptography]
 passlib[bcrypt]
 python-multipart
@@ -9,4 +9,6 @@ fastapi-limiter
 cloudinary
 sqlalchemy
 pydantic[dotenv]
-uvicorn
+uvicorn[standard]
+alembic
+jinja2
