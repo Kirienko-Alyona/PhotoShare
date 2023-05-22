@@ -22,11 +22,6 @@ class RateResponse(BaseModel):
         orm_mode = True
 
 
-class RateDeleteModel(BaseModel):
-    photo_id: int
-    user_id: int
-
-
 class PhotoRatingResponse(BaseModel):
     average_rate: float
     rate_count: int
