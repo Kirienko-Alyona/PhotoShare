@@ -1,14 +1,14 @@
 fastapi
+alembic
 psycopg2
+redis
 python-jose[cryptography]
 passlib[bcrypt]
 python-multipart
 fastapi-mail
-redis
 fastapi-limiter
 cloudinary
 sqlalchemy
 pydantic[dotenv]
 uvicorn[standard]
-alembic
 jinja2
