@@ -3,6 +3,7 @@ import time
 from ipaddress import ip_address
 from typing import Callable
 import uvicorn
+import redis.asyncio as redis
 
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -27,13 +28,17 @@ favicon_path = 'static/images/favicon.ico'
 
 @app.on_event("startup")
 async def startup():
-    """
-    The startup function is called when the application starts up.
-    It's a good place to initialize things that are used by the app, such as databases or caches.
     
-    :return: A list of objects
-    """
-    await FastAPILimiter.init(client_redis_for_main)
+    redis_cache = await redis.Redis(
+        host=settings.redis_host,
+        port=settings.redis_port,
+        password=settings.redis_password,
+        db=0,
+        encoding="utf-8",
+        decode_responses=True
+    )
+    await FastAPILimiter.init(redis_cache)
+    #await FastAPILimiter.init(client_redis_for_main)
    # app.add_middleware() #backend=BearerTokenAuthBackend()
     
     
