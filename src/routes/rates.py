@@ -8,7 +8,7 @@ from src.database.models import User, Role
 from src.conf import messages
 from src.repository import photos as repository_photos
 from src.repository import rates as repository_rates
-from src.schemas.rates import RateModel, RateResponse, RateDeleteModel, PhotoRatingResponse
+from src.schemas.rates import RateModel, RateResponse, PhotoRatingResponse
 from src.services.auth import auth_service
 from src.services.roles import RoleAccess
 
@@ -41,20 +41,7 @@ async def create_rate(body: RateModel,
     return rate
 
 
-@router.get("/{photo_id}", name="Return Photo Rating By Photo Id", 
-            response_model=PhotoRatingResponse, 
-            status_code=status.HTTP_200_OK, 
-            dependencies=[Depends(allowed_read)])
-async def get_rating_by_photo_id(photo_id: int = Path(ge=1), 
-                                 db: Session = Depends(get_db),
-                                 _: User = Depends(auth_service.get_current_user)):
-    rating = await repository_rates.get_rating_by_photo_id(photo_id, db)
-    if rating is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
-    return rating
-
-
-@router.get("/detail/{photo_id}",  name="Return Detail Rating By Photo Id", 
+@router.get("/{photo_id}",  name="Return Detail Rating By Photo Id",
             response_model=List[RateResponse],
             status_code=status.HTTP_200_OK, 
             dependencies=[Depends(allowed_web_admin_read)])
@@ -67,13 +54,13 @@ async def get_rating_by_photo_id(photo_id: int = Path(ge=1),
     return rates
 
 
-@router.delete("/", name="Delete User's Photo Rating", 
+@router.delete("/{photo_id}", name="Delete User's Photo Rating",
                status_code=status.HTTP_204_NO_CONTENT,
                dependencies=[Depends(allowed_delete)])
-async def remove_rate(body: RateDeleteModel, 
+async def remove_rate(photo_id: int = Path(ge=1), user_id: int = Path(ge=1),
                       db: Session = Depends(get_db),
                       _: User = Depends(auth_service.get_current_user)):
-    deleted_count = await repository_rates.remove_rating(body, db)
+    deleted_count = await repository_rates.remove_rating(photo_id, user_id, db)
     if deleted_count == 0:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
     return None

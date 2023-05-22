@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from src.database.models import Rate, User, Photo
 
-from src.schemas.rates import RateModel, RateDeleteModel
+from src.schemas.rates import RateModel
 
 
 async def add_rate(body: RateModel, db: Session, user: User):
@@ -29,7 +29,7 @@ async def get_detail_rating_by_photo(photo_id: int, db: Session):
     return rates
 
 
-async def remove_rating(body: RateDeleteModel, db: Session):
-    count = db.query(Rate).filter(Rate.photo_id == body.photo_id, Rate.user_id == body.user_id).delete()
+async def remove_rating(photo_id: int, user_id: int, db: Session):
+    count = db.query(Rate).filter(Rate.photo_id == photo_id, Rate.user_id == user_id).delete()
     db.commit()
     return count
