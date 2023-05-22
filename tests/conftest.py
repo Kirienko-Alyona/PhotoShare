@@ -6,13 +6,12 @@ from sqlalchemy.orm import sessionmaker
 from main import app
 from src.database.models import Base
 from src.database.db import get_db
+from src.conf.config import settings
 
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
+SQLALCHEMY_DATABASE_URL_TEST = settings.sqlalchemy_database_url_test
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+engine = create_engine(SQLALCHEMY_DATABASE_URL_TEST)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
@@ -43,4 +42,4 @@ def client(session):
 
 @pytest.fixture(scope="module")
 def user():
-    return {"email": "test@example.com", "username": "test", "password": "123456789"}
+    return {"email": "test@example.com", "username": "test_user", "password": "123456789"}

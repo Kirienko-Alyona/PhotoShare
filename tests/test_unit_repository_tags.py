@@ -17,7 +17,7 @@ from src.repository.tags import (
 )
 
 
-class TestContacts(unittest.IsolatedAsyncioTestCase):
+class TestTag(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         self.session = MagicMock(spec=Session)
 
