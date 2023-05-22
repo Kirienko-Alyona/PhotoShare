@@ -9,8 +9,8 @@ from passlib.context import CryptContext
 import redis
 from sqlalchemy.orm import Session
 
-from src.database.db import get_db, client_redis
-from src.database.models import User
+from src.database.db import get_db#, client_redis
+#from src.database.models import User
 from src.repository import users as repository_users
 from src.conf.config import settings
 from src.conf import messages
@@ -25,11 +25,11 @@ class Auth:
                               port=settings.redis_port, 
                               password=settings.redis_password, 
                               db=0)
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail=messages.COULD_NOT_VALIDATE_CREDENTIALS,
-        headers={'WWW-Authenticate': 'Bearer'},
-    )
+    # credentials_exception = HTTPException(
+    #     status_code=status.HTTP_401_UNAUTHORIZED,
+    #     detail=messages.COULD_NOT_VALIDATE_CREDENTIALS,
+    #     headers={'WWW-Authenticate': 'Bearer'},
+    # )
 
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         """
@@ -150,68 +150,68 @@ class Auth:
             raise self.credentials_exception
         return expire
 
-    async def get_current_user(self, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
-        """
-        The get_current_user function is a dependency that will be used in the
-            protected endpoints. It takes a token as an argument and returns the user
-            if it's valid, or raises an exception otherwise.
+    # async def get_current_user(self, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
+    #     """
+    #     The get_current_user function is a dependency that will be used in the
+    #         protected endpoints. It takes a token as an argument and returns the user
+    #         if it's valid, or raises an exception otherwise.
 
-        :param self: Access the class attributes
-        :param token: str: Get the token from the authorization header
-        :param db: Session: Pass the database session to the function
-        :return: A user object
-        """
-        email = self.verify_access_token(token)
-        redis_token = self.redis_cache.get(f'user_token:{email}')
-        if redis_token and redis_token.decode() == token:
-            raise self.credentials_exception
-        user = await client_redis.get(f'user:{email}')
+    #     :param self: Access the class attributes
+    #     :param token: str: Get the token from the authorization header
+    #     :param db: Session: Pass the database session to the function
+    #     :return: A user object
+    #     """
+    #     email = self.verify_access_token(token)
+    #     redis_token = self.redis_cache.get(f'user_token:{email}')
+    #     if redis_token and redis_token.decode() == token:
+    #         raise self.credentials_exception
+    #     user = await client_redis.get(f'user:{email}')
 
-        if user is None:
-            user = await repository_users.get_user_by_email(email, db)
-            if user is None or not user.active:
-                raise self.credentials_exception
-            await client_redis.set(f'user:{email}', pickle.dumps(user), ex=7200)
-        else:
-            user = pickle.loads(user)
-        return user
-
-    # async def get_current_user(self, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    #     credentials_exception = HTTPException(
-    #         status_code=status.HTTP_401_UNAUTHORIZED,
-    #         detail=messages.COULD_NOT_VALIDATE_CREDENTIALS
-    #     )
-
-    #     try:
-    #         # Decode JWT
-    #         payload = jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
-    #         if payload['scope'] == 'access_token':
-    #             email = payload["sub"]
-    #             if email is None:
-    #                 raise credentials_exception
-    #         else:
-    #             raise credentials_exception
-    #         # check token in blacklist
-    #         black_list_token = await repository_users.find_blacklisted_token(token, db)
-    #         if black_list_token:
-    #             raise credentials_exception
-            
-    #     except JWTError as e:
-    #         raise credentials_exception
-        
-    #     # get user from redis_cache
-    #     user = self.redis_cache.get(f'user:{email}')
     #     if user is None:
-    #         print("USER POSTGRES")
     #         user = await repository_users.get_user_by_email(email, db)
-    #         if user is None:
-    #             raise credentials_exception
-    #         self.redis_cache.set(f'user:{email}', pickle.dumps(user))
-    #         self.redis_cache.expire(f'user:{email}', 900)
+    #         if user is None or not user.active:
+    #             raise self.credentials_exception
+    #         await client_redis.set(f'user:{email}', pickle.dumps(user), ex=7200)
     #     else:
-    #         print("USER CACHE")
     #         user = pickle.loads(user)
     #     return user
+
+    async def get_current_user(self, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+        credentials_exception = HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=messages.COULD_NOT_VALIDATE_CREDENTIALS
+        )
+
+        try:
+            # Decode JWT
+            payload = jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
+            if payload['scope'] == 'access_token':
+                email = payload["sub"]
+                if email is None:
+                    raise credentials_exception
+            else:
+                raise credentials_exception
+            # check token in blacklist
+            black_list_token = await repository_users.find_blacklisted_token(token, db)
+            if black_list_token:
+                raise credentials_exception
+            
+        except JWTError as e:
+            raise credentials_exception
+        
+        # get user from redis_cache
+        user = self.redis_cache.get(f'user:{email}')
+        if user is None:
+            print("USER POSTGRES")
+            user = await repository_users.get_user_by_email(email, db)
+            if user is None:
+                raise credentials_exception
+            self.redis_cache.set(f'user:{email}', pickle.dumps(user))
+            self.redis_cache.expire(f'user:{email}', 900)
+        else:
+            print("USER CACHE")
+            user = pickle.loads(user)
+        return user
 
 
     def create_email_token(self, data: dict) -> str:

@@ -3,7 +3,6 @@ from typing import List, Optional
 from pydantic import BaseModel, HttpUrl, Field
 
 from src.schemas.tags import TagResponse
-from src.schemas.rates import PhotoRatingResponse
 import src.conf.constants as constants
 
 

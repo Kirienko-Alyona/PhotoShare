@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 from fastapi import HTTPException, status
-import redis.asyncio as redis
+#import redis.asyncio as redis
 
 from src.conf.config import settings
 

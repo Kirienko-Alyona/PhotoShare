@@ -1,7 +1,7 @@
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from src.database.models import Rate, User, Photo
+from src.database.models import Rate, User
 
 from src.schemas.rates import RateModel
 
