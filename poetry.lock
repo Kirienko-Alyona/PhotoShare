@@ -82,21 +82,6 @@ files = [
 ]
 
 [[package]]
-name = "asyncio-redis"
-version = "0.16.0"
-description = "PEP 3156 implementation of the redis protocol."
-category = "main"
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "asyncio_redis-0.16.0-py2.py3-none-any.whl", hash = "sha256:4a134fde5ea3628ff0c7118e2424b0f26140a1bd21d5e4632058f1f662773686"},
-    {file = "asyncio_redis-0.16.0.tar.gz", hash = "sha256:ff8ce4e7e22a08e2688ae6b397aeac355473e343ce3c68ae3b713494318d848b"},
-]
-
-[package.extras]
-hiredis = ["hiredis"]
-
-[[package]]
 name = "babel"
 version = "2.12.1"
 description = "Internationalization utilities"
@@ -1812,4 +1797,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "2e09d0bd6190271d3e721644ecd013b3ed30a5fa8d2c96775ee6c378d8463982"
+content-hash = "b6112b64bead482d6a1d534d393ab88d1118f11056c801d65529e9968bcd262a"
