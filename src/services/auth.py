@@ -21,10 +21,10 @@ class Auth:
     SECRET_KEY = settings.secret_key
     ALGORITHM = settings.algorithm
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/api/auth/login')
-    # redis_cache = redis.Redis(host=settings.redis_host, 
-    #                           port=settings.redis_port, 
-    #                           password=settings.redis_password, 
-    #                           db=0)
+    redis_cache = redis.Redis(host=settings.redis_host, 
+                              port=settings.redis_port, 
+                              password=settings.redis_password, 
+                              db=0)
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail=messages.COULD_NOT_VALIDATE_CREDENTIALS,
@@ -162,7 +162,7 @@ class Auth:
         :return: A user object
         """
         email = self.verify_access_token(token)
-        redis_token = await client_redis.get(f'user_token:{email}')
+        redis_token = self.redis_cache.get(f'user_token:{email}')
         if redis_token and redis_token.decode() == token:
             raise self.credentials_exception
         user = await client_redis.get(f'user:{email}')

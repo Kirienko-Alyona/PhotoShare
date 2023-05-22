@@ -23,12 +23,12 @@ def get_db():
         db.close()
 
 
-client_redis = redis.Redis(
-    host=settings.redis_host,
-    port=settings.redis_port,
-    #password=settings.redis_password,
-    db=0,
-)
+# client_redis = redis.Redis(
+#     host=settings.redis_host,
+#     port=settings.redis_port,
+#     #password=settings.redis_password,
+#     db=0,
+# )
 
 # client_redis_for_main = redis.Redis(
 #     host=settings.redis_host,
