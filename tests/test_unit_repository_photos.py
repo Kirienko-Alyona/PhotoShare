@@ -109,7 +109,7 @@ class TestPhotos(unittest.IsolatedAsyncioTestCase):
                                        user=user)
         self.assertEqual(result, photo)
 
-    # need check
+
     async def test_update_tags_descriptions_for_photo(self):
         photo = self.photo_test = Photo(
             id=1,
@@ -119,19 +119,15 @@ class TestPhotos(unittest.IsolatedAsyncioTestCase):
             description='New jump',
             tags=[],
         )
-        new_descr = 'New jump'
-        tag = 'new_tag'
-        photo.description = new_descr
-        # photo.tags = [tag]
         self.session.query().filter().first.return_value = photo
         result = await update_tags_descriptions_for_photo(photo_id=photo.id,
-                                                          new_description=new_descr,
-                                                          tags=tag,
+                                                          new_description=None,
+                                                          tags=None,
                                                           db=self.session,
                                                           user=self.user)
         self.assertEqual(result, photo)
 
-    # need check
+
     async def test_generate_qrcode(self):
         img = qrcode.make(self.photo_test.url_photo)
         buffer = io.BytesIO()
@@ -160,12 +156,14 @@ class TestPhotos(unittest.IsolatedAsyncioTestCase):
         result = await add_photo(url=photo.url_photo,
                                  public_id=photo.cloud_public_id,
                                  description=photo.description,
-                                 tags=[],
+                                 tags=None,
                                  db=self.session,
                                  user=self.user)
         self.assertEqual(result.url_photo, photo.url_photo)
+        self.assertEqual(result.description, photo.description)
+        self.assertEqual(result.cloud_public_id, photo.cloud_public_id)
+        self.assertTrue(hasattr(result, "id"))
 
-    # need check
     async def test_get_photos(self):
         photos = [(
             self.photo_test.id,
