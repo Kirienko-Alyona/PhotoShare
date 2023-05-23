@@ -4,12 +4,12 @@ import re
 from pydantic import BaseModel, Field, EmailStr, EmailError, validator
 
 from src.database.models import Role
-from src.conf.constants import EMAIL_MAX__LEN, EMAIL_MIN_LEN, USERNAME_MIN_LEN, USERNAME_MAX_LEN, PASSWORD_MIN_LEN, PASSWORD_MAX_LEN, FIRST_NAME_MIN_LEN, FIRST_NAME_MAX_LEN
+from src.conf.constants import EMAIL_MAX__LEN, EMAIL_MIN_LEN, USERNAME_MIN_LEN, USERNAME_MAX_LEN, PASSWORD_MIN_LEN, PASSWORD_MAX_LEN
 
 class UserModel(BaseModel):
     
-    username: str = Field(..., min_length=USERNAME_MIN_LEN, max_length=USERNAME_MAX_LEN-1) #'@jay_b'
-    email: str = Field(..., min_length=EMAIL_MIN_LEN, max_length=EMAIL_MAX__LEN) #'jay_b@example.com'
+    username: str = Field(..., min_length=USERNAME_MIN_LEN, max_length=USERNAME_MAX_LEN-1)
+    email: str = Field(..., min_length=EMAIL_MIN_LEN, max_length=EMAIL_MAX__LEN)
     password: str = Field(min_length=PASSWORD_MIN_LEN, max_length=PASSWORD_MAX_LEN)
   
     

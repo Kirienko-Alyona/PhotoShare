@@ -8,7 +8,7 @@ from src.database.models import User, Role
 from src.conf import messages
 from src.repository import photos as repository_photos
 from src.repository import rates as repository_rates
-from src.schemas.rates import RateModel, RateResponse, PhotoRatingResponse
+from src.schemas.rates import RateModel, RateResponse
 from src.services.auth import auth_service
 from src.services.roles import RoleAccess
 

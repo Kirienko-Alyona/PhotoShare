@@ -1,11 +1,12 @@
 import pathlib
 import time
-from ipaddress import ip_address
-from typing import Callable
+#from ipaddress import ip_address
+#from typing import Callable
 import uvicorn
+import redis.asyncio as redis
 
-from fastapi import Depends, FastAPI, HTTPException, Request, status
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi import Depends, FastAPI, HTTPException, Request#, status
+from fastapi.responses import HTMLResponse#, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -13,9 +14,9 @@ from fastapi_limiter import FastAPILimiter
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from starlette.middleware.authentication import AuthenticationMiddleware
+#from starlette.middleware.authentication import AuthenticationMiddleware
 
-from src.database.db import get_db, client_redis_for_main
+from src.database.db import get_db#, client_redis_for_main
 from src.routes import photos, auth, users, comments, tags, photo_transformations, rates, photo_filters
 
 from src.conf.config import settings
@@ -27,13 +28,17 @@ favicon_path = 'static/images/favicon.ico'
 
 @app.on_event("startup")
 async def startup():
-    """
-    The startup function is called when the application starts up.
-    It's a good place to initialize things that are used by the app, such as databases or caches.
     
-    :return: A list of objects
-    """
-    await FastAPILimiter.init(client_redis_for_main)
+    redis_cache = await redis.Redis(
+        host=settings.redis_host,
+        port=settings.redis_port,
+        password=settings.redis_password,
+        db=0,
+        encoding="utf-8",
+        decode_responses=True
+    )
+    await FastAPILimiter.init(redis_cache)
+    #await FastAPILimiter.init(client_redis_for_main)
    # app.add_middleware() #backend=BearerTokenAuthBackend()
     
     
@@ -142,6 +147,6 @@ app.include_router(rates.router, prefix='/api')
 
 
 
-# if __name__ == '__main__':
-#     uvicorn.run('main:app', port=8000, reload=True)
+if __name__ == '__main__':
+    uvicorn.run('main:app', port=8000, reload=True)
     

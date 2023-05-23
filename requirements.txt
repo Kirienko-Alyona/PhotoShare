@@ -1,0 +1,15 @@
+python-jose[cryptography]
+passlib[bcrypt]
+fastapi
+uvicorn[standard]
+alembic
+sqlalchemy
+psycopg2
+python-multipart
+redis
+cloudinary
+fastapi-limiter
+fastapi-mail
+qrcode
+pydantic[dotenv]
+jinja2
