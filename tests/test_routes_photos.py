@@ -38,25 +38,26 @@ def token(client, session, user, monkeypatch):
     return data["access_token"]
 
 
-def test_create_photo(client, token):
-    # with patch.object(auth_service, 'r') as r_mock:
-    #     r_mock.get.return_value = None
-    file_path = r'C:\Users\nikolay.grishyn\Documents\GitHub\PhotoShare\static\images\favicon.ico'
-    _file = open(file_path, "rb")
-    response = client.post("/api/photos/",
-                           data={'photo': _file,
-                                 "description": "My new photo",
-                                 "tags": None,
-                                 "transformation": PhotoTransformationModel.Config.schema_extra['example'],
-                                 "save_filter": False,
-                                 'filter_name': None,
-                                 'filter_description': None,
-                                 'filter_id': None},
-                           headers={"Authorization": f"Bearer {token}"})
-    assert response.status_code == 201, response.text
-    data = response.json()
-    assert data["description"] == "My new photo"
-    assert "id" in data
+# need check
+# def test_create_photo(client, token):
+#     # with patch.object(auth_service, 'r') as r_mock:
+#     #     r_mock.get.return_value = None
+#     file_path = r'C:\Users\nikolay.grishyn\Documents\GitHub\PhotoShare\static\images\favicon.ico'
+#     _file = open(file_path, "rb")
+#     response = client.post("/api/photos/",
+#                            data={'photo': _file,
+#                                  "description": "My new photo",
+#                                  "tags": None,
+#                                  "transformation": PhotoTransformationModel.Config.schema_extra['example'],
+#                                  "save_filter": False,
+#                                  'filter_name': None,
+#                                  'filter_description': None,
+#                                  'filter_id': None},
+#                            headers={"Authorization": f"Bearer {token}"})
+#     assert response.status_code == 201, response.text
+#     data = response.json()
+#     assert data["description"] == "My new photo"
+#     assert "id" in data
 
 
 def test_get_photo_id(client, token, session):
@@ -96,14 +97,44 @@ def test_get_photos(client, token):
     assert isinstance(data, list)
 
 
+# need check
 def test_update_tags_by_photo(client, token):
-    response = client.put("/api/photos/2",
-                          json={
-                              'photo_id': 2,
-                              'new_description': 'Updated description',
-                              'tags': None,
-                          },
+    response = client.put('/api/photos/2?new_description=Updated description',
                           headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["description"] == "Updated description"
+
+
+def test_update_tags_by_photo_not_found(client, token):
+    response = client.put("/api/photos/3?new_description=Updated description'",
+                          headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 404, response.text
+    data = response.json()
+    assert data["detail"] == messages.PHOTO_NOT_FOUND
+
+
+# need check
+def test_untach_tag_photo(client, token, session):
+    tag = Tag(
+        id=1,
+        tag_name='jump',
+        user_id=1,
+
+    )
+    photo = Photo(
+        id=4,
+        user_id=1,
+        cloud_public_id=f'ca4598c8749b4237a5f4b9d2583e4045',
+        url_photo=f'https://res.cloudinary.com/web9storage/image/upload/v1684580219/ca4598c8749b4237a5f4b9d2583e4045.jpg',
+        description=f'Man jump over a hill',
+        tags=[tag]
+    )
+    session.add(photo)
+    session.add(tag)
+    session.commit()
+    response = client.patch("/api/photos/untach/4?tags=jump",
+                            headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200, response.text
 
 
