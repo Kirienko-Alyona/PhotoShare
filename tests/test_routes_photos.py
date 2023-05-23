@@ -97,7 +97,7 @@ def test_get_photos(client, token):
     assert isinstance(data, list)
 
 
-# need check
+
 def test_update_tags_by_photo(client, token):
     response = client.put('/api/photos/2?new_description=Updated description',
                           headers={"Authorization": f"Bearer {token}"})
@@ -114,13 +114,11 @@ def test_update_tags_by_photo_not_found(client, token):
     assert data["detail"] == messages.PHOTO_NOT_FOUND
 
 
-# need check
+
 def test_untach_tag_photo(client, token, session):
     tag = Tag(
-        id=1,
-        tag_name='jump',
+        tag_name='#jump',
         user_id=1,
-
     )
     photo = Photo(
         id=4,
@@ -131,9 +129,8 @@ def test_untach_tag_photo(client, token, session):
         tags=[tag]
     )
     session.add(photo)
-    session.add(tag)
     session.commit()
-    response = client.patch("/api/photos/untach/4?tags=jump",
+    response = client.patch("/api/photos/untach_tag/4?tags=jump",
                             headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 200, response.text
 
