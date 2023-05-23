@@ -14,8 +14,8 @@ def get_current_user(user, session):
 @pytest.fixture()
 def token(client, session, user, monkeypatch):
     monkeypatch.setattr("src.routes.auth.send_email", MagicMock())
-    monkeypatch.setattr("src.servise.auth.auth_servise.redis_cache.get", AsyncMock(return_value=None))
-    monkeypatch.setattr("src.servise.auth.auth_servise.redis_cache.set", AsyncMock())
+    monkeypatch.setattr("src.services.auth.auth_service.redis_cache.get", MagicMock(return_value=None))
+    monkeypatch.setattr("src.services.auth.auth_service.redis_cache.set", MagicMock())
 
     client.post("api/auth/singup", json=user)
     current_user = get_current_user(user, session)
