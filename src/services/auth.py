@@ -23,7 +23,7 @@ class Auth:
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/api/auth/login')
     redis_cache = redis.Redis(host=settings.redis_host, 
                               port=settings.redis_port, 
-                              password=settings.redis_password, 
+                              #password=settings.redis_password,
                               db=0)
     # credentials_exception = HTTPException(
     #     status_code=status.HTTP_401_UNAUTHORIZED,

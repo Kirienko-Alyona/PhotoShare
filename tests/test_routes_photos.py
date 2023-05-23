@@ -7,7 +7,7 @@ from src.database.models import Tag, User, Role, Photo
 from src.conf import messages
 from src.schemas.photo_transformations import PhotoTransformationModel
 from src.services.auth import auth_service
-from src.database.db import get_db, client_redis
+from src.database.db import get_db
 
 
 def get_current_user(user, session):
@@ -18,8 +18,8 @@ def get_current_user(user, session):
 @pytest.fixture()
 def token(client, session, user, monkeypatch):
     monkeypatch.setattr("src.routes.auth.send_email", MagicMock())
-    monkeypatch.setattr("src.services.auth.client_redis.get", AsyncMock(return_value=None))
-    monkeypatch.setattr("src.services.auth.client_redis.set", AsyncMock())
+    monkeypatch.setattr("src.services.auth.auth_service.redis_cache.get", MagicMock(return_value=None))
+    monkeypatch.setattr("src.services.auth.auth_service.redis_cache.set", MagicMock())
 
     client.post("api/auth/singup", json=user)
     current_user = get_current_user(user, session)
