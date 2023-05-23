@@ -59,9 +59,9 @@ def test_create_photo(client, token):
     assert "id" in data
 
 
-def test_get_photo_id(client,token,session):
+def test_get_photo_id(client, token, session):
     photo = Photo(
-        id=1,
+        id=2,
         user_id=1,
         cloud_public_id=f'ca4598c8749b4237a5f4b9d2583e4045',
         url_photo=f'https://res.cloudinary.com/web9storage/image/upload/v1684580219/ca4598c8749b4237a5f4b9d2583e4045.jpg',
@@ -71,8 +71,49 @@ def test_get_photo_id(client,token,session):
     session.add(photo)
     session.commit()
 
-    response = client.get("/api/photos/",
+    response = client.get("/api/photos/2",
                           headers={"Authorization": f"Bearer {token}"}
                           )
     assert response.status_code == 200, response.text
-    # data = response.json()
+    data = response.json()
+    assert data["description"] == 'Man jump over a hill'
+
+
+def test_get_photo_id_not_found(client, token):
+    response = client.get("/api/photos/3",
+                          headers={"Authorization": f"Bearer {token}"}
+                          )
+    assert response.status_code == 404, response.text
+    data = response.json()
+    assert data["detail"] == messages.NOT_FOUND
+
+
+def test_get_photos(client, token):
+    response = client.get("/api/photos/",
+                          headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert isinstance(data, list)
+
+
+def test_update_tags_by_photo(client, token):
+    response = client.put("/api/photos/2",
+                          json={
+                              'photo_id': 2,
+                              'new_description': 'Updated description',
+                              'tags': None,
+                          },
+                          headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200, response.text
+
+
+def test_photo_remove(client, token):
+    response = client.delete("/api/photos/2", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 204, response.text
+
+
+def test_photo_remove_not_found(client, token):
+    response = client.delete("/api/photos/2", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 404, response.text
+    data = response.json()
+    assert data["detail"] == messages.NOT_FOUND
