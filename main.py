@@ -32,7 +32,7 @@ async def startup():
     redis_cache = await redis.Redis(
         host=settings.redis_host,
         port=settings.redis_port,
-        # password=settings.redis_password,
+        password=settings.redis_password,
         db=0,
         encoding="utf-8",
         decode_responses=True
