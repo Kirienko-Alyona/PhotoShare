@@ -1,3 +1,4 @@
+import base64
 import io
 import unittest
 from unittest.mock import MagicMock
@@ -132,14 +133,12 @@ class TestContacts(unittest.IsolatedAsyncioTestCase):
 
     # need check
     async def test_generate_qrcode(self):
-        qrcode.make = MagicMock(spec=qrcode)
-        io.BytesIO = MagicMock()
         photo = self.photo_test
         img = qrcode.make(photo.url_photo)
-        buffer = io.BytesIO
-        # img.save(buffer)
+        buffer = io.BytesIO()
+        img.save(buffer)
         result = await generate_qrcode(photo_url=photo.url_photo)
-        self.assertEqual(result['qrcode_encode'], img)
+        self.assertEqual(result['qrcode_encode'], base64.b64encode(buffer.getvalue()).decode('utf-8'))
 
     async def test_untach_tag(self):
         photo = Photo(

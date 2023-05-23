@@ -1,8 +1,8 @@
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
-from src.database.models import User, Role, Rate, Photo
+from src.database.models import User, Role, Photo
 from src.conf import messages
 
 
@@ -12,15 +12,15 @@ def get_current_user(user, session):
 
 
 @pytest.fixture()
-def token(client, session, user, monkeypatch):
+def token_user(client, session, user, monkeypatch):
     monkeypatch.setattr("src.routes.auth.send_email", MagicMock())
-    monkeypatch.setattr("src.servise.auth.auth_servise.redis_cache.get", AsyncMock(return_value=None))
-    monkeypatch.setattr("src.servise.auth.auth_servise.redis_cache.set", AsyncMock())
+    monkeypatch.setattr("src.services.auth.auth_service.redis_cache.get", MagicMock(return_value=None))
+    monkeypatch.setattr("src.services.auth.auth_service.redis_cache.set", MagicMock())
 
     client.post("api/auth/singup", json=user)
     current_user = get_current_user(user, session)
     current_user.confirmed = True
-    current_user.roles = Role.admin
+    current_user.roles = Role.user
     session.commit()
 
     response = client.post(
@@ -35,15 +35,15 @@ def token(client, session, user, monkeypatch):
 
 
 @pytest.fixture()
-def token_second_user(client, session, user, monkeypatch):
+def token(client, session, user, monkeypatch):
     monkeypatch.setattr("src.routes.auth.send_email", MagicMock())
-    monkeypatch.setattr("src.services.auth.client_redis.get", AsyncMock(return_value=None))
-    monkeypatch.setattr("src.services.auth.client_redis.set", AsyncMock())
+    monkeypatch.setattr("src.services.auth.auth_service.redis_cache.get", MagicMock(return_value=None))
+    monkeypatch.setattr("src.services.auth.auth_service.redis_cache.set", MagicMock())
 
     client.post("api/auth/singup", json=user)
     current_user = get_current_user(user, session)
     current_user.confirmed = True
-    current_user.roles = Role.user
+    current_user.roles = Role.admin
     session.commit()
 
     response = client.post(
@@ -79,19 +79,19 @@ def test_create_rate_error_not_found(client, token, session):
     assert response.status_code == 404, response.text
 
 
-def test_create_rate_success(client, token_second_user, session):
+def test_create_rate_success(client, token_user, session):
     response = client.post(
         "/api/rating",
-        json={"photo_id": 1, "rate": 5},
-        headers={"Authorization": f"Bearer {token_second_user}"}
+        json={"photo_id": 2, "rate": 5},
+        headers={"Authorization": f"Bearer {token_user}"}
     )
     assert response.status_code == 404, response.text
 
 
-def test_get_rating_by_photo_id_forbidden(client, token_second_user, session):
+def test_get_rating_by_photo_id_forbidden(client, token_user, session):
     response = client.get(
         "/api/rating/1",
-        headers={"Authorization": f"Bearer {token_second_user}"}
+        headers={"Authorization": f"Bearer {token_user}"}
     )
     assert response.status_code == 403, response.text
 
@@ -104,23 +104,9 @@ def test_get_rating_by_photo_id_success(client, token, session):
     assert response.status_code == 200, response.text
 
 
-# def test_remove_rate_success(client, token, session):
-#     photo_id = 1
-#     user_id = 1
-#     url = f"/api/photos/{photo_id}/users/{user_id}"
-#     response = client.delete(
-#         url,
-#         headers={"Authorization": f"Bearer {token}"}
-#     )
-#     assert response.status_code == 204, response.text
-
-
 def test_remove_rate_not_found(client, token, session):
-    photo_id = 1
-    user_id = 2
-    url = f"/api/photos/{photo_id}/users/{user_id}"
     response = client.delete(
-        url,
+        "/api/photos/10/users/2",
         headers={"Authorization": f"Bearer {token}"}
     )
     assert response.status_code == 404, response.text
