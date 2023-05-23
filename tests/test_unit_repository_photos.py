@@ -137,6 +137,7 @@ class TestPhotos(unittest.IsolatedAsyncioTestCase):
         self.assertIsInstance(result, dict)
         self.assertEqual(result["qrcode_encode"], qr_base64)
 
+
     async def test_untach_tag(self):
         photo = Photo(
             id=1,
