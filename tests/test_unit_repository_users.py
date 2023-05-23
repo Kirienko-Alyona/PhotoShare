@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from src.database.models import User
 from src.repository import users as repository_users
+from src.services.auth import auth_servise
 from src.schemas.users import UserModel, UserUpdateModel
 
 
@@ -104,8 +105,9 @@ class TestUser(unittest.IsolatedAsyncioTestCase):
         user = User(id=1, refresh_token=token)
         time = 1
         repository_users.auth.auth_service.verify_access_token = MagicMock()
-        repository_users.auth.auth_service.get_exp_by_access_token = MagicMock(return_value=time)
-        repository_users.client_redis = AsyncMock()
+        # repository_users.auth.auth_service.get_exp_by_access_token = MagicMock(return_value=time)
+        #repository_users.client_redis = AsyncMock()
+        auth_servise.redis_cache = AsyncMock()
         self.session.query().filter().first.return_value = user
         result = await repository_users.block_token(token=token, db=self.session)
         self.assertIsNone(user.refresh_token)
@@ -113,7 +115,8 @@ class TestUser(unittest.IsolatedAsyncioTestCase):
 
     async def test_ban_user(self):
         user = User(id=1, refresh_token="token", active=True)
-        repository_users.client_redis = AsyncMock()
+        #repository_users.client_redis = AsyncMock()
+        auth_servise.redis_cache = AsyncMock()
         self.session.query().filter_by().first.return_value = user
         result = await repository_users.ban_user(user_id=user.id, db=self.session)
         self.assertEqual(result.id, user.id)

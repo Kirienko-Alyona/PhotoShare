@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 from fastapi import HTTPException, status
-import redis.asyncio as redis
+#import redis.asyncio as redis
 
 from src.conf.config import settings
 
@@ -23,18 +23,18 @@ def get_db():
         db.close()
 
 
-client_redis = redis.Redis(
-    host=settings.redis_host,
-    port=settings.redis_port,
-    # password=settings.redis_password,    #only alex
-    db=0,
-)
+# client_redis = redis.Redis(
+#     host=settings.redis_host,
+#     port=settings.redis_port,
+#     #password=settings.redis_password,
+#     db=0,
+# )
 
-client_redis_for_main = redis.Redis(
-    host=settings.redis_host,
-    port=settings.redis_port,
-    # password=settings.redis_password,    #only alex
-    db=0,
-    encoding="utf-8",
-    decode_responses=True
-)
+# client_redis_for_main = redis.Redis(
+#     host=settings.redis_host,
+#     port=settings.redis_port,
+#     #password=settings.redis_password,
+#     db=0,
+#     encoding="utf-8",
+#     decode_responses=True
+# )

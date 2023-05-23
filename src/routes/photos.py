@@ -14,7 +14,7 @@ from src.services.auth import auth_service
 from src.services.photos import upload_photo
 import src.conf.messages as messages
 from src.services.roles import RoleAccess
-from src.repository import rates as repository_rates
+#from src.repository import rates as repository_rates
 from src.schemas.photo_transformations import PhotoTransformationModel
     
 
