@@ -21,7 +21,7 @@ def token(client, session, user, monkeypatch):
     monkeypatch.setattr("src.services.auth.auth_service.redis_cache.get", MagicMock(return_value=None))
     monkeypatch.setattr("src.services.auth.auth_service.redis_cache.set", MagicMock())
 
-    client.post("api/auth/singup", json=user)
+    client.post("api/auth/signup", json=user)
     current_user = get_current_user(user, session)
     current_user.confirmed = True
     current_user.roles = Role.admin
