@@ -38,8 +38,6 @@ async def startup():
         decode_responses=True
     )
     await FastAPILimiter.init(redis_cache)
-    #await FastAPILimiter.init(client_redis_for_main)
-   # app.add_middleware() #backend=BearerTokenAuthBackend()
     
     
 app.add_middleware(
