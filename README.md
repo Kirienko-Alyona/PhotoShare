@@ -1,9 +1,8 @@
 # PhotoShare
 1. Для розгортання додатку локально на комп'ютері потрібно створити базу даних *Postges*, наприклад в *DBeaver*.
-
 2. Встановити пакет віртуального оточення *poetry*
 3. Створити *".env"* файл на основі *"example.env"*
-4. Встановити Docker(desktop), Redis(web)
+4. Встановити Docker(desktop), Redis(web), якщо Redis(desktop), то треба закоментувати "redis_password" в main.py, src/services/auth.py
 5. Запустити середовище розробки 
 6. В терміналі виконати команду **alembic upgrade head**
 7. В терміналі виконати команду **docker-compose up**
