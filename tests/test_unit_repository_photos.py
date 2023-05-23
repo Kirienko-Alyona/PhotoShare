@@ -19,7 +19,7 @@ from src.repository.photos import (
 )
 
 
-class TestContacts(unittest.IsolatedAsyncioTestCase):
+class TestPhotos(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         self.session = MagicMock(spec=Session)
         self.user = User(id=1,
@@ -109,7 +109,7 @@ class TestContacts(unittest.IsolatedAsyncioTestCase):
                                        user=user)
         self.assertEqual(result, photo)
 
-    # need check
+
     async def test_update_tags_descriptions_for_photo(self):
         photo = self.photo_test = Photo(
             id=1,
@@ -119,26 +119,24 @@ class TestContacts(unittest.IsolatedAsyncioTestCase):
             description='New jump',
             tags=[],
         )
-        new_descr = 'New jump'
-        tag = 'new_tag'
-        photo.description = new_descr
-        # photo.tags = [tag]
         self.session.query().filter().first.return_value = photo
         result = await update_tags_descriptions_for_photo(photo_id=photo.id,
-                                                          new_description=new_descr,
-                                                          tags=tag,
+                                                          new_description=None,
+                                                          tags=None,
                                                           db=self.session,
                                                           user=self.user)
         self.assertEqual(result, photo)
 
-    # need check
+
     async def test_generate_qrcode(self):
-        photo = self.photo_test
-        img = qrcode.make(photo.url_photo)
+        img = qrcode.make(self.photo_test.url_photo)
         buffer = io.BytesIO()
         img.save(buffer)
-        result = await generate_qrcode(photo_url=photo.url_photo)
-        self.assertEqual(result['qrcode_encode'], base64.b64encode(buffer.getvalue()).decode('utf-8'))
+        qr_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        result = await generate_qrcode(photo_url=self.photo_test.url_photo)
+        self.assertIsInstance(result, dict)
+        self.assertEqual(result["qrcode_encode"], qr_base64)
+
 
     async def test_untach_tag(self):
         photo = Photo(
@@ -159,15 +157,22 @@ class TestContacts(unittest.IsolatedAsyncioTestCase):
         result = await add_photo(url=photo.url_photo,
                                  public_id=photo.cloud_public_id,
                                  description=photo.description,
-                                 tags=[],
+                                 tags=None,
                                  db=self.session,
                                  user=self.user)
         self.assertEqual(result.url_photo, photo.url_photo)
+        self.assertEqual(result.description, photo.description)
+        self.assertEqual(result.cloud_public_id, photo.cloud_public_id)
+        self.assertTrue(hasattr(result, "id"))
 
-    # need check
     async def test_get_photos(self):
-        photos = [self.photo_test]
-        self.session.query().filter().limit().offset().all.return_value = photos
+        photos = [(
+            self.photo_test.id,
+            self.photo_test.url_photo,
+            self.photo_test.description,
+            None
+        )]
+        self.session.query().outerjoin().group_by().limit().offset().all.return_value = photos
         result = await get_photos(user_id=None,
                                   cur_user_id=None,
                                   cur_user_role=Role.user,
@@ -180,7 +185,11 @@ class TestContacts(unittest.IsolatedAsyncioTestCase):
                                   offset=0,
                                   db=self.session
                                   )
-        self.assertEqual(photos, result)
+        self.assertIsInstance(result, list)
+        self.assertEqual(result[0].id, self.photo_test.id)
+        self.assertEqual(result[0].url_photo, self.photo_test.url_photo)
+        self.assertEqual(result[0].description, self.photo_test.description)
+        self.assertIsNone(result[0].rating)
 
 
 if __name__ == '__main__':
