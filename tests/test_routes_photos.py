@@ -38,26 +38,17 @@ def token(client, session, user, monkeypatch):
     return data["access_token"]
 
 
-# need check
+#need check or delete
 # def test_create_photo(client, token):
-#     # with patch.object(auth_service, 'r') as r_mock:
-#     #     r_mock.get.return_value = None
 #     file_path = r'C:\Users\nikolay.grishyn\Documents\GitHub\PhotoShare\static\images\favicon.ico'
 #     _file = open(file_path, "rb")
-#     response = client.post("/api/photos/",
-#                            data={'photo': _file,
-#                                  "description": "My new photo",
-#                                  "tags": None,
-#                                  "transformation": PhotoTransformationModel.Config.schema_extra['example'],
-#                                  "save_filter": False,
-#                                  'filter_name': None,
-#                                  'filter_description': None,
-#                                  'filter_id': None},
+#     response = client.post("/api/photos/?description=My new photo",
+#                            data={'photo': UploadFile(file=_file)},
 #                            headers={"Authorization": f"Bearer {token}"})
 #     assert response.status_code == 201, response.text
-#     data = response.json()
-#     assert data["description"] == "My new photo"
-#     assert "id" in data
+#     # data = response.json()
+#     # assert data["description"] == "My new photo"
+#     # assert "id" in data
 
 
 def test_get_photo_id(client, token, session):
