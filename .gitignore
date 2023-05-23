@@ -4,3 +4,6 @@ postgres-data
 /.idea/
 __pycache__
 .vscode/launch.json
+.pytest_cache
+settings.json
+.coverage

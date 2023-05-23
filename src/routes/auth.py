@@ -97,7 +97,7 @@ async def request_email(body: RequestEmail,
     return {'message': messages.CHECK_YOUR_EMAIL_FOR_CONFIRMATION}
 
 
-@router.post('/singup', name="SignUp", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post('/signup', name="SignUp", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def singup(body: UserModel,
                  background_tasks: BackgroundTasks,
                  request: Request,
