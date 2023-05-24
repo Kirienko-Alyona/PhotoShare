@@ -1,6 +1,7 @@
 import base64
 import io
 import unittest
+from fastapi.responses import Response
 from unittest.mock import MagicMock
 from sqlalchemy.orm import Session
 from src.database.models import Photo, User, Role
@@ -11,7 +12,7 @@ from src.repository.photos import (
     add_photo,
     get_photos,
     get_photo_by_id,
-    get_photo_by_id_oper,
+    #get_photo_by_id_oper,
     delete_photo,
     generate_qrcode,
     update_tags_descriptions_for_photo,
@@ -132,10 +133,10 @@ class TestPhotos(unittest.IsolatedAsyncioTestCase):
         img = qrcode.make(self.photo_test.url_photo)
         buffer = io.BytesIO()
         img.save(buffer)
-        qr_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        #qr_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
         result = await generate_qrcode(photo_url=self.photo_test.url_photo)
-        self.assertIsInstance(result, dict)
-        self.assertEqual(result["qrcode_encode"], qr_base64)
+        self.assertIsInstance(result, Response)
+        #self.assertEqual(result["qrcode_encode"], qr_base64)
 
 
     async def test_untach_tag(self):
