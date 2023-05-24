@@ -11,7 +11,7 @@ from src.schemas.photo_filters import PhotoFilterDbModel, PhotoFilterModel
 from src.services.auth import auth_service
 from src.services.roles import RoleAccess
 
-router = APIRouter(prefix="/photos/filters", tags=['photo filters'])
+router = APIRouter(prefix="/filters", tags=['photo filters'])
 
 allowed_create = RoleAccess([Role.admin, Role.moderator, Role.user])
 allowed_read = RoleAccess([Role.admin, Role.moderator, Role.user])

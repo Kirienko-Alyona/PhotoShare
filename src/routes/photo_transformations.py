@@ -14,7 +14,7 @@ from src.schemas.photo_transformations import (
 from src.services.auth import auth_service
 from src.services.roles import RoleAccess
 
-router = APIRouter(prefix="/photos/transformed", tags=['photo transformations'])
+router = APIRouter(prefix="/transformations", tags=['photo transformations'])
 
 
 allowed_create = RoleAccess([Role.admin, Role.moderator, Role.user])

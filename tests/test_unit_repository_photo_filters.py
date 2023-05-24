@@ -63,12 +63,12 @@ class TestContactsRepository(unittest.IsolatedAsyncioTestCase):
         self.session = None
 
     async def test_get_filter_by_id_found(self):
-        self.session.query().get.return_value = self.photo_filter
+        self.session.get.return_value = self.photo_filter
         result = await get_filter_by_id(filter_id=1, db=self.session)
         self.assertEqual(result, self.photo_filter)
 
     async def test_get_filter_by_id_not_found(self):
-        self.session.query().get.return_value = None
+        self.session.get.return_value = None
         result = await get_filter_by_id(filter_id=1, db=self.session)
         self.assertIsNone(result)
 
@@ -131,7 +131,7 @@ class TestContactsRepository(unittest.IsolatedAsyncioTestCase):
 
     @patch('src.repository.photo_filters.advanced_rights_check', return_value=None)
     async def test_update_photo_filter_found(self, _):
-        self.session.query().get.return_value = self.photo_filter
+        self.session.get.return_value = self.photo_filter
         self.session.query().filter_by().update.return_value = 1
 
         result = await update_photo_filter(filter_id=1,
@@ -143,7 +143,7 @@ class TestContactsRepository(unittest.IsolatedAsyncioTestCase):
 
     @patch('src.repository.photo_filters.advanced_rights_check', return_value=None)
     async def test_update_photo_filter_not_found(self, _):
-        self.session.query().get.return_value = None
+        self.session.get.return_value = None
         result = await update_photo_filter(filter_id=1,
                                            data=self.body,
                                            user_id=1,
@@ -153,16 +153,12 @@ class TestContactsRepository(unittest.IsolatedAsyncioTestCase):
 
     @patch('src.repository.photo_filters.advanced_rights_check', return_value=None)
     async def test_remove_photo_filter_found(self, _):
-        self.session.query().get.return_value = self.photo_filter
+        self.session.get.return_value = self.photo_filter
         result = await remove_photo_filter(filter_id=1, user_id=1, user_role=Role.user, db=self.session)
         self.assertEqual(result, self.photo_filter.id)
 
     @patch('src.repository.photo_filters.advanced_rights_check', return_value=None)
     async def test_remove_photo_filter_not_found(self, _):
-        self.session.query().get.return_value = None
+        self.session.get.return_value = None
         result = await remove_photo_filter(filter_id=1, user_id=1, user_role=Role.user, db=self.session)
         self.assertIsNone(result)
-
-
-if __name__ == '__main__':
-    unittest.main()

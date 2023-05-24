@@ -18,8 +18,8 @@ advanced_roles_update = [Role.admin]
 advanced_roles_delete = [Role.admin]
 
 
-async def get_transformation_by_id(trans_id, db: Session) -> PhotoTransformation:
-    return db.query(PhotoTransformation).get(trans_id)
+async def get_transformation_by_id(trans_id, db: Session) -> Optional[PhotoTransformation]:
+    return db.get(PhotoTransformation, trans_id)
 
 
 async def get_photo_user_id(photo_id: int, db: Session) -> int:  # waiting_for_realization_from_Mykola

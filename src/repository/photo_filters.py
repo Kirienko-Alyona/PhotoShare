@@ -15,7 +15,7 @@ advanced_roles_delete = [Role.admin]
 
 
 async def get_filter_by_id(filter_id: int, db: Session) -> Optional[PhotoFilter]:
-    return db.query(PhotoFilter).get(filter_id)
+    return db.get(PhotoFilter, filter_id)
 
 
 async def get_photo_filter_user_id(filter_id: int, db: Session) -> int:
