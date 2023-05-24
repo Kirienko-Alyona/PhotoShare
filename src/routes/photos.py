@@ -3,13 +3,15 @@ import types
 from datetime import date
 from fastapi import Depends, status, APIRouter, File, UploadFile, Query, HTTPException
 from sqlalchemy.orm import Session
+from fastapi.responses import HTMLResponse
+
 from typing import Optional
 from src.repository.photo_transformations import create_transformation, create_transformation_from_preset
 
 from src.database.db import get_db
 from src.database.models import User, Role
 from src.repository import photos as repository_photos
-from src.schemas.photos import PhotoResponse, PhotoQRCodeResponse
+from src.schemas.photos import PhotoResponse#, PhotoQRCodeResponse
 from src.services.auth import auth_service
 from src.services.photos import upload_photo
 import src.conf.messages as messages
@@ -77,9 +79,9 @@ async def create_photo(photo: UploadFile = File(),
     return photo
 
 
-@router.post('/qrcode/',
+@router.get('/qrcode/',
              name='Generate QRCode By Url',
-             response_model=PhotoQRCodeResponse,
+             response_class=HTMLResponse,
              status_code=status.HTTP_201_CREATED,
              dependencies=[Depends(allowed_create)])
 # accsess - admin, authenticated users

@@ -1,10 +1,11 @@
 from datetime import date
-import base64
+#import base64
 import io
 from typing import Optional, List, Tuple
+
 from fastapi import HTTPException, Query, status
 from src.conf import messages
-
+from fastapi.responses import Response
 import qrcode as qrcode
 from sqlalchemy import func#, or_
 from sqlalchemy.orm import Session
@@ -129,8 +130,8 @@ async def delete_photo(photo_id: int,
 async def generate_qrcode(photo_url: str):
     img = qrcode.make(photo_url)
     buffer = io.BytesIO()
-    img.save(buffer)
-    return {'qrcode_encode': base64.b64encode(buffer.getvalue()).decode('utf-8')}
+    img.save(buffer)    
+    return Response(content=buffer.getvalue(), media_type="image/png")
 
 
 async def update_tags_descriptions_for_photo(photo_id: int,
