@@ -11,6 +11,7 @@ from src.repository.photo_transformations import create_transformation, create_t
 from src.database.db import get_db
 from src.database.models import User, Role
 from src.repository import photos as repository_photos
+from src.repository import photo_transformations as repository_photo_transformations
 from src.schemas.photos import PhotoResponse#, PhotoQRCodeResponse
 from src.services.auth import auth_service
 from src.services.photos import upload_photo
@@ -84,10 +85,30 @@ async def create_photo(photo: UploadFile = File(),
              response_class=Response,
              status_code=status.HTTP_201_CREATED,
              dependencies=[Depends(allowed_create)])
-# accsess - admin, authenticated users
-async def generate_qrcode(photo_url: str,
-                          _: User = Depends(auth_service.get_current_user)):
-    qrcode_encode = await repository_photos.generate_qrcode(photo_url)
+# access - admin, authenticated users
+async def generate_qrcode(photo_url: Optional[str]= Query(default=None),
+                          photo_id: Optional[int]= Query(default=None),
+                          trans_id: Optional[int]= Query(default=None),
+                          _: User = Depends(auth_service.get_current_user),
+                          db: Session = Depends(get_db)):
+    qr_code_url = None
+    if photo_id:
+        photo = await repository_photos.get_photo_by_id_oper(photo_id, db)
+        if not photo:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
+        qr_code_url = photo.url_photo
+    elif trans_id:
+        transformation = await repository_photo_transformations.get_transformation_by_id(trans_id, db)
+        if not transformation:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
+        qr_code_url = transformation.transformed_url
+    qr_code_url = qr_code_url or photo_url
+    if not qr_code_url:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=messages.NOT_FOUND)
+    qrcode_encode = await repository_photos.generate_qrcode(qr_code_url)
     return qrcode_encode
 
 
