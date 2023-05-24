@@ -68,12 +68,12 @@ class TestContactsRepository(unittest.IsolatedAsyncioTestCase):
         self.session = None
 
     async def test_get_transformation_by_id_found(self):
-        self.session.query().get.return_value = self.transformation
+        self.session.get.return_value = self.transformation
         result = await get_transformation_by_id(trans_id=1, db=self.session)
         self.assertEqual(result, self.transformation)
 
     async def test_get_transformation_by_id_not_found(self):
-        self.session.query().get.return_value = None
+        self.session.get.return_value = None
         result = await get_transformation_by_id(trans_id=1, db=self.session)
         self.assertIsNone(result)
 
@@ -194,17 +194,13 @@ class TestContactsRepository(unittest.IsolatedAsyncioTestCase):
     @patch('src.repository.photo_transformations.advanced_rights_check', return_value=None)
     @patch('src.repository.photo_transformations.get_transformation_by_id', return_value=PhotoTransformation(id=1))
     async def test_remove_transformation_found(self, *_):
-        self.session.query().get.return_value = self.transformation
+        self.session.get.return_value = self.transformation
         result = await remove_transformation(trans_id=1, user_id=1, user_role=Role.user, db=self.session)
         self.assertEqual(result, 1)
 
     @patch('src.repository.photo_transformations.advanced_rights_check', return_value=None)
     @patch('src.repository.photo_transformations.get_transformation_by_id', return_value=PhotoTransformation())
     async def test_remove_transformation_not_found(self, *_):
-        self.session.query().get.return_value = None
+        self.session.get.return_value = None
         result = await remove_transformation(trans_id=1, user_id=1, user_role=Role.user, db=self.session)
         self.assertIsNone(result)
-
-
-if __name__ == '__main__':
-    unittest.main()
